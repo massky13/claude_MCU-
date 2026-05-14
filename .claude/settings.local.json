@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__canvas-authoring__describe_control",
+      "mcp__canvas-authoring__sync_canvas",
+      "mcp__canvas-authoring__compile_canvas",
+      "Bash(claude mcp *)",
+      "Skill(canvas-apps:configure-canvas-mcp)",
+      "Skill(canvas-apps:canvas-app)",
+      "mcp__canvas-authoring__connect",
+      "mcp__canvas-authoring__list_controls",
+      "mcp__canvas-authoring__list_data_sources",
+      "Bash(git init *)",
+      "Bash(git *)"
+    ]
+  }
+}

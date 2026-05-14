@@ -1,0 +1,947 @@
+Screens:
+  screen_LSSGB:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: "=Set(varIsReady, false);\r\nSet(varUserEmail, Lower(User().Email));\r\nIf(\r\n    // FIRST time taking the test, write to local collection and SharePoint\r\n    IsEmpty(Filter(lss_responses,UserEmail=varUserEmail, exam=\"LSSGB\", SessionID=varSessionID)),\r\n\r\n    ClearCollect(\r\n        col_lssgb_shuffled,\r\n        Sort(\r\n            AddColumns(col_lssgb_questions, RandKey, Rand()),\r\n            RandKey \r\n        )\r\n    );\r\n    ClearCollect(\r\n        colResponses,\r\n        ForAll(\r\n            Sequence(100),\r\n            {\r\n                Title: varSessionID & \".\" & User().EntraObjectId & \".\" & Last(FirstN(col_lssgb_shuffled, Value)).Title,\r\n                exam: \"LSSGB\",\r\n                SessionID: varSessionID,\r\n                UserEmail: varUserEmail,\r\n                QuestionID:      Last(FirstN(col_lssgb_shuffled, Value)).Title,\r\n                QuestionNumber:  Value,\r\n                SelectedAnswer:  \"\",\r\n                IsCorrect:       false,\r\n                AttemptNumber: 1\r\n                //AnswerTimestamp: \r\n                \r\n            }\r\n        )\r\n    );\r\n    ForAll(colResponses As row,\r\n        Patch(\r\n            lss_responses, Defaults(lss_responses),\r\n            {\r\n                Title: row.Title,\r\n                exam: \"LSSGB\",\r\n                SessionID: varSessionID,\r\n                UserEmail: varUserEmail,\r\n                QuestionID:      row.QuestionID,\r\n                QuestionNumber:  row.QuestionNumber,\r\n                SelectedAnswer:  \"\",\r\n                IsCorrect:       false,\r\n                AttemptNumber: 1\r\n                //AnswerTimestamp: Blank() \r\n                \r\n            }\r\n        )\r\n    ),\r\n    // THERE IS DATA IN SHAREPOINT, not the first time taking the test\r\n    ClearCollect(colResponses, Filter(lss_responses,exam=\"LSSGB\", UserEmail=varUserEmail, SessionID=varSessionID))\r\n\r\n);\r\nSet(\r\n    var_question_number,\r\n    Coalesce(\r\n        LookUp(\r\n            Sort(colResponses, QuestionNumber, SortOrder.Ascending),\r\n            IsBlank(SelectedAnswer)\r\n        ).QuestionNumber,\r\n        1\r\n    )\r\n);\r\n\r\n\r\nSet(var_question_ID,LookUp(colResponses, QuestionNumber=var_question_number,QuestionID));\r\nSet(varCurrentQ, LookUp(col_lssgb_questions, Title = var_question_ID));\r\n\r\n\r\n\r\n// Restore elapsed time from saved session\r\nSet(varElapsedSeconds, Coalesce(LookUp(lss_sessions, ID = varSessionID).ElapsedSeconds, 0));\r\nSet(varIsPaused, false);\r\nSet(varIsReady, true);"
+    Children:
+      - main_container:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - cont_header:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(2, 66, 109, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMaxHeight: =75
+                  LayoutMinHeight: =75
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  X: =40
+                  Y: =40
+                Children:
+                  - Image2:
+                      Control: Image
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Height: =50
+                        Image: ='Opex Logo vertical white nobg'
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        RadiusBottomLeft: =25
+                        RadiusBottomRight: =25
+                        RadiusTopLeft: =25
+                        RadiusTopRight: =25
+                        Width: =50
+                  - Label2:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingLeft: =20
+                        Size: =18
+                        Text: ="Lean Six Sigma Green Belt Certification Exam"
+                        Width: =600
+                  - Timer1:
+                      Control: Timer
+                      Properties:
+                        AutoStart: =true
+                        BorderColor: =ColorFade(Self.Fill, -15%)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+                        DisabledColor: =ColorFade(Self.Fill, 90%)
+                        DisabledFill: =ColorFade(Self.Fill, 70%)
+                        Duration: =varRemainingSeconds * 1000
+                        Fill: =RGBA(56, 96, 178, 1)
+                        Font: =Font.'Open Sans'
+                        HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                        OnTimerEnd: |-
+                          =If(
+                              !varIsCompleted,
+                              Notify("Time is up! Your exam is being submitted.", NotificationType.Warning);
+                              Set(varIsCompleted, true);
+                              Set(varIsPaused, true);
+
+                              Set(varFinalScore, CountRows(Filter(colResponses, IsCorrect = true)));
+                              Set(varScorePercent, Round((varFinalScore / 100) * 100, 1));
+                              Set(varPassed, varScorePercent >= 80);
+
+                              Patch(
+                                  lss_sessions,
+                                  LookUp(lss_sessions, ID = varSessionID),
+                                  {
+                                      ElapsedSeconds:  varElapsedSeconds,
+                                      IsCompleted:     true,
+                                      SessionStatus:   {Value: "Completed"},
+                                      CorrectAnswers:  varFinalScore,
+                                      ScorePercent:    varScorePercent,
+                                      Passed:          varPassed,
+                                      CompletedDate:   Now()
+                                  }
+                              );
+
+                              Patch(lss_cetificates, LookUp(lss_cetificates, UserEmail = varUserEmail), {TestDone: true});
+
+                              If(
+                                  varPassed,
+                                  Office365Outlook.SendEmailV2(
+                                      User().Email & ";" & "massky@gmail.com" & ";ralfonzo@skylinehomes.com",
+                                      "LSSGB Certification Exam — PASSED",
+                                      "<h2 style='color:#28A745;'>Congratulations, " & User().FullName & "!</h2>" &
+                                      "<p>You have <strong>passed</strong> the Lean Six Sigma Green Belt certification exam.</p>" &
+                                      "<table style='border-collapse:collapse; width:400px;'>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Score</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>" & varFinalScore & " / 100 (" & varScorePercent & "%)</td></tr>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Passing Threshold</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>80%</td></tr>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Duration</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>" & Text(Time(0, 0, varElapsedSeconds), "hh:mm:ss") & "</td></tr>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Attempt</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>#" & LookUp(lss_sessions, ID = varSessionID).AttemptNumber & "</td></tr>" &
+                                      "</table>" &
+                                      "<p>Next step: complete your approved DMAIC project to earn your certificate.</p>",
+                                      {IsHtml: true}
+                                  ),
+                                  Office365Outlook.SendEmailV2(
+                                      User().Email & ";" & "massky@gmail.com" & ";ralfonzo@skylinehomes.com",
+                                      "LSSGB Certification Exam — Results",
+                                      "<h2 style='color:#DC3545;'>Exam Results for " & User().FullName & "</h2>" &
+                                      "<p>Unfortunately, the passing threshold of 80% was not met on this attempt.</p>" &
+                                      "<table style='border-collapse:collapse; width:400px;'>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Score</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>" & varFinalScore & " / 100 (" & varScorePercent & "%)</td></tr>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Passing Threshold</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>80%</td></tr>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Duration</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>" & Text(Time(0, 0, varElapsedSeconds), "hh:mm:ss") & "</td></tr>" &
+                                      "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Attempt</strong></td>" &
+                                      "<td style='padding:8px; border:1px solid #ddd;'>#" & LookUp(lss_sessions, ID = varSessionID).AttemptNumber & "</td></tr>" &
+                                      "</table>" &
+                                      "<p>Please review the training material and try again when ready. You've got this!</p>",
+                                      {IsHtml: true}
+                                  )
+                              );
+
+                              Navigate(screen_results, ScreenTransition.Fade)
+                          )
+                        PressedBorderColor: =Self.Fill
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        Start: =varIsReady && !varIsPaused && !varIsCompleted
+                        X: =749
+                        Y: =35
+                  - Label1:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Size: =18
+                        Text: |-
+                          ="⏱ "&
+
+                          Text(
+                              Time(0, 0, (Timer1.Duration - Timer1.Value) / 1000),
+                              "hh:mm:ss"
+                          )
+                        X: =361
+                        Y: =35
+                  - Image4:
+                      Control: Image
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Height: =60
+                        Image: =User().Image
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        RadiusBottomLeft: =30
+                        RadiusBottomRight: =30
+                        RadiusTopLeft: =30
+                        RadiusTopRight: =30
+                        Width: =60
+            - BottomContainer1_2:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(245, 245, 245, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  LayoutWrap: =true
+                  PaddingBottom: =2
+                  PaddingTop: =2
+                Children:
+                  - Container3_2:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Fill: =RGBA(2, 66, 109, 1)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingTop: =8
+                        X: =40
+                        Y: =40
+                      Children:
+                        - Text1_8:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              PaddingBottom: =0
+                              PaddingLeft: =10
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Navigation "
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =40
+                        - Icon3:
+                            Control: Classic/Icon
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(255, 255, 255, 1)
+                              BorderThickness: =1
+                              Color: =RGBA(0, 18, 107, 1)
+                              Height: =1
+                              Icon: =Icon.HorizontalLine
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingLeft: =10
+                              Width: =Parent.Width-20
+                        - Text1_11:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisplayMode: =DisplayMode.View
+                              Height: =50
+                              OnSelect: =Navigate(screen_main,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =20
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🏠︎ Home"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Text1_12:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: |-
+                                =If(
+                                    varIsPaused,
+                                    // RESUME — restart the clock from now
+                                    Set(varIsPaused, false);
+                                    Set(varTimerStart, Now());
+                                    Patch(colSession, First(colSession), {IsPaused: false}),
+
+                                    // PAUSE — freeze elapsed seconds, stop the clock
+                                    Set(varElapsedAtPause, varElapsedAtPause + DateDiff(varTimerStart, Now(), TimeUnit.Seconds));
+                                    Set(varIsPaused, true);
+                                    Patch(colSession, First(colSession), {
+                                        IsPaused: true,
+                                        ElapsedSeconds: varElapsedAtPause
+                                    })
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =20
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="❚❚ Pause"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Text1_9:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_main,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =20
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="➜] Exit"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Rectangle2_2:
+                            Control: Rectangle
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FillPortions: =1
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - Rectangle2_6:
+                            Control: Rectangle
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FillPortions: =1
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - Text1_15:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Progress:"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Text1_10:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: =CountRows(Filter(colResponses,UserEmail=User().Email,!IsBlank(SelectedAnswer))) & " / " & CountRows(Filter(colResponses,UserEmail=User().Email))
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Timer2:
+                            Control: Timer
+                            Properties:
+                              AutoStart: =true
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+                              DisabledColor: =ColorFade(Self.Fill, 90%)
+                              DisabledFill: =ColorFade(Self.Fill, 70%)
+                              Duration: =1000
+                              Fill: =RGBA(56, 96, 178, 1)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnTimerEnd: |-
+                                =Set(varElapsedSeconds, varElapsedSeconds + 1);
+
+                                // Periodic session save every 60 seconds (resilience)
+                                If(
+                                    Mod(varElapsedSeconds, 300) = 0,
+                                    Patch(
+                                        lss_sessions,
+                                        LookUp(lss_sessions, ID = varSessionID),
+                                        {
+                                            ElapsedSeconds: varElapsedSeconds,
+                                            IsPaused:       false
+                                        }
+                                    )
+                                )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              Repeat: =true
+                              Start: =varIsReady && !varIsPaused && !varIsCompleted
+                              Visible: =false
+                              X: =40
+                              Y: =40
+                  - cont_Q&A:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =5
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                      Children:
+                        - Container1:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Semilight
+                              FillPortions: =2
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              PaddingTop: =8
+                            Children:
+                              - Text2:
+                                  Control: ModernText
+                                  Properties:
+                                    AutoHeight: =true
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Size: =20
+                                    Text: |-
+                                      ="Question #" & var_question_number
+                              - txt_question:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    AutoHeight: =true
+                                    FillPortions: =3
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =150
+                                    LayoutMaxHeight: =150
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Size: =20
+                                    Text: =LookUp(col_lssgb_questions,Title = var_question_ID,question)
+                        - Container7:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Semilight
+                              FillPortions: =6
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              PaddingTop: =8
+                            Children:
+                              - Container8:
+                                  Control: GroupContainer
+                                  Variant: GridLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =5
+                                    LayoutGridColumns: =1
+                                    LayoutGridRows: =5
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =5
+                                    PaddingLeft: =5
+                                    PaddingRight: =5
+                                    PaddingTop: =5
+                                  Children:
+                                    - answerA:
+                                        Control: ModernText
+                                        Properties:
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =1
+                                          Color: |-
+                                            =If(
+                                                varSelectedAnswer = "A",
+                                                RGBA(255, 255, 255, 1),   // highlighted - your app's blue
+                                                RGBA(0, 0, 0, 1) // default white
+                                            )
+                                          Fill: |-
+                                            =If(
+                                                varSelectedAnswer = "A",
+                                                RGBA(2, 66, 109, 1),   // highlighted - your app's blue
+                                                RGBA(255, 255, 255, 1) // default white
+                                            )
+                                          FontWeight: |-
+                                            =If(
+                                                varSelectedAnswer = "A",
+                                                FontWeight.Bold,   // highlighted - your app's blue
+                                                FontWeight.Normal // default white
+                                            )
+                                          OnSelect: "=Set(varSelectedAnswer, \"A\");\r\nSet(varAnswerID,varSessionID & \".\" & User().EntraObjectId & \".\" & varCurrentQ.Title);\r\nSet(varIsCorrect, varCurrentQ.correct_answer = varSelectedAnswer);\r\n\r\n// Update local collection\r\nPatch(\r\n    colResponses,\r\n    LookUp(colResponses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\n// Update SharePoint record\r\n\r\n\r\nPatch(\r\n    lss_responses,\r\n    LookUp(lss_responses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\nPatch(\r\n    lss_sessions,\r\n    LookUp(lss_sessions, ID = varSessionID),\r\n    {ElapsedSeconds: varElapsedSeconds}\r\n);\r\n    \r\n"
+                                          RadiusBottomLeft: =5
+                                          RadiusBottomRight: =5
+                                          RadiusTopLeft: =5
+                                          RadiusTopRight: =5
+                                          Text: |-
+                                            ="A: " & LookUp(col_lssgb_questions, Title=var_question_ID,answerA)
+                                          X: =40
+                                          Y: =40
+                                    - answerB:
+                                        Control: ModernText
+                                        Properties:
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =1
+                                          Color: |-
+                                            =If(
+                                                varSelectedAnswer = "B",
+                                                RGBA(255, 255, 255, 1),   // highlighted - your app's blue
+                                                RGBA(0, 0, 0, 1) // default white
+                                            )
+                                          Fill: |-
+                                            =If(
+                                                varSelectedAnswer = "B",
+                                                RGBA(2, 66, 109, 1),   // highlighted - your app's blue
+                                                RGBA(255, 255, 255, 1) // default white
+                                            )
+                                          FontWeight: |-
+                                            =If(
+                                                varSelectedAnswer = "B",
+                                                FontWeight.Bold,   // highlighted - your app's blue
+                                                FontWeight.Normal // default white
+                                            )
+                                          OnSelect: "=Set(varSelectedAnswer, \"B\");\r\nSet(varAnswerID,varSessionID & \".\" & User().EntraObjectId & \".\" & varCurrentQ.Title);\r\nSet(varIsCorrect, varCurrentQ.correct_answer = varSelectedAnswer);\r\n\r\n// Update local collection\r\nPatch(\r\n    colResponses,\r\n    LookUp(colResponses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\n// Update SharePoint record\r\n\r\n\r\nPatch(\r\n    lss_responses,\r\n    LookUp(lss_responses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\nPatch(\r\n    lss_sessions,\r\n    LookUp(lss_sessions, ID = varSessionID),\r\n    {ElapsedSeconds: varElapsedSeconds}\r\n);\r\n    \r\n"
+                                          RadiusBottomLeft: =5
+                                          RadiusBottomRight: =5
+                                          RadiusTopLeft: =5
+                                          RadiusTopRight: =5
+                                          Text: |-
+                                            ="B: " & LookUp(col_lssgb_questions, Title=var_question_ID,answerB)
+                                          X: =16
+                                          Y: =28
+                                    - answerC:
+                                        Control: ModernText
+                                        Properties:
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =1
+                                          Color: |-
+                                            =If(
+                                                varSelectedAnswer = "C",
+                                                RGBA(255, 255, 255, 1),   // highlighted - your app's blue
+                                                RGBA(0, 0, 0, 1) // default white
+                                            )
+                                          Fill: |-
+                                            =If(
+                                                varSelectedAnswer = "C",
+                                                RGBA(2, 66, 109, 1),   // highlighted - your app's blue
+                                                RGBA(255, 255, 255, 1) // default white
+                                            )
+                                          FontWeight: |-
+                                            =If(
+                                                varSelectedAnswer = "C",
+                                                FontWeight.Bold,   // highlighted - your app's blue
+                                                FontWeight.Normal // default white
+                                            )
+                                          OnSelect: "=Set(varSelectedAnswer, \"C\");\r\nSet(varAnswerID,varSessionID & \".\" & User().EntraObjectId & \".\" & varCurrentQ.Title);\r\nSet(varIsCorrect, varCurrentQ.correct_answer = varSelectedAnswer);\r\n\r\n// Update local collection\r\nPatch(\r\n    colResponses,\r\n    LookUp(colResponses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\n// Update SharePoint record\r\n\r\n\r\nPatch(\r\n    lss_responses,\r\n    LookUp(lss_responses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\nPatch(\r\n    lss_sessions,\r\n    LookUp(lss_sessions, ID = varSessionID),\r\n    {ElapsedSeconds: varElapsedSeconds}\r\n);\r\n    \r\n"
+                                          RadiusBottomLeft: =5
+                                          RadiusBottomRight: =5
+                                          RadiusTopLeft: =5
+                                          RadiusTopRight: =5
+                                          Text: |-
+                                            ="C: " & LookUp(col_lssgb_questions, Title=var_question_ID,answerC)
+                                          X: =16
+                                          Y: =28
+                                    - answerD:
+                                        Control: ModernText
+                                        Properties:
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =1
+                                          Color: |-
+                                            =If(
+                                                varSelectedAnswer = "D",
+                                                RGBA(255, 255, 255, 1),   // highlighted - your app's blue
+                                                RGBA(0, 0, 0, 1) // default white
+                                            )
+                                          Fill: |-
+                                            =If(
+                                                varSelectedAnswer = "D",
+                                                RGBA(2, 66, 109, 1),   // highlighted - your app's blue
+                                                RGBA(255, 255, 255, 1) // default white
+                                            )
+                                          FontWeight: |-
+                                            =If(
+                                                varSelectedAnswer = "D",
+                                                FontWeight.Bold,   // highlighted - your app's blue
+                                                FontWeight.Normal // default white
+                                            )
+                                          OnSelect: "=Set(varSelectedAnswer, \"D\");\r\nSet(varAnswerID,varSessionID & \".\" & User().EntraObjectId & \".\" & varCurrentQ.Title);\r\nSet(varIsCorrect, varCurrentQ.correct_answer = varSelectedAnswer);\r\n\r\n// Update local collection\r\nPatch(\r\n    colResponses,\r\n    LookUp(colResponses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\n// Update SharePoint record\r\n\r\n\r\nPatch(\r\n    lss_responses,\r\n    LookUp(lss_responses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\nPatch(\r\n    lss_sessions,\r\n    LookUp(lss_sessions, ID = varSessionID),\r\n    {ElapsedSeconds: varElapsedSeconds}\r\n);\r\n    \r\n"
+                                          RadiusBottomLeft: =5
+                                          RadiusBottomRight: =5
+                                          RadiusTopLeft: =5
+                                          RadiusTopRight: =5
+                                          Text: |-
+                                            ="D: " & LookUp(col_lssgb_questions, Title=var_question_ID,answerD)
+                                          X: =16
+                                          Y: =28
+                                    - answerE:
+                                        Control: ModernText
+                                        Properties:
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =1
+                                          Color: |-
+                                            =If(
+                                                varSelectedAnswer = "E",
+                                                RGBA(255, 255, 255, 1),   // highlighted - your app's blue
+                                                RGBA(0, 0, 0, 1) // default white
+                                            )
+                                          Fill: |-
+                                            =If(
+                                                varSelectedAnswer = "E",
+                                                RGBA(2, 66, 109, 1),   // highlighted - your app's blue
+                                                RGBA(255, 255, 255, 1) // default white
+                                            )
+                                          FontWeight: |-
+                                            =If(
+                                                varSelectedAnswer = "E",
+                                                FontWeight.Bold,   // highlighted - your app's blue
+                                                FontWeight.Normal // default white
+                                            )
+                                          OnSelect: "=Set(varSelectedAnswer, \"E\");\r\nSet(varAnswerID,varSessionID & \".\" & User().EntraObjectId & \".\" & varCurrentQ.Title);\r\nSet(varIsCorrect, varCurrentQ.correct_answer = varSelectedAnswer);\r\n\r\n// Update local collection\r\nPatch(\r\n    colResponses,\r\n    LookUp(colResponses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\n// Update SharePoint record\r\n\r\n\r\nPatch(\r\n    lss_responses,\r\n    LookUp(lss_responses, Title = varAnswerID),\r\n    {\r\n        SelectedAnswer:  varSelectedAnswer,\r\n        IsCorrect:       varIsCorrect,\r\n        AnswerTimestamp:  Now()\r\n    }\r\n    \r\n);\r\nPatch(\r\n    lss_sessions,\r\n    LookUp(lss_sessions, ID = varSessionID),\r\n    {ElapsedSeconds: varElapsedSeconds}\r\n);\r\n    \r\n"
+                                          RadiusBottomLeft: =5
+                                          RadiusBottomRight: =5
+                                          RadiusTopLeft: =5
+                                          RadiusTopRight: =5
+                                          Text: |-
+                                            ="E: " & LookUp(col_lssgb_questions, Title=var_question_ID,answerE)
+                                          X: =16
+                                          Y: =28
+                              - Gallery2:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    DisplayMode: =DisplayMode.View
+                                    FillPortions: =3
+                                    Items: =Filter(Documents,exam="LSSGB", QuestionID=var_question_ID)
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    ShowScrollbar: =false
+                                    TemplatePadding: =0
+                                    TemplateSize: =Parent.Height
+                                  Children:
+                                    - Image3:
+                                        Control: Image
+                                        Properties:
+                                          AutoDisableOnSelect: =false
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          DisplayMode: =DisplayMode.View
+                                          Height: =Parent.Height
+                                          Image: =If(IsBlank(ThisItem.Thumbnail.Large),SampleImage,ThisItem.Thumbnail.Large)
+                                          Width: =Parent.Width
+                        - Container2:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Semilight
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              PaddingTop: =8
+                            Children:
+                              - button_previous:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderColor: =ColorFade(Self.Fill, -15%)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    DisplayMode: =If(var_question_number=1, DisplayMode.Disabled,DisplayMode.Edit)
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Font: =Font.'Open Sans'
+                                    HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: |-
+                                      =Set(var_question_number,var_question_number-1);
+                                      Set(var_question_ID,LookUp(colResponses, QuestionNumber=var_question_number,QuestionID));
+                                      Set(varCurrentQ, LookUp(col_lssgb_questions, Title = var_question_ID));
+
+
+                                      Set(
+                                          varSelectedAnswer,
+                                          LookUp(colResponses, QuestionNumber = var_question_number).SelectedAnswer
+                                      );
+                                      If(varSelectedAnswer = "", Set(varSelectedAnswer, Blank()));
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Text: ="⬅ Previous"
+                              - Rectangle2_1:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FillPortions: =1
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                              - ButtonCanvas3:
+                                  Control: Button
+                                  Properties:
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: =Set(var_question_number,99)
+                              - button_submit:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderColor: =ColorFade(Self.Fill, -15%)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Font: =Font.'Open Sans'
+                                    HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: |-
+                                      =// Lock exam
+                                      Set(varIsCompleted, true);
+                                      Set(varIsPaused, true);
+
+                                      // Calculate score
+                                      Set(varFinalScore, CountRows(Filter(colResponses, IsCorrect = true)));
+                                      Set(varScorePercent, Round((varFinalScore / 100) * 100, 1));
+                                      Set(varPassed, varScorePercent >= 80);
+
+                                      // Update session in SharePoint
+                                      Patch(
+                                          lss_sessions,
+                                          LookUp(lss_sessions, ID = varSessionID),
+                                          {
+                                              ElapsedSeconds:  varElapsedSeconds,
+                                              IsCompleted:     true,
+                                              SessionStatus:   {Value: "Completed"},
+                                              CorrectAnswers:  varFinalScore,
+                                              ScorePercent:    varScorePercent,
+                                              Passed:          varPassed,
+                                              CompletedDate:   Now()
+                                          }
+                                      );
+
+                                      Patch(lss_cetificates,LookUp(lss_cetificates,UserEmail=varUserEmail),
+                                          {
+                                              TestDone:true
+                                          }
+                                      );
+
+                                      // Look up user's manager
+                                      //Set(    varManagerEmail,    Office365Users.ManagerV2().));
+
+                                      // Send email — PASSED
+                                      If(
+                                          varPassed,
+                                          Office365Outlook.SendEmailV2(
+                                              User().Email & ";" & "massky@gmail.com" & ";ralfonzo@skylinehomes.com",
+                                              "LSSGB Certification Exam — PASSED",
+                                              "<h2 style='color:#28A745;'>Congratulations, " & User().FullName & "!</h2>" &
+                                              "<p>You have <strong>passed</strong> the Lean Six Sigma Green Belt certification exam.</p>" &
+                                              "<table style='border-collapse:collapse; width:400px;'>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Score</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>" & varFinalScore & " / 100 (" & varScorePercent & "%)</td></tr>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Passing Threshold</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>80%</td></tr>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Duration</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>" & Text(Time(0, 0, varElapsedSeconds), "hh:mm:ss") & "</td></tr>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Attempt</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>#" & LookUp(lss_sessions, ID = varSessionID).AttemptNumber & "</td></tr>" &
+                                              "</table>" &
+                                              "<p>Next step: complete your approved DMAIC project to earn your certificate.</p>",
+                                              {IsHtml: true}
+                                          ),
+
+                                          // Send email — NOT PASSED
+                                          Office365Outlook.SendEmailV2(
+                                              User().Email & ";" & "massky@gmail.com" & ";ralfonzo@skylinehomes.com",
+                                              "LSSGB Certification Exam — Results",
+                                              "<h2 style='color:#DC3545;'>Exam Results for " & User().FullName & "</h2>" &
+                                              "<p>Unfortunately, the passing threshold of 80% was not met on this attempt.</p>" &
+                                              "<table style='border-collapse:collapse; width:400px;'>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Score</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>" & varFinalScore & " / 100 (" & varScorePercent & "%)</td></tr>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Passing Threshold</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>80%</td></tr>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Duration</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>" & Text(Time(0, 0, varElapsedSeconds), "hh:mm:ss") & "</td></tr>" &
+                                              "<tr><td style='padding:8px; border:1px solid #ddd;'><strong>Attempt</strong></td>" &
+                                              "<td style='padding:8px; border:1px solid #ddd;'>#" & LookUp(lss_sessions, ID = varSessionID).AttemptNumber & "</td></tr>" &
+                                              "</table>" &
+                                              "<p>Please review the training material and try again when ready. You've got this!</p>",
+                                              {IsHtml: true}
+                                          )
+                                      );
+
+                                      Set(varShowSubmitConfirm, false);
+                                      Navigate(screen_results, ScreenTransition.Fade)
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Text: ="Submit"
+                                    Visible: =var_question_number=100
+                              - Rectangle2:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FillPortions: =1
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                              - button_next:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderColor: =ColorFade(Self.Fill, -15%)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Font: =Font.'Open Sans'
+                                    HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: |-
+                                      =If(
+                                          var_question_number < 100,
+
+                                          // Normal navigation
+                                          Set(var_question_number, var_question_number + 1);
+                                          Set(var_question_ID, LookUp(colResponses, QuestionNumber = var_question_number).QuestionID);
+                                          Set(varCurrentQ, LookUp(col_lssgb_questions, Title = var_question_ID));
+                                          Set(varSelectedAnswer, LookUp(colResponses, QuestionNumber = var_question_number).SelectedAnswer);
+                                          If(varSelectedAnswer = "", Set(varSelectedAnswer, Blank())),
+
+                                          // Question 100 — check for unanswered
+                                          Set(
+                                              varUnansweredCount,
+                                              CountRows(Filter(colResponses, SelectedAnswer = Blank()))
+                                          );
+                                          If(
+                                              varUnansweredCount > 50,
+                                              Set(varShowUnansweredWarning, true),
+                                              Set(varShowSubmitConfirm, true)
+                                          )
+                                      )
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Text: =If(var_question_number = 100, "End", "Next →")
+      - Container10:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(39, 113, 194, 1)
+            Height: =641
+            Visible: =varShowUnansweredWarning
+            Width: =1099
+            X: =250
+            Y: =110
+          Children:
+            - Text6:
+                Control: ModernText
+                Properties:
+                  FontWeight: =FontWeight.Bold
+                  Height: =149
+                  Size: =30
+                  Text: |-
+                    ="You have " & CountRows(Filter(colResponses, SelectedAnswer = Blank())) & " unanswered question(s). 
+                    Unanswered questions will be marked incorrect. Submit anyway?"
+                  Width: =940
+                  X: =(Parent.Width-Self.Width)/2
+                  Y: =210
+            - Button1:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(0, 0, 0, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(214, 221, 224, 1)
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                  OnSelect: |-
+                    =Set(
+                        var_question_number,
+                        LookUp(
+                            Sort(colResponses, QuestionNumber, SortOrder.Ascending),
+                            SelectedAnswer = Blank()
+                        ).QuestionNumber
+                    );
+                    Set(var_question_ID, LookUp(colResponses, QuestionNumber = var_question_number).QuestionID);
+                    Set(varCurrentQ, LookUp(col_lssgb_questions, Title = var_question_ID));
+                    Set(varShowUnansweredWarning, false);
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Answer Now"
+                  Width: =190
+                  X: =351
+                  Y: =394
+            - Button1_1:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(0, 0, 0, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(214, 221, 224, 1)
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                  OnSelect: |-
+                    =Set(varShowUnansweredWarning, false);
+                    Set(varShowSubmitConfirm, true)
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Submit anyway"
+                  Width: =190
+                  X: =588
+                  Y: =394

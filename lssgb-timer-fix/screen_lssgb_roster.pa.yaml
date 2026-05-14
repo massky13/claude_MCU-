@@ -1,0 +1,874 @@
+Screens:
+  screen_lssgb_roster:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =
+        UpdateContext({add_person:false});
+        Set(var_permission, LookUp(lss_certificates,UserEmail=User().Email,role).Value)
+    Children:
+      - ScreenContainer1_1:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - Header1_1:
+                Control: Header
+                Properties:
+                  BorderRadiusBottomLeft: =5
+                  BorderRadiusBottomRight: =5
+                  BorderRadiusTopLeft: =5
+                  BorderRadiusTopRight: =5
+                  Fill: =RGBA(2, 66, 109, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Logo: ='Opex Logo vertical white nobg'
+                  Title: ="Lean Six Sigma Green Belt"
+            - BottomContainer1_1:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(245, 245, 245, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  LayoutWrap: =true
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                Children:
+                  - Container3_1:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Fill: =RGBA(2, 66, 109, 1)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.Center
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingTop: =8
+                        X: =40
+                        Y: =40
+                      Children:
+                        - Text1_18:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Navigation "
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =40
+                        - Icon3_2:
+                            Control: Classic/Icon
+                            Properties:
+                              BorderColor: =RGBA(255, 255, 255, 1)
+                              BorderThickness: =1
+                              Color: =RGBA(0, 18, 107, 1)
+                              Height: =1
+                              Icon: =Icon.HorizontalLine
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - Text1_19:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_main,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🏠︎ Home"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Text1_22:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =UpdateContext({add_person:false})
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🗐 Roster"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =142
+                              Y: =28
+                        - Rectangle2_4:
+                            Control: Rectangle
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FillPortions: =1
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - Text1_25:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: |-
+                                =UpdateContext({add_person:true});
+                                Reset(txtEmployeeSearch);
+                                Clear(colEmployeeResults);
+                                Clear(colRandomNumberCandidates);
+                                Set(varSelectedEmployee, Blank());
+                                Set(varAvailableNumber, Blank())
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="╋  Add Person"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =142
+                              Y: =28
+                  - cont_roster:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =5
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                        Visible: =!add_person
+                      Children:
+                        - Container11:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              LayoutMaxHeight: =45
+                              LayoutMinHeight: =45
+                              LayoutMinWidth: =16
+                            Children:
+                              - Text3:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =45
+                                    Size: =24
+                                    Text: ="Champion Homes Employee Roster"
+                                    Width: =495
+                                    Wrap: =false
+                                    X: =65
+                              - type_filter:
+                                  Control: Classic/DropDown
+                                  Properties:
+                                    BorderColor: =RGBA(53, 61, 63, 1)
+                                    BorderThickness: =1
+                                    ChevronBackground: =RGBA(0, 0, 0, 1)
+                                    ChevronFill: =RGBA(255, 255, 255, 1)
+                                    ChevronHoverBackground: =Color.Black
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Default: ="""LSSGB"""
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Font: =Font.'Open Sans'
+                                    Height: =30
+                                    HoverBorderColor: =Color.Black
+                                    HoverFill: =RGBA(214, 221, 224, 1)
+                                    Items: =Distinct(lss_certificates,type.Value)
+                                    Items.Value: =Value
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =RGBA(53, 61, 63, 1)
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =RGBA(214, 221, 224, 1)
+                                    Size: =10
+                                    Width: =156
+                                    X: =802
+                                    Y: =7
+                        - Container9:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - Gallery3:
+                                  Control: Gallery
+                                  Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Height: =529
+                                    Items: =Filter(lss_certificates, type.Value=type_filter.SelectedText.Value)
+                                    Width: =1052
+                                    X: =13
+                                    Y: =44
+                                  Children:
+                                    - Image1:
+                                        Control: Image
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Height: =80
+                                          Image: =If(IsBlank(ThisItem.UserEmail), SampleImage, IfError(Office365Users.UserPhotoV2(ThisItem.UserEmail), SampleImage))
+                                          OnSelect: =Select(Parent)
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Width: =80
+                                          X: =(Parent.TemplateHeight-8-Self.Height)
+                                          Y: =8
+                                    - Title1:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =Self.Size * 1.8
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: '=ThisItem.Title& " - " & ThisItem.UserName '
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =237
+                                          X: =108
+                                          Y: =40
+                                    - Separator1:
+                                        Control: Rectangle
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          Height: =8
+                                          OnSelect: =Select(Parent)
+                                          Width: =Parent.TemplateWidth
+                                          Y: =Parent.TemplateHeight - Self.Height
+                                    - training_YES:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(52, 152, 47, 1)
+                                          Height: =30
+                                          Icon: =Icon.CheckBadge
+                                          OnSelect: |-
+                                            =If(var_permission = "admin",
+                                                Set(var_trainingDone, ThisItem.TrainingDone);
+                                                Patch(lss_certificates,ThisItem,
+                                                    {TrainingDone: !var_trainingDone}
+                                                )
+                                            )
+                                          Visible: =LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,TrainingDone)=true
+                                          Width: =30
+                                          X: =466
+                                          Y: =33
+                                    - exam_YES:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(52, 152, 47, 1)
+                                          Height: =30
+                                          Icon: =Icon.CheckBadge
+                                          OnSelect: |-
+                                            =If(var_permission = "admin",
+                                                Set(var_testDone, ThisItem.TestDone);
+                                                Patch(lss_certificates,ThisItem,
+                                                    {TestDone: !var_testDone}
+                                                )
+                                            )
+                                          Visible: =LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,TestDone)=true
+                                          Width: =30
+                                          X: =570
+                                          Y: =33
+                                    - project_YES:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(52, 152, 47, 1)
+                                          Height: =30
+                                          Icon: =Icon.CheckBadge
+                                          OnSelect: |-
+                                            =If(var_permission = "admin",
+                                                Set(var_projectDone, ThisItem.ProjectDone);
+                                                Patch(lss_certificates,ThisItem,
+                                                    {ProjectDone: !var_projectDone}
+                                                )
+                                            )
+                                          Visible: =LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,ProjectDone)=true
+                                          Width: =30
+                                          X: =669
+                                          Y: =33
+                                    - training_NO:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(215, 58, 60, 1)
+                                          Height: =30
+                                          Icon: =Icon.CancelBadge
+                                          OnSelect: |-
+                                            =If(var_permission = "admin",
+                                                Set(var_trainingDone, ThisItem.TrainingDone);
+                                                Patch(lss_certificates,ThisItem,
+                                                    {TrainingDone: !var_trainingDone}
+                                                )
+                                            )
+                                          Visible: =LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,TrainingDone)=false
+                                          Width: =30
+                                          X: =466
+                                          Y: =33
+                                    - exam_NO:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(215, 58, 60, 1)
+                                          Height: =30
+                                          Icon: =Icon.CancelBadge
+                                          OnSelect: |-
+                                            =If(var_permission = "admin",
+                                                Set(var_testDone, ThisItem.TestDone);
+                                                Patch(lss_certificates,ThisItem,
+                                                    {TestDone: !var_testDone}
+                                                )
+                                            )
+                                          Visible: =LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,TestDone)=false
+                                          Width: =30
+                                          X: =570
+                                          Y: =33
+                                    - project_NO:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(215, 58, 60, 1)
+                                          Height: =30
+                                          Icon: =Icon.CancelBadge
+                                          OnSelect: |-
+                                            =If(var_permission = "admin",
+                                                Set(var_projectDone, ThisItem.ProjectDone);
+                                                Patch(lss_certificates,ThisItem,
+                                                    {ProjectDone: !var_projectDone}
+                                                )
+                                            )
+                                          Visible: =LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,ProjectDone)=false
+                                          Width: =30
+                                          X: =669
+                                          Y: =33
+                                    - Image5:
+                                        Control: Image
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Height: =72
+                                          Image: ='GB badge'
+                                          OnSelect: =Select(Parent)
+                                          Visible: =ThisItem.TrainingDone && ThisItem.TestDone && ThisItem.ProjectDone //LookUp(lss_certificates, UserEmail= ThisItem.UserEmail,award)=true
+                                          Width: =72
+                                          X: =815
+                                          Y: =16
+                                    - delete_person_icon:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Color: =RGBA(189, 49, 51, 1)
+                                          Height: =30
+                                          Icon: =Icon.Trash
+                                          OnSelect: |-
+                                            =IfError(
+                                                Remove(lss_certificates, ThisItem),
+                                                Notify("Delete failed.", NotificationType.Error),
+                                                Notify("Employee removed.", NotificationType.Success)
+                                            )
+                                          Visible: =var_permission="admin"
+                                          Width: =30
+                                          X: =972
+                                          Y: =35
+                              - Label3:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Number - Name"
+                                    Width: =278
+                                    X: =117
+                                    Y: =4
+                              - Label3_1:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Training"
+                                    Width: =100
+                                    X: =443
+                                    Y: =3
+                              - Label3_2:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Test"
+                                    Width: =100
+                                    X: =543
+                                    Y: =3
+                              - Label3_3:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Project"
+                                    Width: =100
+                                    X: =643
+                                    Y: =3
+                              - Label3_4:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Award"
+                                    Width: =100
+                                    X: =816
+                                    Y: =4
+                              - Icon4:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    BorderThickness: =1
+                                    Color: =RGBA(0, 18, 107, 1)
+                                    Height: =1
+                                    Icon: =Icon.HorizontalLine
+                                    Width: =Parent.Width
+                                    Y: =43
+                  - cont_addperson:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =5
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                        Visible: =add_person
+                      Children:
+                        - Text3_2:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Center
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Bold
+                              LayoutMaxHeight: =50
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Size: =24
+                              Text: ="Champion Homes Add Employee"
+                              Width: =600
+                        - Container9_2:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =6
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - txtEmployeeSearch:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Width: =150
+                                    X: =237
+                                    Y: =27
+                              - Text1:
+                                  Control: ModernText
+                                  Properties:
+                                    Text: |-
+                                      ="Employee search keyword: "
+                                    Width: =205
+                                    X: =32
+                                    Y: =27
+                              - ButtonCanvas2:
+                                  Control: Button
+                                  Properties:
+                                    OnSelect: |-
+                                      =ClearCollect(
+                                          colEmployeeResults,
+                                          Office365Users.SearchUserV2({
+                                              searchTerm: txtEmployeeSearch.Text,
+                                              top: 10
+                                          }).value
+                                      )
+                                    Text: ="Find"
+                                    X: =409
+                                    Y: =27
+                              - Gallery4:
+                                  Control: Gallery
+                                  Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Height: =466
+                                    Items: =colEmployeeResults
+                                    OnSelect: =Set(varSelectedEmployee, ThisItem)
+                                    TemplateSize: =91
+                                    Width: =491
+                                    X: =588
+                                    Y: =27
+                                  Children:
+                                    - Image7:
+                                        Control: Image
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Height: =72
+                                          Image: |-
+                                            =IfError(
+                                                Office365Users.UserPhotoV2(ThisItem.Id),
+                                                SampleImage
+                                            )
+                                          OnSelect: =Select(Parent)
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Width: =72
+                                          X: =16
+                                          Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                                    - Title2:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =Self.Size * 1.8
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: =ThisItem.UserPrincipalName
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =Parent.TemplateWidth - 173
+                                          X: =103
+                                          Y: =32
+                                    - Subtitle2:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =Self.Size * 1.8
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.City
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =Title2.Width
+                                          X: =Title2.X
+                                          Y: =57
+                                    - Separator2:
+                                        Control: Rectangle
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          Height: =8
+                                          OnSelect: =Select(Parent)
+                                          Width: =Parent.TemplateWidth
+                                          Y: =Parent.TemplateHeight - Self.Height
+                                    - Rectangle5:
+                                        Control: Rectangle
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Fill: =RGBA(0, 18, 107, 1)
+                                          Height: =Parent.TemplateHeight - Separator2.Height
+                                          OnSelect: =Select(Parent)
+                                          Visible: =ThisItem.IsSelected
+                                          Width: =4
+                                    - Title2_1:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =Self.Size * 1.8
+                                          OnSelect: =Select(Parent)
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: =ThisItem.DisplayName
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =Parent.TemplateWidth - 173
+                                          X: =103
+                                          Y: =9
+                              - Container6:
+                                  Control: GroupContainer
+                                  Variant: ManualLayout
+                                  Properties:
+                                    Height: =384
+                                    Width: =541
+                                    X: =32
+                                    Y: =90
+                                  Children:
+                                    - Text1_1:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: |
+                                            ="Name: " & If(IsBlank(varSelectedEmployee), "", varSelectedEmployee.DisplayName)
+                                          Width: =345
+                                          X: =15
+                                          Y: =40
+                                    - Text1_2:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: |-
+                                            ="Employee picture: "
+                                          X: =15
+                                          Y: =251
+                                    - Image6:
+                                        Control: Image
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Height: =185
+                                          Image: =IfError(Office365Users.UserPhotoV2(varSelectedEmployee.Id),Blank())
+                                          Width: =200
+                                          X: =(Parent.Width-Self.Width)/2
+                                          Y: =174
+                                    - Text1_3:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: |-
+                                            ="Email: " & If(IsBlank(varSelectedEmployee), "", varSelectedEmployee.Mail)
+                                          Width: =434
+                                          X: =15
+                                          Y: =84
+                                    - Text4:
+                                        Control: ModernText
+                                        Properties:
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =40
+                                          Size: =18
+                                          Text: ="Selected Employee Card"
+                                          Width: =329
+                                    - Text1_4:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: |-
+                                            ="Location: " & If(IsBlank(varSelectedEmployee), "", varSelectedEmployee.City & " - " & varSelectedEmployee.OfficeLocation)
+                                          Width: =434
+                                          X: =15
+                                          Y: =129
+                                    - type_filter_1:
+                                        Control: Classic/DropDown
+                                        Properties:
+                                          BorderColor: =RGBA(53, 61, 63, 1)
+                                          BorderThickness: =1
+                                          ChevronBackground: =RGBA(0, 0, 0, 1)
+                                          ChevronFill: =RGBA(255, 255, 255, 1)
+                                          ChevronHoverBackground: =Color.Black
+                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                          Default: ="""LSSGB"""
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          Font: =Font.'Open Sans'
+                                          Height: =31
+                                          HoverBorderColor: =Color.Black
+                                          HoverFill: =RGBA(214, 221, 224, 1)
+                                          Items: =Distinct(lss_certificates,type.Value)
+                                          Items.Value: =Value
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(53, 61, 63, 1)
+                                          SelectionColor: =RGBA(255, 255, 255, 1)
+                                          SelectionFill: =RGBA(214, 221, 224, 1)
+                                          Size: =10
+                                          Width: =156
+                                          X: =360
+                                          Y: =40
+                              - Text5:
+                                  Control: ModernText
+                                  Properties:
+                                    Text: |-
+                                      ="Results: " &CountRows(colEmployeeResults)
+                                    Width: =144
+                                    X: =588
+                        - Container4:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PaddingBottom: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              PaddingTop: =8
+                            Children:
+                              - Rectangle4_2:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FillPortions: =1
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                              - ButtonCanvas1_1:
+                                  Control: Button
+                                  Properties:
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: =UpdateContext({add_person:false})
+                                    Text: ="Close"
+                                    Width: =120
+                              - Rectangle4:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FillPortions: =1
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                              - ButtonCanvas1:
+                                  Control: Button
+                                  Properties:
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    OnSelect: |-
+                                      =With(
+                                          {
+                                              _email: Lower(Coalesce(varSelectedEmployee.Mail, varSelectedEmployee.UserPrincipalName)),
+                                              _name: varSelectedEmployee.DisplayName
+                                          },
+                                          If(
+                                              IsBlank(varSelectedEmployee) || IsBlank(varSelectedEmployee.Id),
+                                              Notify("Please find and select an employee first.", NotificationType.Warning),
+
+                                              If(
+                                                  !IsBlank(
+                                                      LookUp(
+                                                          lss_certificates,
+                                                          UserEmail = _email
+                                                      )
+                                                  ),
+                                                  Notify("This employee already exists in the certification list.", NotificationType.Warning),
+
+                                                  ClearCollect(
+                                                      colRandomNumberCandidates,
+                                                      AddColumns(
+                                                          Sequence(50),
+                                                          CandidateNumber,
+                                                          RandBetween(0, 9999)
+                                                      )
+                                                  );
+
+                                                  Set(
+                                                      varAvailableNumber,
+                                                      First(
+                                                          Filter(
+                                                              colRandomNumberCandidates,
+                                                              IsBlank(
+                                                                  LookUp(
+                                                                      lss_certificates,
+                                                                      Number = CandidateNumber
+                                                                  )
+                                                              )
+                                                          )
+                                                      ).CandidateNumber
+                                                  );
+
+                                                  If(
+                                                      IsBlank(varAvailableNumber),
+                                                      Notify("Could not generate an available certificate number. Please try again.", NotificationType.Error),
+
+                                                      With(
+                                                          {
+                                                              _newRecord: Patch(
+                                                                  lss_certificates,
+                                                                  Defaults(lss_certificates),
+                                                                  {
+                                                                      Title: varAvailableNumber,
+                                                                      Number: varAvailableNumber,
+                                                                      UserEmail: _email,
+                                                                      UserName: _name,
+                                                                      type: {Value: type_filter_1.SelectedText.Value},
+                                                                      role: {Value: "user"},
+                                                                      TrainingDone: false,
+                                                                      TestDone: false,
+                                                                      ProjectDone: false,
+                                                                      award: false
+                                                                  }
+                                                              )
+                                                          },
+                                                          Notify(
+                                                              "Employee added successfully. Assigned number: " & Text(_newRecord.Number),
+                                                              NotificationType.Success
+                                                          );
+                                                          Reset(txtEmployeeSearch);
+                                                          Clear(colEmployeeResults);
+                                                          Clear(colRandomNumberCandidates);
+                                                          Set(varSelectedEmployee, Blank());
+                                                          Set(varAvailableNumber, Blank())
+                                                      )
+                                                  )
+                                              )
+                                          )
+                                      )
+                                    Text: ="Add to Roster"
+                                    Width: =120
+                              - Rectangle4_1:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    FillPortions: =1
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16

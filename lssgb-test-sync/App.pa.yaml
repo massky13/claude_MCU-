@@ -1,0 +1,5 @@
+App:
+  Properties:
+    OnStart: =Set(varUserEmail, User().Email);
+    StartScreen: =screen_main
+    Theme: =CHB

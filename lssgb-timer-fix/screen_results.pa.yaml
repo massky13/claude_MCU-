@@ -1,0 +1,484 @@
+Screens:
+  screen_results:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+    Children:
+      - ScreenContainer_results:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - Header_results:
+                Control: Header
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  BorderRadiusBottomLeft: =5
+                  BorderRadiusBottomRight: =5
+                  BorderRadiusTopLeft: =5
+                  BorderRadiusTopRight: =5
+                  Fill: =RGBA(2, 66, 109, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Logo: ='Opex Logo vertical white nobg'
+                  Title: ="Lean Six Sigma Green Belt"
+            - Body_results:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(245, 245, 245, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                Children:
+                  - Sidebar_results:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Fill: =RGBA(2, 66, 109, 1)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.Center
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingTop: =8
+                      Children:
+                        - NavTitle_results:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Navigation "
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                        - NavDivider_results:
+                            Control: Classic/Icon
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              BorderColor: =RGBA(255, 255, 255, 1)
+                              BorderThickness: =1
+                              Color: =RGBA(0, 18, 107, 1)
+                              Height: =1
+                              Icon: =Icon.HorizontalLine
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - NavHome_results:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_main,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🏠︎ Home"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                        - NavRoster_results:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_lssgb_roster,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🗐 Roster"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                        - NavSpacer_results:
+                            Control: Rectangle
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FillPortions: =1
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                  - MainContent_results:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =5
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =16
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                      Children:
+                        - Banner_results:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              Fill: =If(varPassed, RGBA(40, 167, 69, 1), RGBA(220, 53, 69, 1))
+                              FillPortions: =0
+                              Height: =100
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =16
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                            Children:
+                              - Image8:
+                                  Control: Image
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Image: ='lssgb logo'
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Visible: =varPassed
+                              - BannerText_results:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    AutoHeight: =true
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =32
+                                    Text: =If(varPassed, "CONGRATULATIONS — YOU PASSED!", "EXAM COMPLETE — NOT PASSED")
+                                    Wrap: =false
+                              - BannerBadge_results:
+                                  Control: Badge
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: ='BadgeCanvas.Appearance'.Filled
+                                    BasePaletteColor: =If(varPassed, RGBA(40, 167, 69, 1), RGBA(220, 53, 69, 1))
+                                    Content: =If(varPassed, "PASS", "FAIL")
+                                    FontColor: =RGBA(255, 255, 255, 1)
+                                    FontSize: =22
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =50
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    Width: =120
+                        - ScoreCard_results:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Semilight
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Height: =260
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =12
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =24
+                              PaddingLeft: =24
+                              PaddingRight: =24
+                              PaddingTop: =24
+                            Children:
+                              - ScoreHeading_results:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    Color: =RGBA(2, 66, 109, 1)
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Your Score"
+                                    Wrap: =false
+                              - ScoreNumber_results:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    Color: =If(varPassed, RGBA(40, 167, 69, 1), RGBA(220, 53, 69, 1))
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =48
+                                    Text: =Text(varFinalScore) & " / 100"
+                                    Wrap: =false
+                              - ScorePercent_results:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    Color: =If(varPassed, RGBA(40, 167, 69, 1), RGBA(220, 53, 69, 1))
+                                    FontWeight: =FontWeight.Semibold
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =24
+                                    Text: =Text(varScorePercent, "0.0") & "%"
+                                    Wrap: =false
+                              - ScoreProgress_results:
+                                  Control: Progress
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Height: =20
+                                    ProgressColor: =If(varPassed, 'Progress.ProgressColor'.Success, 'Progress.ProgressColor'.Error)
+                                    Shape: ='Progress.Shape'.Rounded
+                                    Thickness: ='Progress.Thickness'.Large
+                                    Value: =varScorePercent
+                                    Width: =400
+                              - ScoreThreshold_results:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    Color: =RGBA(100, 100, 100, 1)
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: |-
+                                      ="Passing threshold: 80%"
+                        - StatsRow_results:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =130
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =24
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingTop: =16
+                            Children:
+                              - StatTime_results:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.Semilight
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =16
+                                    PaddingLeft: =16
+                                    PaddingRight: =16
+                                    PaddingTop: =16
+                                  Children:
+                                    - StatTimeLabel_results:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          AutoHeight: =true
+                                          Color: =RGBA(120, 120, 120, 1)
+                                          LayoutMinWidth: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: ="Time Taken"
+                                          Wrap: =false
+                                    - StatTimeValue_results:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          AutoHeight: =true
+                                          Color: =RGBA(2, 66, 109, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          LayoutMinWidth: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =20
+                                          Text: =Text(Time(0, 0, varElapsedSeconds), "hh:mm:ss")
+                                          Wrap: =false
+                              - StatCorrect_results:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.Semilight
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =16
+                                    PaddingLeft: =16
+                                    PaddingRight: =16
+                                    PaddingTop: =16
+                                  Children:
+                                    - StatCorrectLabel_results:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          AutoHeight: =true
+                                          Color: =RGBA(120, 120, 120, 1)
+                                          LayoutMinWidth: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: ="Correct Answers"
+                                          Wrap: =false
+                                    - StatCorrectValue_results:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          AutoHeight: =true
+                                          Color: =RGBA(2, 66, 109, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          LayoutMinWidth: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =20
+                                          Text: =Text(varFinalScore) & " of 100"
+                                          Wrap: =false
+                              - StatAttempt_results:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.Semilight
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =16
+                                    PaddingLeft: =16
+                                    PaddingRight: =16
+                                    PaddingTop: =16
+                                  Children:
+                                    - StatAttemptLabel_results:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          AutoHeight: =true
+                                          Color: =RGBA(120, 120, 120, 1)
+                                          LayoutMinWidth: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: ="Attempt"
+                                          Wrap: =false
+                                    - StatAttemptValue_results:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          AutoHeight: =true
+                                          Color: =RGBA(2, 66, 109, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          LayoutMinWidth: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =20
+                                          Text: ="#" & Text(varAttemptNumber) & " of 3"
+                                          Wrap: =false
+                        - NavButtons_results:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =66
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =16
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - BtnHome_results:
+                                  Control: Button
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =RGBA(2, 66, 109, 1)
+                                    FontSize: =16
+                                    Height: =50
+                                    OnSelect: =Navigate(screen_main, ScreenTransition.Fade)
+                                    Text: ="Home"
+                                    Width: =160
+                              - BtnRetake_results:
+                                  Control: Button
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =RGBA(56, 96, 178, 1)
+                                    FontSize: =16
+                                    Height: =50
+                                    OnSelect: =Navigate(screen_lssgb_landing, ScreenTransition.Fade)
+                                    Text: ="Retake Exam"
+                                    Visible: =!varPassed
+                                    Width: =180

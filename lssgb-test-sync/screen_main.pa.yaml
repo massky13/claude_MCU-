@@ -1,0 +1,175 @@
+Screens:
+  screen_main:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+    Children:
+      - ScreenContainer1:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - Header1:
+                Control: Header
+                Properties:
+                  BorderRadiusBottomLeft: =5
+                  BorderRadiusBottomRight: =5
+                  BorderRadiusTopLeft: =5
+                  BorderRadiusTopRight: =5
+                  Fill: =RGBA(2, 66, 109, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Logo: ='Opex Logo vertical white nobg'
+                  Title: ="OpEx Training Hub"
+                  TitleFontSize: =26
+            - BottomContainer1:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(245, 245, 245, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  LayoutWrap: =true
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                Children:
+                  - Container3:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Fill: =RGBA(2, 66, 109, 1)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.Center
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingTop: =8
+                        X: =40
+                        Y: =40
+                      Children:
+                        - Text1_13:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Navigation "
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =40
+                        - Icon3_1:
+                            Control: Classic/Icon
+                            Properties:
+                              BorderColor: =RGBA(255, 255, 255, 1)
+                              BorderThickness: =1
+                              Color: =RGBA(0, 18, 107, 1)
+                              Height: =1
+                              Icon: =Icon.HorizontalLine
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - Text1_14:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🏠︎ Home"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Text1_30:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_lssgb_roster,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🗐 Roster"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =142
+                              Y: =28
+                        - Rectangle2_3:
+                            Control: Rectangle
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FillPortions: =1
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                  - Container5:
+                      Control: GroupContainer
+                      Variant: GridLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =5
+                        LayoutGap: =20
+                        LayoutGridColumns: =3
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                      Children:
+                        - Card1:
+                            Control: ModernCard
+                            Properties:
+                              DisplayMode: |-
+                                =If(IsBlank(
+                                    LookUp(
+                                        lss_cetificates,
+                                        type.Value = "LSSGB" && UserEmail = Lower(User().Email)
+                                    )
+                                ), DisplayMode.View,DisplayMode.Edit)
+                              HeaderImage: ='LSSGB stamp'
+                              Image: ='GB badge'
+                              ImagePosition: =ImagePosition.Fit
+                              OnSelect: =Navigate(screen_lssgb_landing,ScreenTransition.CoverRight)
+                              Subtitle: ="Certification Exam"
+                              Title: ="Lean Six Sigma Green Belt "
+                              X: =361
+                              Y: =425
+                        - Card2:
+                            Control: ModernCard
+                            Properties:
+                              HeaderImage: ='LSSWB MEdal'
+                              Image: ='LSSWB MEdal'
+                              ImagePosition: =ImagePosition.Center
+                              Subtitle: ="Certification Exam"
+                              Title: ="Lean Six Sigma White Belt"
+                              X: =40
+                              Y: =40

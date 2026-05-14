@@ -1,0 +1,317 @@
+Screens:
+  screen_lssgb_landing:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =Set(varUserEmail, Lower(User().Email));
+        ClearCollect(col_lssgb_questions, Filter(lss_questions, exam="LSSGB"));
+        Set(
+            varCompletedAttempts,
+            CountRows(Filter(lss_sessions, UserEmail=varUserEmail, IsCompleted=true))
+        );
+        Set(
+            varInProgressSession,
+            LookUp(lss_sessions, UserEmail=varUserEmail && !IsCompleted)
+        )
+    Children:
+      - ScreenContainer1_2:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - Header1_2:
+                Control: Header
+                Properties:
+                  BorderRadiusBottomLeft: =5
+                  BorderRadiusBottomRight: =5
+                  BorderRadiusTopLeft: =5
+                  BorderRadiusTopRight: =5
+                  Fill: =RGBA(2, 66, 109, 1)
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  Logo: ='Opex Logo vertical white nobg'
+                  Title: ="Lean Six Sigma Green Belt"
+            - BottomContainer1_3:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(245, 245, 245, 1)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  LayoutWrap: =true
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                Children:
+                  - Container3_3:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Fill: =RGBA(2, 66, 109, 1)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.Center
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingTop: =8
+                        X: =40
+                        Y: =40
+                      Children:
+                        - Text1_23:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Navigation "
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =40
+                        - Icon3_3:
+                            Control: Classic/Icon
+                            Properties:
+                              BorderColor: =RGBA(255, 255, 255, 1)
+                              BorderThickness: =1
+                              Color: =RGBA(0, 18, 107, 1)
+                              Height: =1
+                              Icon: =Icon.HorizontalLine
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                        - Text1_24:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_main,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🏠︎ Home"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =40
+                              Y: =70
+                        - Text1_27:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Height: =50
+                              OnSelect: =Navigate(screen_lssgb_roster,ScreenTransition.Fade)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                ="🗐 Roster"
+                              Width: =Parent.Width*0.8
+                              Wrap: =false
+                              X: =142
+                              Y: =28
+                        - Rectangle2_5:
+                            Control: Rectangle
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FillPortions: =1
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Width: =Parent.Width
+                  - Container6_1:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =5
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - Container5_3:
+                            Control: GroupContainer
+                            Variant: GridLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =5
+                              LayoutGap: =20
+                              LayoutGridColumns: =3
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Visible: =false
+                              X: =40
+                              Y: =40
+                            Children:
+                              - Card1_3:
+                                  Control: ModernCard
+                                  Properties:
+                                    OnSelect: =Navigate(screen_LSSGB,ScreenTransition.Fade)
+                                    Subtitle: ="Green Belt"
+                                    Title: ="Lean Six Sigma"
+                                    X: =361
+                                    Y: =425
+                              - Card2_9:
+                                  Control: ModernCard
+                                  Properties:
+                                    HeaderImage: =
+                                    X: =40
+                                    Y: =40
+                              - Card2_10:
+                                  Control: ModernCard
+                                  Properties:
+                                    HeaderImage: =
+                                    X: =303
+                                    Y: =28
+                              - Card2_11:
+                                  Control: ModernCard
+                                  Properties:
+                                    HeaderImage: =
+                                    X: =749
+                                    Y: =28
+                        - Text3_1:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Center
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Bold
+                              LayoutMaxHeight: =50
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Size: =24
+                              Text: ="Lean Six Sigma Green Belt Certification Exam"
+                              Width: =600
+                        - Container9_1:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - Image1_1:
+                                  Control: Image
+                                  Properties:
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Height: =520
+                                    Image: ='LSSGB medal'
+                                    Width: =321
+                                    X: =58
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - Text5_1:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =36
+                                    Size: =18
+                                    Text: ="Welcome to the exam portion of the certification process."
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =534
+                                    X: =471
+                                    Y: =35
+                              - Text6_1:
+                                  Control: ModernText
+                                  Properties:
+                                    Height: =293
+                                    Size: =18
+                                    Text: |-
+                                      ="Instructions:
+                                       - You will have 2 hours to answer 100 questions.
+                                       - The questions cover the Green Belt materials by OpEx.
+                                       - The passing score is 80%.
+                                       - You will have a maximum of 3 attempts to pass the test.
+                                       - At the end of the test you will see a report with your result.
+                                       - Click the Start button below to begin."
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =534
+                                    X: =471
+                                    Y: =111
+                              - ButtonCanvas3_1:
+                                  Control: Button
+                                  Properties:
+                                    BasePaletteColor: =RGBA(2, 66, 109, 1)
+                                    DisplayMode: =If(varCompletedAttempts >= 3, DisplayMode.Disabled, DisplayMode.Edit)
+                                    FontSize: =18
+                                    Height: =61
+                                    OnSelect: |-
+                                      =If(
+                                          !IsBlank(varInProgressSession),
+
+                                          // RESUME path — restore session state
+                                          Set(varSessionID, varInProgressSession.ID);
+                                          Set(varElapsedSeconds, Coalesce(varInProgressSession.ElapsedSeconds, 0));
+                                          Set(varRemainingSeconds, 7200 - varElapsedSeconds);
+                                          Set(varIsCompleted, false);
+                                          Set(varIsPaused, false);
+                                          Set(varSelectedAnswer, "");
+                                          Navigate(screen_LSSGB, ScreenTransition.Fade),
+
+                                          // NEW START path
+                                          Set(varElapsedSeconds, 0);
+                                          Set(varRemainingSeconds, 7200);
+                                          Set(varIsCompleted, false);
+                                          Set(varIsPaused, false);
+                                          Set(varSelectedAnswer, "");
+                                          Set(varAttemptNumber, varCompletedAttempts + 1);
+
+                                          // Write new session record to SharePoint
+                                          Set(
+                                              varSession,
+                                              Patch(
+                                                  lss_sessions,
+                                                  Defaults(lss_sessions),
+                                                  {
+                                                      Title: User().FullName & " - " & Text(Now(), "yyyy-mm-dd hh:mm"),
+                                                      UserEmail: varUserEmail,
+                                                      StartTime: Now(),
+                                                      PausedTime: Blank(),
+                                                      ElapsedSeconds: 0,
+                                                      IsPaused: false,
+                                                      IsCompleted: false,
+                                                      AttemptNumber: varAttemptNumber,
+                                                      SessionStatus: {Value: "In Progress"},
+                                                      TotalQuestions: 100,
+                                                      Passed: false,
+                                                      CompletedDate: Blank()
+                                                  }
+                                              )
+                                          );
+                                          Set(varSessionID, varSession.ID);
+                                          ClearCollect(colSession, varSession);
+                                          Navigate(screen_LSSGB, ScreenTransition.Fade)
+                                      )
+                                    Text: =If(varCompletedAttempts >= 3, "Maximum attempts reached", If(!IsBlank(varInProgressSession), "Resume", "Start"))
+                                    Width: =157
+                                    X: =659
+                                    Y: =465
