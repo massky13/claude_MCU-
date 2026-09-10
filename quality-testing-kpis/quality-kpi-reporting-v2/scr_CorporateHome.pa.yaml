@@ -1,0 +1,283 @@
+Screens:
+  scr_CorporateHome:
+    Properties:
+      Fill: =PageBg
+      OnVisible: =LoadCorporateHome()
+    Children:
+      - cnt_root_corp:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =Parent.Width
+          Children:
+            - cnt_header_corp:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =ChampionBlue
+                  FillPortions: =0
+                  Height: =56
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  Width: =Parent.Width
+                Children:
+                  - cnt_header_left_corp:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - img_logo_corp:
+                            Control: Image
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =4
+                              Height: =Parent.Height
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              Image: =quality_logo
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =RGBA(0, 0, 0, 0)
+                              Width: =Parent.Height
+                        - lbl_title_corp:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: ="Quality KPI Reporting - Corporate Overview (First Time Through)"
+                              Width: =340
+                              Wrap: =false
+                  - cnt_header_right_corp:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - lbl_loaded_corp:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              FillPortions: =1
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: =User().FullName & ", " & varRole & ". " & If(IsBlank(varCorpLoadedAt), "Loading...", "Loaded " & Text(varCorpLoadedAt, "h:mm AM/PM"))
+                              Wrap: =false
+            - cnt_corp_main:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =PageBg
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingTop: =12
+                  Width: =Parent.Width
+                Children:
+                  - gal_regions:
+                      Control: Gallery
+                      Variant: Horizontal
+                      Properties:
+                        Items: =Sort(Filter(col_corp_regions, !IsBlank(Region_Name) && Region_Name<>"CAN"),Region_Name)
+                        LayoutMaxWidth: =Parent.Width
+                        LayoutMinHeight: =0
+                        ShowScrollbar: =false
+                        TemplatePadding: =12
+                        TemplateSize: =(Parent.Width- (8*9))/5   //(Parent.Width-110)/Max(CountRows(Filter(col_corp_regions, !IsBlank(Region_Name) && Region_Name<>"CAN")), 1)
+                        Width: =Parent.Width
+                      Children:
+                        - cnt_region_col:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =CardBorder
+                              BorderThickness: =1
+                              Fill: =CardBg
+                              Height: =Parent.TemplateHeight
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              PaddingBottom: =10
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              PaddingTop: =10
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Width: =Parent.TemplateWidth
+                            Children:
+                              - lbl_region_name:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =24
+                                    LayoutMinHeight: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =16
+                                    Text: =ThisItem.Region_Name
+                                    Wrap: =false
+                              - badge_region_metric:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =StatusGlyphOf(StatusOf(ThisItem.Region_FTT, varGoalFTT, 0)) & " " &
+                                          Text(ThisItem.Region_FTT, "0.0") & "% FTT"
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: |-
+                                      =If(StatusOf(ThisItem.Region_FTT, varGoalFTT, 0) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          StatusOf(ThisItem.Region_FTT, varGoalFTT, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          StatusOf(ThisItem.Region_FTT, varGoalFTT, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                          'BadgeCanvas.ThemeColor'.Danger)
+                                    Width: =140
+                              - rect_region_sep:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: =GridLine
+                                    Height: =1
+                                    LayoutMinHeight: =0
+                                    Width: =Parent.Width-20
+                              - gal_region_plants:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    Items: |-
+                                      =Sort(
+                                          Filter(col_corp_plant_metrics, Plant_Region = ThisItem.Region_Name),
+                                          Plant_FTT, SortOrder.Descending)
+                                    LayoutMaxWidth: =gal_regions.TemplateWidth
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    TemplateSize: '=50  '
+                                    Width: =Parent.Width
+                                  Children:
+                                    - cnt_plant_row_wrap:
+                                        Control: GroupContainer
+                                        Variant: ManualLayout
+                                        Properties:
+                                          Height: =Parent.TemplateHeight
+                                          Width: =Parent.Width-Parent.X
+                                        Children:
+                                          - cnt_plant_row:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                BorderColor: =GridLine
+                                                BorderThickness: =1
+                                                Height: =Parent.Height
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =6
+                                                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                                PaddingLeft: =4
+                                                PaddingRight: =4
+                                                Width: =Parent.Width
+                                              Children:
+                                                - lbl_plant_row_name:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Color: =TextPrimary
+                                                      FillPortions: =1
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: =Text(ThisItem.Plant_ID) & " - " & ThisItem.Plant_Name
+                                                      Wrap: =false
+                                                - badge_plant_row_metric:
+                                                    Control: Badge
+                                                    Properties:
+                                                      Content: |-
+                                                        =StatusGlyphOf(StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0)) & " " &
+                                                            Text(ThisItem.Plant_FTT, "0.0")
+                                                      Height: =20
+                                                      LayoutMinWidth: =0
+                                                      Shape: ='BadgeCanvas.Shape'.Rounded
+                                                      ThemeColor: |-
+                                                        =If(StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                                            StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                                            StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                                            'BadgeCanvas.ThemeColor'.Danger)
+                                                      Width: =70
+                                                - lbl_plant_row_stale:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Align: =Align.Right
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =If(Coalesce(ThisItem.Plant_Stale_days, 999) > 7, AlertRed, TextMuted)
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =6
+                                                      PaddingTop: =0
+                                                      Size: =10
+                                                      Text: |-
+                                                        =If(IsBlank(ThisItem.Plant_Updated), "never reported",
+                                                            ThisItem.Plant_Stale_days <= 7, "",
+                                                            Text(ThisItem.Plant_Stale_days, "0") & "d stale")
+                                                      Width: =78
+                                                      Wrap: =false
+                                          - btn_plant_overlay:
+                                              Control: Classic/Button
+                                              Properties:
+                                                BorderStyle: =BorderStyle.None
+                                                BorderThickness: =0
+                                                Fill: =RGBA(0, 0, 0, 0)
+                                                Height: =Parent.Height
+                                                HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                                HoverColor: =RGBA(145, 143, 141, 1)
+                                                HoverFill: =RGBA(122, 125, 128, 0.19)
+                                                OnSelect: =SelectCorporatePlant(ThisItem.Plant_ID)
+                                                PressedBorderColor: =RGBA(0, 0, 0, 0)
+                                                PressedColor: =RGBA(145, 143, 141, 1)
+                                                PressedFill: =RGBA(2, 66, 109, 0.16)
+                                                Text: =""
+                                                Tooltip: ="Open plant dashboard"
+                                                Width: =Parent.Width

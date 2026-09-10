@@ -1,0 +1,13 @@
+App:
+  Properties:
+    OnStart: |-
+      =If ( User().Email in sys_test_access.Inspector_email,Set(PID,LookUp(sys_test_access,Inspector_email = User().Email,Value(Plant_ID))),Set(PID,Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation,3))));
+
+      Set(var_facility,1);
+      ClearCollect(col_sys_access,sys_test_access);
+      ClearCollect(col_sys_test,Filter(system_testing_data,Plant_ID=PID && Facility_ID=var_facility)); //&& Plant_ID=Value(drop_facility_main.SelectedText.Value)));
+      ClearCollect(col_calendar,calendar_list);
+
+      IfError(Set(var_lastweekgas,LookUp(col_sys_test,Week_end=Last(Filter(calendar_list, Month = Month(Today()), Year = Year(Today()))).W_end,Gas_pass)/(LookUp(col_sys_test,Week_end=Last(Filter(calendar_list, Month = Month(Today()), Year = Year(Today()))).W_end,Gas_fail)+LookUp(col_sys_test,Week_end=Last(Filter(calendar_list, Month = Month(Today()), Year = Year(Today()))).W_end,Gas_pass))),"");
+    StartScreen: ='Welcome screen'
+    Theme: =PowerAppsTheme

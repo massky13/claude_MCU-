@@ -1,0 +1,1031 @@
+Screens:
+  scr_TaxonomyAdmin:
+    Properties:
+      Fill: =PageBg
+      OnVisible: |-
+        =// Admin-only screen - Navigate() is not permitted inside OnVisible, so access is
+        // enforced by the nav controls (Visible: =varIsAdmin) rather than a redirect here.
+        Reset(tabs_main_ta);
+        Set(varSelectedTypeId, Blank());
+        Set(varShowAddType, false);
+        Set(varShowAddDefect, false);
+        Set(varEditTypeId, Blank());
+        Set(varSelectedTestId, Blank());
+        Set(varEditDefectId, Blank());
+        // Taxonomy Admin needs BOTH active and inactive rows (to reactivate a deactivated
+        // type/defect), unlike the shared col_type/col_defect which are active-only per
+        // App.OnStart - so this screen keeps its own full-taxonomy collections.
+        ClearCollect(col_type_admin, qk_test_type);
+        // col_severity_options dropped with the severity dropdown - cost replaced it.
+        // qk_defect_type.Severity still exists and still holds the seeded 2s; the only
+        // remaining reader is scr_WeekDetail's historical per-defect label.
+        ClearCollect(col_defect_admin, qk_defect_type)
+    Children:
+      - cnt_root_ta:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width
+          Children:
+            - cnt_header_ta:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =ChampionBlue
+                  FillPortions: =0
+                  Height: =56
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  Width: =Parent.Width
+                Children:
+                  - cnt_header_left_ta:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - img_logo_ta:
+                            Control: Image
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =4
+                              Height: =Parent.Height
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              Image: =quality_logo
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =RGBA(0, 0, 0, 0)
+                              Width: =Parent.Height
+                        - lbl_title_ta:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: ="Quality KPI Reporting"
+                              Width: =300
+                              Wrap: =false
+                  - cnt_header_right_ta:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =0
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - ico_admin_ta:
+                            Control: ModernIcon
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Icon: ="Settings"
+                              IconColor: =RGBA(255, 255, 255, 1)
+                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
+                              Tooltip: ="Admin"
+                              Visible: =varIsAdmin
+                        - ico_theme_ta:
+                            Control: ModernIcon
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Icon: ="WeatherSunny"
+                              IconColor: =RGBA(255, 255, 255, 1)
+                              OnSelect: =Set(varDarkMode, !Coalesce(varDarkMode, false))
+                              Tooltip: ="Toggle theme"
+                        - lbl_plant_ta:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =RGBA(255, 255, 255, 1)
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =If(IsBlank(varPID), "Select a plant",
+                                    Text(varPID) & " - " & LookUp(col_plants, Plant_ID = varPID, Plant_Names))
+                              Wrap: =false
+            - cnt_nav_ta:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =CardBg
+                  FillPortions: =0
+                  Height: =48
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  Width: =Parent.Width
+                Children:
+                  - tabs_main_ta:
+                      Control: ModernTabList
+                      Properties:
+                        AlignInContainer: =AlignInContainer.End
+                        Default: |-
+                          ={Value: "Taxonomy"}
+                        FillPortions: =1
+                        Items: |-
+                          =If(varIsAdmin,
+                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
+                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
+                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"})
+                              ),
+                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
+                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}),
+                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
+                              )
+                          )
+                        LayoutMinHeight: =38
+                        OnChange: |-
+                          =If(tabs_main_ta.Selected.Value = "Corporate Home", Navigate(scr_CorporateHome, ScreenTransition.None),
+                              tabs_main_ta.Selected.Value = "Dashboard", Navigate(scr_Dashboard, ScreenTransition.None),
+                              tabs_main_ta.Selected.Value = "Data Entry", Navigate(scr_Entry, ScreenTransition.None),
+                              tabs_main_ta.Selected.Value = "Week Detail", Navigate(scr_WeekDetail, ScreenTransition.None),
+                              tabs_main_ta.Selected.Value = "History", Navigate(scr_History, ScreenTransition.None),
+                              tabs_main_ta.Selected.Value = "Taxonomy", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
+                              tabs_main_ta.Selected.Value = "Access", Navigate(scr_AccessAdmin, ScreenTransition.None))
+            - cnt_main_ta:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =PageBg
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =16
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  Width: =Parent.Width
+                Children:
+                  - lbl_screen_title:
+                      Control: ModernText
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =22
+                        Text: ="Taxonomy Admin"
+                        Wrap: =false
+                  - cnt_review_flags:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =CardBorder
+                        BorderThickness: =1
+                        Fill: =CardBg
+                        FillPortions: =0
+                        Height: =72
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =10
+                        PaddingLeft: =14
+                        PaddingRight: =14
+                        PaddingTop: =10
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                      Children:
+                        - lbl_qp_flag:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =StatusWarningColor
+                              Height: =26
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                ="⚠ " & CountRows(Filter(col_type_admin, Len(QP_ref) > 0 &&
+                                    Mid(QP_ref, 3, 1) <> ".")) &
+                                    " type(s) have inconsistent QP_ref formatting - Gas uses QP04.0/" &
+                                    "QP05.0 without the dot the other seven types use (known gap)."
+                  - cnt_columns:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =600
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =16
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - cnt_tests:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =CardBorder
+                              BorderThickness: =1
+                              Fill: =CardBg
+                              FillPortions: =2
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                            Children:
+                              - lbl_tests_header:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Tests"
+                                    Wrap: =false
+                              - gal_tests:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                                    Items: =Sort(col_test, Sort_order)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    TemplateSize: =36
+                                  Children:
+                                    - rect_test_row_bg:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =If(varSelectedTestId = Value(ThisItem.Title), LightAqua, CardBg)
+                                          Height: =36
+                                          Width: =183
+                                    - lbl_test_row:
+                                        Control: ModernText
+                                        Properties:
+                                          Color: =TextPrimary
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =36
+                                          PaddingBottom: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =Text(ThisItem.Sort_order, "0") & " - " & ThisItem.Test_name
+                                          Width: =Parent.Width
+                                          Wrap: =false
+                                    - btn_test_row_overlay:
+                                        Control: Button
+                                        Properties:
+                                          Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                          BorderColor: =RGBA(161, 159, 157, 1)
+                                          BorderThickness: =1
+                                          Height: =36
+                                          OnSelect: |-
+                                            =// Tapping the selected test again clears the filter - without this the admin
+                                            // would have no way back to the full list once a test was picked.
+                                            If(varSelectedTestId = Value(ThisItem.Title),
+                                                Set(varSelectedTestId, Blank()),
+                                                Set(varSelectedTestId, Value(ThisItem.Title)));
+                                            // The Defects pane hangs off varSelectedTypeId. Changing the test filter can
+                                            // scroll that type out of gal_types, which would leave the Defects pane showing
+                                            // a parent the admin can no longer see - so drop the type selection and any
+                                            // half-finished inline edit with it.
+                                            Set(varSelectedTypeId, Blank());
+                                            Set(varEditTypeId, Blank());
+                                            Set(varEditDefectId, Blank())
+                                          PaddingLeft: =3
+                                          Text: =""
+                                          Width: =183
+                        - cnt_types:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =CardBorder
+                              BorderThickness: =1
+                              Fill: =CardBg
+                              FillPortions: =5
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                            Children:
+                              - cnt_types_header:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =32
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lbl_types_header:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =TextPrimary
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: |-
+                                            ="Types of Test" &
+                                                If(IsBlank(varSelectedTestId),
+                                                    " - all tests",
+                                                    " - " & LookUp(col_test, Value(Title) = varSelectedTestId, Test_name))
+                                          Wrap: =false
+                                    - btn_add_type:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          OnSelect: =Set(varShowAddType, !varShowAddType)
+                                          Size: =12
+                                          Text: ="+ Type"
+                              - cnt_add_type_form:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    FillPortions: =0
+                                    Height: =172
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingTop: =8
+                                    Visible: =varShowAddType
+                                  Children:
+                                    - txt_new_type_name:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Height: =36
+                                          Placeholder: ="Type name"
+                                          Type: ='TextInputType'.SingleLine
+                                    - txt_new_qp_ref:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Height: =36
+                                          Placeholder: ="QP reference, e.g. QP.07.0"
+                                          Type: ='TextInputType'.SingleLine
+                                    - drp_new_type_test:
+                                        Control: ModernDropdown
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Default: =LookUp(col_test, Value(Title) = varSelectedTestId)
+                                          Height: =36
+                                          ItemDisplayText: =ThisItem.Test_name
+                                          Items: =Sort(col_test, Sort_order)
+                                    - btn_save_new_type:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Height: =36
+                                          OnSelect: |-
+                                            =If(
+                                                IsBlank(txt_new_type_name.Text),
+                                                Notify("Enter a type name.", NotificationType.Error),
+
+                                                IsBlank(drp_new_type_test.Selected),
+                                                Notify("Choose which test this type belongs to.",
+                                                    NotificationType.Error),
+
+                                                IsBlank(txt_new_qp_ref.Text),
+                                                Notify("Enter a QP reference.", NotificationType.Error),
+
+                                                !IsBlank(LookUp(col_type_admin,
+                                                    Type_name = Trim(txt_new_type_name.Text))),
+                                                Notify("A type named """ & txt_new_type_name.Text &
+                                                    """ already exists.", NotificationType.Error),
+
+                                                IfError(
+                                                    Patch(qk_test_type, Defaults(qk_test_type), {
+                                                        Title: Text(Coalesce(
+                                                            Max(col_type_admin, Value(Title)), 0) + 1,
+                                                            "0"),
+                                                        Test_ID: Value(drp_new_type_test.Selected.Title),
+                                                        Test_name: drp_new_type_test.Selected.Test_name,
+                                                        Type_name: Trim(txt_new_type_name.Text),
+                                                        QP_ref: Trim(txt_new_qp_ref.Text),
+                                                        Sort_order: Coalesce(
+                                                            Max(col_type_admin, Sort_order), 0) + 1,
+                                                        Active: true
+                                                    }),
+                                                    Notify("Could not save type. " & FirstError.Message,
+                                                        NotificationType.Error)
+                                                );
+                                                ClearCollect(col_type_admin, qk_test_type);
+                                                ClearCollect(col_type,
+                                                    Filter(qk_test_type, Active = true));
+                                                Reset(txt_new_type_name);
+                                                Reset(txt_new_qp_ref);
+                                                Set(varShowAddType, false)
+                                            )
+                                          Text: ="Save Type"
+                              - gal_types:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                                    Items: |-
+                                      =Sort(
+                                          If(IsBlank(varSelectedTestId),
+                                              col_type_admin,
+                                              Filter(col_type_admin, Test_ID = varSelectedTestId)),
+                                          Sort_order)
+                                    TemplateSize: =44
+                                  Children:
+                                    - cnt_type_row:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          Fill: |-
+                                            =If(Value(ThisItem.Title) = varSelectedTypeId, LightAqua,
+                                                CardBg)
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          PaddingBottom: =4
+                                          PaddingLeft: =6
+                                          PaddingRight: =6
+                                          PaddingTop: =4
+                                          Width: =Parent.Width-10
+                                        Children:
+                                          - lbl_type_name:
+                                              Control: Button
+                                              Properties:
+                                                Align: =Align.Left
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                                FillPortions: =1
+                                                FontColor: =If(ThisItem.Active, TextPrimary, TextMuted)
+                                                FontSize: =13
+                                                OnSelect: =Set(varSelectedTypeId, Value(ThisItem.Title))
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Text: |-
+                                                  =ThisItem.Type_name &
+                                                      If(!ThisItem.Active, " (inactive)", "")
+                                                Visible: =varEditTypeId <> Value(ThisItem.Title)
+                                          - txt_edit_type_name:
+                                              Control: ModernTextInput
+                                              Properties:
+                                                AccessibleLabel: ="Type name"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Default: =ThisItem.Type_name
+                                                FillPortions: =1
+                                                Height: =36
+                                                LayoutMinWidth: =0
+                                                Placeholder: ="Type name"
+                                                Type: ='TextInputType'.SingleLine
+                                                Visible: =varEditTypeId = Value(ThisItem.Title)
+                                          - bdg_qp_ref:
+                                              Control: Badge
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                Content: =ThisItem.QP_ref
+                                                Height: =20
+                                                Shape: ='BadgeCanvas.Shape'.Rounded
+                                                ThemeColor: |-
+                                                  =If(Len(ThisItem.QP_ref) > 0 &&
+                                                          Mid(ThisItem.QP_ref, 3, 1) <> ".",
+                                                      'BadgeCanvas.ThemeColor'.Warning,
+                                                      'BadgeCanvas.ThemeColor'.Informative)
+                                                Visible: =varEditTypeId <> Value(ThisItem.Title)
+                                                Width: =80
+                                          - txt_edit_qp_ref:
+                                              Control: ModernTextInput
+                                              Properties:
+                                                AccessibleLabel: ="QP reference"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Default: =ThisItem.QP_ref
+                                                Height: =36
+                                                LayoutMinWidth: =0
+                                                Placeholder: ="QP.07.0"
+                                                Type: ='TextInputType'.SingleLine
+                                                Visible: =varEditTypeId = Value(ThisItem.Title)
+                                                Width: =104
+                                          - lbl_defect_count:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =TextMuted
+                                                FillPortions: =1
+                                                LayoutMaxWidth: =50
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =10
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =11
+                                                Text: |-
+                                                  ="Qty: " & CountRows(Filter(col_defect_admin,
+                                                      Type_ID = Value(ThisItem.Title)))
+                                                Visible: =varEditTypeId <> Value(ThisItem.Title)
+                                                Wrap: =false
+                                          - tgl_type_active:
+                                              Control: ModernToggle
+                                              Properties:
+                                                Default: =ThisItem.Active
+                                                FillPortions: =1
+                                                Label: ="Active"
+                                                LayoutMinWidth: =0
+                                                OnCheck: |-
+                                                  =IfError(
+                                                      Patch(qk_test_type, ThisItem, {Active: true}),
+                                                      Notify("Could not activate type. " &
+                                                          FirstError.Message, NotificationType.Error)
+                                                  );
+                                                  ClearCollect(col_type_admin, qk_test_type);
+                                                  ClearCollect(col_type,
+                                                      Filter(qk_test_type, Active = true))
+                                                OnUncheck: |-
+                                                  =ClearCollect(col_type_usage_check,
+                                                      Filter(qk_home_defect, Type_ID = Value(ThisItem.Title)));
+                                                  Set(varTypeUsageCount, CountRows(col_type_usage_check));
+                                                  If(varTypeUsageCount > 0,
+                                                      Notify("This type is referenced by " &
+                                                          varTypeUsageCount &
+                                                          " existing defect record(s). Deactivating " &
+                                                          "hides it from new entry; history is kept.",
+                                                          NotificationType.Warning)
+                                                  );
+                                                  IfError(
+                                                      Patch(qk_test_type, ThisItem, {Active: false}),
+                                                      Notify("Could not deactivate type. " &
+                                                          FirstError.Message, NotificationType.Error)
+                                                  );
+                                                  ClearCollect(col_type_admin, qk_test_type);
+                                                  ClearCollect(col_type,
+                                                      Filter(qk_test_type, Active = true))
+                                                ToggleSize: =16
+                                                Visible: =varEditTypeId <> Value(ThisItem.Title)
+                                          - btn_type_edit:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Edit this type"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Subtle
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =Set(varEditTypeId, Value(ThisItem.Title));
+                                                  Reset(txt_edit_type_name);
+                                                  Reset(txt_edit_qp_ref)
+                                                Text: ="Edit"
+                                                Visible: =varEditTypeId <> Value(ThisItem.Title)
+                                                Width: =64
+                                          - btn_type_save:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Save type changes"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                BasePaletteColor: =ChampionBlue
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =// Name is required; QP_ref is deliberately NOT format-validated - fixing the
+                                                  // inconsistent Gas refs (CLAUDE.md §14 gap 2) is exactly what this edit is for,
+                                                  // and §9 defines no QP_ref format rule to enforce.
+                                                  If(IsBlank(Trim(txt_edit_type_name.Text)),
+                                                      Notify("Type name cannot be blank.", NotificationType.Error),
+                                                      IfError(
+                                                          Patch(qk_test_type, ThisItem,
+                                                              {Type_name: Trim(txt_edit_type_name.Text),
+                                                               QP_ref: Trim(txt_edit_qp_ref.Text)}),
+                                                          Notify("Could not update type. " & FirstError.Message,
+                                                              NotificationType.Error)
+                                                      );
+                                                      // Same refresh discipline as every other write on this screen: the admin
+                                                      // collection AND the shared active-only col_type, so scr_Entry's dropdowns
+                                                      // and the QP_ref warning banner both recompute immediately.
+                                                      ClearCollect(col_type_admin, qk_test_type);
+                                                      ClearCollect(col_type,
+                                                          Filter(qk_test_type, Active = true));
+                                                      Set(varEditTypeId, Blank())
+                                                  )
+                                                Text: ="Save"
+                                                Visible: =varEditTypeId = Value(ThisItem.Title)
+                                                Width: =64
+                                          - btn_type_cancel:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Cancel editing"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Subtle
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =Reset(txt_edit_type_name);
+                                                  Reset(txt_edit_qp_ref);
+                                                  Set(varEditTypeId, Blank())
+                                                Text: ="Cancel"
+                                                Visible: =varEditTypeId = Value(ThisItem.Title)
+                                                Width: =70
+                              - lbl_types_empty:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextMuted
+                                    PaddingLeft: =2
+                                    Size: =12
+                                    Text: |-
+                                      ="No active or inactive types for " &
+                                          LookUp(col_test, Value(Title) = varSelectedTestId, Test_name) &
+                                          " yet - use + Type to add one."
+                                    Visible: |-
+                                      =!IsBlank(varSelectedTestId) &&
+                                          CountRows(Filter(col_type_admin, Test_ID = varSelectedTestId)) = 0
+                        - cnt_defects:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =CardBorder
+                              BorderThickness: =1
+                              Fill: =CardBg
+                              FillPortions: =5
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                            Children:
+                              - cnt_defects_header:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =32
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lbl_defects_header:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =TextPrimary
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Semibold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: |-
+                                            ="Defects" & If(!IsBlank(varSelectedTypeId), " · " &
+                                                Coalesce(LookUp(col_type_admin,
+                                                    Value(Title) = varSelectedTypeId).Type_name, ""),
+                                                " · select a type on the left")
+                                          Wrap: =false
+                                    - btn_add_defect:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          DisplayMode: |-
+                                            =If(IsBlank(varSelectedTypeId), DisplayMode.Disabled,
+                                                DisplayMode.Edit)
+                                          OnSelect: =Set(varShowAddDefect, !varShowAddDefect)
+                                          Size: =12
+                                          Text: ="+ Defect"
+                              - cnt_add_defect_form:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    FillPortions: =0
+                                    Height: =136
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingTop: =8
+                                    Visible: =varShowAddDefect && !IsBlank(varSelectedTypeId)
+                                  Children:
+                                    - txt_new_defect_name:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Height: =36
+                                          Placeholder: ="Defect name"
+                                          Type: ='TextInputType'.SingleLine
+                                    - txt_new_defect_cost:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="Cost per occurrence in dollars"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Height: =36
+                                          Placeholder: ="Cost per occurrence, e.g. 45.00"
+                                          Type: ='TextInputType'.SingleLine
+                                    - btn_save_new_defect:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Height: =36
+                                          OnSelect: |-
+                                            =If(
+                                                IsBlank(txt_new_defect_name.Text),
+                                                Notify("Enter a defect name.", NotificationType.Error),
+
+                                                // Cost may be left blank on add - the row then shows "no cost set" and the
+                                                // admin can price it later. Only a negative is rejected outright.
+                                                Value(txt_new_defect_cost.Text) < 0,
+                                                Notify("Cost cannot be negative.", NotificationType.Error),
+
+                                                !IsBlank(LookUp(col_defect_admin,
+                                                    Defect_name = Trim(txt_new_defect_name.Text))),
+                                                Notify("A defect named """ & txt_new_defect_name.Text &
+                                                    """ already exists.", NotificationType.Error),
+
+                                                IfError(
+                                                    Patch(qk_defect_type, Defaults(qk_defect_type), {
+                                                        Title: Text(Coalesce(
+                                                            Max(Filter(col_defect_admin,
+                                                                Type_ID = varSelectedTypeId),
+                                                                Value(Title)), 0) + 1, "0"),
+                                                        Type_ID: varSelectedTypeId,
+                                                        Test_ID: LookUp(col_type_admin,
+                                                            Value(Title) = varSelectedTypeId).Test_ID,
+                                                        Test_name: LookUp(col_type_admin,
+                                                            Value(Title) = varSelectedTypeId).Test_name,
+                                                        Type_name: LookUp(col_type_admin,
+                                                            Value(Title) = varSelectedTypeId).Type_name,
+                                                        QP_ref: LookUp(col_type_admin,
+                                                            Value(Title) = varSelectedTypeId).QP_ref,
+                                                        Defect_name: Trim(txt_new_defect_name.Text),
+                                                        Defect_cost: Coalesce(Value(txt_new_defect_cost.Text), 0),
+                                                        Sort_order: Coalesce(
+                                                            Max(Filter(col_defect_admin,
+                                                                Type_ID = varSelectedTypeId),
+                                                                Sort_order), 0) + 1,
+                                                        Active: true
+                                                    }),
+                                                    Notify("Could not save defect. " &
+                                                        FirstError.Message, NotificationType.Error)
+                                                );
+                                                ClearCollect(col_defect_admin, qk_defect_type);
+                                                ClearCollect(col_defect,
+                                                    Filter(qk_defect_type, Active = true));
+                                                Reset(txt_new_defect_name);
+                                                Reset(txt_new_defect_cost);
+                                                Set(varShowAddDefect, false)
+                                            )
+                                          Text: ="Save Defect"
+                              - gal_defects:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                                    Items: |-
+                                      =Sort(Filter(col_defect_admin, Type_ID = varSelectedTypeId),
+                                          Sort_order)
+                                    TemplateSize: =44
+                                  Children:
+                                    - cnt_defect_row:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          PaddingBottom: =4
+                                          PaddingLeft: =6
+                                          PaddingRight: =6
+                                          PaddingTop: =4
+                                        Children:
+                                          - lbl_defect_name:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =If(ThisItem.Active, TextPrimary, TextMuted)
+                                                FillPortions: =1
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =13
+                                                Text: |-
+                                                  =ThisItem.Defect_name &
+                                                      If(!ThisItem.Active, " (inactive)", "")
+                                                Visible: =varEditDefectId <> Value(ThisItem.Title)
+                                                Wrap: =false
+                                          - txt_edit_defect_name:
+                                              Control: ModernTextInput
+                                              Properties:
+                                                AccessibleLabel: ="Defect name"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Default: =ThisItem.Defect_name
+                                                FillPortions: =1
+                                                Height: =36
+                                                LayoutMinWidth: =0
+                                                Placeholder: ="Defect name"
+                                                Type: ='TextInputType'.SingleLine
+                                                Visible: =varEditDefectId = Value(ThisItem.Title)
+                                          - bdg_defect_cost:
+                                              Control: Badge
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                Content: |-
+                                                  =If(Coalesce(ThisItem.Defect_cost, 0) > 0,
+                                                      Text(ThisItem.Defect_cost, "[$-en-US]$#,##0.00"),
+                                                      "no cost set")
+                                                Height: =20
+                                                Shape: ='BadgeCanvas.Shape'.Rounded
+                                                ThemeColor: |-
+                                                  =If(Coalesce(ThisItem.Defect_cost, 0) > 0,
+                                                      'BadgeCanvas.ThemeColor'.Informative,
+                                                      'BadgeCanvas.ThemeColor'.Warning)
+                                                Visible: =varEditDefectId <> Value(ThisItem.Title)
+                                                Width: =110
+                                          - txt_edit_defect_cost:
+                                              Control: ModernTextInput
+                                              Properties:
+                                                AccessibleLabel: ="Cost per occurrence in dollars"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Default: =Text(ThisItem.Defect_cost, "[$-en-US]0.00")
+                                                Height: =36
+                                                LayoutMinWidth: =0
+                                                Placeholder: ="0.00"
+                                                Type: ='TextInputType'.SingleLine
+                                                Visible: =varEditDefectId = Value(ThisItem.Title)
+                                                Width: =110
+                                          - tgl_defect_active:
+                                              Control: ModernToggle
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Default: =ThisItem.Active
+                                                Label: ="Active"
+                                                OnCheck: |-
+                                                  =IfError(
+                                                      Patch(qk_defect_type, ThisItem, {Active: true}),
+                                                      Notify("Could not activate defect. " &
+                                                          FirstError.Message, NotificationType.Error)
+                                                  );
+                                                  ClearCollect(col_defect_admin, qk_defect_type);
+                                                  ClearCollect(col_defect,
+                                                      Filter(qk_defect_type, Active = true))
+                                                OnUncheck: |-
+                                                  =ClearCollect(col_defect_usage_check,
+                                                      Filter(qk_home_defect, Defect_ID = Value(ThisItem.Title)));
+                                                  Set(varDefectUsageCount, CountRows(col_defect_usage_check));
+                                                  If(varDefectUsageCount > 0,
+                                                      Notify("This defect is referenced by " &
+                                                          varDefectUsageCount &
+                                                          " existing record(s). Deactivating hides " &
+                                                          "it from new entry; history is kept.",
+                                                          NotificationType.Warning)
+                                                  );
+                                                  IfError(
+                                                      Patch(qk_defect_type, ThisItem, {Active: false}),
+                                                      Notify("Could not deactivate defect. " &
+                                                          FirstError.Message, NotificationType.Error)
+                                                  );
+                                                  ClearCollect(col_defect_admin, qk_defect_type);
+                                                  ClearCollect(col_defect,
+                                                      Filter(qk_defect_type, Active = true))
+                                                ToggleSize: =16
+                                                Visible: =varEditDefectId <> Value(ThisItem.Title)
+                                          - btn_defect_edit:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Edit this defect"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Subtle
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =Set(varEditDefectId, Value(ThisItem.Title));
+                                                  Reset(txt_edit_defect_name);
+                                                  Reset(txt_edit_defect_cost)
+                                                Text: ="Edit"
+                                                Visible: =varEditDefectId <> Value(ThisItem.Title)
+                                                Width: =64
+                                          - btn_defect_save:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Save defect changes"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                BasePaletteColor: =ChampionBlue
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =If(IsBlank(Trim(txt_edit_defect_name.Text)),
+                                                      Notify("Defect name cannot be blank.", NotificationType.Error),
+                                                      // CLAUDE.md §4: all 66 Defect_name values are globally unique, which is what
+                                                      // lets charts and pickers label by defect name alone - so a rename must not
+                                                      // be allowed to collide with another defect.
+                                                      !IsBlank(LookUp(col_defect_admin,
+                                                          Defect_name = Trim(txt_edit_defect_name.Text) &&
+                                                          Value(Title) <> Value(ThisItem.Title))),
+                                                      Notify("A defect named """ & Trim(txt_edit_defect_name.Text) &
+                                                          """ already exists.", NotificationType.Error),
+                                                      // Cost is not range-validated beyond rejecting a negative: the company sets
+                                                      // these figures and CLAUDE.md §9 defines no rule to enforce. A blank clears it
+                                                      // back to 0, which the badge then flags as "no cost set".
+                                                      Value(txt_edit_defect_cost.Text) < 0,
+                                                      Notify("Cost cannot be negative.", NotificationType.Error),
+                                                      IfError(
+                                                          Patch(qk_defect_type, ThisItem,
+                                                              {Defect_name: Trim(txt_edit_defect_name.Text),
+                                                               Defect_cost: Coalesce(Value(txt_edit_defect_cost.Text), 0)}),
+                                                          Notify("Could not update defect. " & FirstError.Message,
+                                                              NotificationType.Error)
+                                                      );
+                                                      ClearCollect(col_defect_admin, qk_defect_type);
+                                                      ClearCollect(col_defect,
+                                                          Filter(qk_defect_type, Active = true));
+                                                      Set(varEditDefectId, Blank())
+                                                  )
+                                                Text: ="Save"
+                                                Visible: =varEditDefectId = Value(ThisItem.Title)
+                                                Width: =64
+                                          - btn_defect_cancel:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Cancel editing"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Subtle
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =Reset(txt_edit_defect_name);
+                                                  Reset(txt_edit_defect_cost);
+                                                  Set(varEditDefectId, Blank())
+                                                Text: ="Cancel"
+                                                Visible: =varEditDefectId = Value(ThisItem.Title)
+                                                Width: =70

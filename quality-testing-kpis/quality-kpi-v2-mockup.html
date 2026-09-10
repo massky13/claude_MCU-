@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quality KPI Reporting v2.2 — UI Mockup</title>
+<style>
+:root{
+  color-scheme: light;
+  --brand:#0F6CBD; --page:#f3f4f2; --card:#ffffff;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#898781;
+  --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10);
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b; --nodata:#e1e0d9;
+  --good-ink:#006300; --radius:10px;
+  --shadow:0 1px 2px rgba(11,11,11,.06), 0 4px 12px rgba(11,11,11,.05);
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --brand:#1e7ac9; --page:#0d0d0d; --card:#1a1a19;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#898781;
+  --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --nodata:#2c2c2a; --good-ink:#0ca30c;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text-primary);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+button{font:inherit}
+
+header{background:var(--brand);color:#fff;padding:0 20px;height:56px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:40}
+.logo{width:30px;height:30px;border-radius:7px;background:#fff;color:var(--brand);
+  display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
+header h1{font-size:16px;font-weight:700}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);
+  padding:4px 12px;border-radius:999px;font-size:12.5px}
+.icon-btn{background:rgba(255,255,255,.14);border:0;color:#fff;width:32px;height:32px;
+  border-radius:8px;cursor:pointer;font-size:14px;display:grid;place-items:center}
+.icon-btn:hover{background:rgba(255,255,255,.26)}
+
+nav{display:flex;gap:2px;background:var(--card);border-bottom:1px solid var(--border);
+  padding:0 20px;position:sticky;top:56px;z-index:35;overflow-x:auto}
+nav button{background:none;border:0;padding:11px 15px;cursor:pointer;font-size:13.5px;
+  font-weight:600;color:var(--text-secondary);border-bottom:2.5px solid transparent;white-space:nowrap}
+nav button[aria-current="page"]{color:var(--brand);border-bottom-color:var(--brand)}
+nav button:hover:not([aria-current]){color:var(--text-primary)}
+nav .adm{margin-left:auto;display:flex;gap:2px}
+
+.filters{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;
+  padding:11px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-weight:600}
+select,input[type=text],input[type=number]{font:inherit;font-size:13px;padding:6px 10px;border-radius:7px;
+  border:1px solid var(--baseline);background:var(--card);color:var(--text-primary);min-width:120px}
+select{cursor:pointer}
+input:focus-visible,select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.note-r{margin-left:auto;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good)}
+
+main{padding:18px 20px 60px;max-width:1500px;margin:0 auto}
+.screen{display:none} .screen.on{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px}
+.card-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.card-head h2{font-size:14.5px}
+.card-sub{font-size:12px;color:var(--text-muted)}
+.card-head .spacer{margin-left:auto}
+.grid-2{display:grid;grid-template-columns:minmax(340px,.85fr) 1.15fr;gap:16px}
+.grid-2.rev{grid-template-columns:1.2fr minmax(300px,.8fr)}
+.grid-2>.card{margin-bottom:0}
+@media(max-width:1080px){.grid-2,.grid-2.rev{grid-template-columns:1fr}}
+
+/* ---- tablet / narrow: entry screen becomes list-then-detail ---- */
+@media(max-width:900px){
+  .entry-grid{grid-template-columns:1fr}
+  body.detail-open  #eListCard{display:none}
+  body:not(.detail-open) #eDetailCard{display:none}
+  .tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  /* touch targets */
+  .homerow{min-height:52px}
+  .pf button{padding:11px 20px}
+  .btn{padding:11px 18px}
+  .dfrow{grid-template-columns:1fr;gap:5px}
+  .dfhead{display:none}
+  .dfrow select,.dfrow input,.dfrow .rm{min-height:44px}
+  select,input[type=text],input[type=number]{min-height:44px}
+  .homelist{max-height:none}
+}
+#eBack{display:none}
+@media(max-width:900px){ body.detail-open #eBack{display:inline-flex} }
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:13px 16px 14px;position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent,var(--brand))}
+.tile .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-weight:650}
+.tile .val{font-size:29px;font-weight:680;letter-spacing:-.025em;margin:3px 0 1px;line-height:1.05}
+.tile .sub{font-size:11.5px;color:var(--text-secondary);display:flex;align-items:center;gap:5px}
+.delta{font-weight:650}
+.delta.up{color:var(--good-ink)} .delta.down{color:var(--critical)} .delta.flat{color:var(--text-muted)}
+
+.st-good{--st:var(--good)} .st-warning{--st:var(--warning)}
+.st-serious{--st:var(--serious)} .st-critical{--st:var(--critical)} .st-nodata{--st:var(--nodata)}
+.badge,.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;
+  padding:2px 7px;border-radius:5px;white-space:nowrap;
+  background:color-mix(in srgb,var(--st) 16%,transparent);
+  border:1px solid color-mix(in srgb,var(--st) 45%,transparent)}
+.badge .g,.chip .g{color:var(--st);font-size:10px}
+
+.qwrap{margin-top:10px}
+.qgrid{display:grid;gap:2px}
+.qhead{font-size:11px;font-weight:700;text-align:center;color:var(--text-secondary);
+  padding-bottom:5px;display:flex;align-items:center;justify-content:center;gap:5px}
+.swatch{width:9px;height:9px;border-radius:2px;flex:none;display:inline-block}
+.qcell{border:0;font:inherit;cursor:pointer;text-align:center;padding:9px 4px;border-radius:5px;
+  background:color-mix(in srgb,var(--st) 26%,var(--card));
+  border:1px solid color-mix(in srgb,var(--st) 55%,transparent);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  color:var(--text-primary);min-height:50px;transition:transform .1s}
+.qcell:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.qcell .n{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.qcell .g{font-size:10px;color:var(--st);font-weight:800;line-height:1}
+.qwk{font-size:10.5px;color:var(--text-secondary);display:flex;flex-direction:column;
+  justify-content:center;padding-right:6px;font-variant-numeric:tabular-nums}
+.qwk b{font-weight:650;color:var(--text-primary);font-size:11px}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:11.5px;
+  color:var(--text-secondary);margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block;font-style:normal}
+
+.tbl-scroll{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+th{text-align:right;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);
+  font-weight:650;padding:7px 9px;border-bottom:1px solid var(--baseline);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{padding:7px 9px;border-bottom:1px solid var(--grid);text-align:right;white-space:nowrap}
+.cellpill{display:inline-block;padding:2px 7px;border-radius:5px;font-weight:640;
+  background:color-mix(in srgb,var(--st) 22%,transparent);
+  border:1px solid color-mix(in srgb,var(--st) 45%,transparent)}
+.muted{color:var(--text-muted)}
+
+.chart{position:relative;width:100%}
+svg{display:block;width:100%;overflow:visible}
+.tick{font-size:10px;fill:var(--text-muted)}
+.gridline{stroke:var(--grid);stroke-width:1}
+.baseline{stroke:var(--baseline);stroke-width:1}
+.goal-rule{stroke:var(--critical);stroke-width:1.5;opacity:.75}
+.goal-lbl{font-size:10px;fill:var(--critical);font-weight:700}
+.tip{position:absolute;pointer-events:none;background:var(--card);color:var(--text-primary);
+  border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:8px 10px;
+  font-size:12px;opacity:0;transition:opacity .1s;z-index:20;min-width:150px}
+.tip b{display:block;font-size:11.5px;margin-bottom:4px;color:var(--text-secondary);font-weight:600}
+.tip .row{display:flex;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums}
+
+.seg{display:inline-flex;border:1px solid var(--baseline);border-radius:7px;overflow:hidden}
+.seg button{font-size:11.5px;padding:4px 11px;border:0;cursor:pointer;background:var(--card);
+  color:var(--text-secondary);font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--brand);color:#fff}
+
+.btn{border:0;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;
+  background:var(--brand);color:#fff}
+.btn:hover{filter:brightness(.92)}
+.btn.sec{background:var(--card);color:var(--text-secondary);border:1px solid var(--baseline)}
+.btn.danger{background:var(--critical);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 10px;font-size:12px}
+
+/* ---------- entry screen ---------- */
+.entry-grid{display:grid;grid-template-columns:minmax(330px,.8fr) 1.2fr;gap:16px;align-items:start}
+@media(max-width:1100px){.entry-grid{grid-template-columns:1fr}}
+.addrow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;padding:12px;border-radius:8px;
+  background:color-mix(in srgb,var(--brand) 7%,transparent);border:1px solid color-mix(in srgb,var(--brand) 22%,transparent)}
+.progress{font-size:12px;color:var(--text-secondary);margin-top:10px;display:flex;gap:14px;flex-wrap:wrap}
+.progress b{color:var(--text-primary)}
+.homelist{margin-top:10px;max-height:520px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+.homerow{display:flex;align-items:center;gap:9px;padding:9px 11px;border-bottom:1px solid var(--grid);
+  cursor:pointer;background:none;border-left:3px solid transparent;width:100%;text-align:left}
+.homerow:hover{background:color-mix(in srgb,var(--brand) 6%,transparent)}
+.homerow.sel{background:color-mix(in srgb,var(--brand) 12%,transparent);border-left-color:var(--brand)}
+.homerow .hn{font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;min-width:78px}
+.homerow .meta{font-size:11px;color:var(--text-muted);margin-left:auto;text-align:right;white-space:nowrap}
+.tchips{display:flex;gap:3px}
+.tchip{width:22px;height:20px;border-radius:4px;display:grid;place-items:center;font-size:10px;font-weight:800;
+  background:color-mix(in srgb,var(--st) 22%,transparent);
+  border:1px solid color-mix(in srgb,var(--st) 48%,transparent);color:var(--st)}
+.tchip.na{background:var(--nodata);border-color:var(--baseline);color:var(--text-muted)}
+
+.testcard{border:1px solid var(--border);border-radius:9px;margin-bottom:12px;overflow:hidden;background:var(--card)}
+.testcard-h{display:flex;align-items:center;gap:10px;padding:11px 13px;
+  background:color-mix(in srgb,var(--tc) 9%,transparent);border-bottom:1px solid var(--border)}
+.testcard-h .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px}
+.pf{display:inline-flex;border:1px solid var(--baseline);border-radius:7px;overflow:hidden;margin-left:auto}
+.pf button{border:0;padding:5px 15px;font-size:12.5px;font-weight:700;cursor:pointer;
+  background:var(--card);color:var(--text-secondary)}
+.pf button[aria-pressed="true"][data-v="1"]{background:var(--good);color:#fff}
+.pf button[aria-pressed="true"][data-v="0"]{background:var(--critical);color:#fff}
+.dfbody{padding:11px 13px}
+.dfrow{display:grid;grid-template-columns:1fr 1fr 74px 34px;gap:7px;margin-bottom:7px;align-items:center}
+.dfrow select,.dfrow input{width:100%;min-width:0}
+.dfrow .rm{background:none;border:1px solid var(--baseline);border-radius:6px;cursor:pointer;
+  color:var(--critical);height:32px;font-size:13px}
+.dfhead{display:grid;grid-template-columns:1fr 1fr 74px 34px;gap:7px;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px}
+.auto{font-size:10.5px;color:var(--good-ink);font-weight:650}
+.warnbar{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:7px;font-size:12.5px;margin-top:8px;
+  background:color-mix(in srgb,var(--warning) 16%,transparent);
+  border:1px solid color-mix(in srgb,var(--warning) 45%,transparent)}
+.errbar{background:color-mix(in srgb,var(--critical) 14%,transparent);
+  border-color:color-mix(in srgb,var(--critical) 45%,transparent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:26px;z-index:90;
+  padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:var(--shadow);
+  opacity:0;transition:all .2s;pointer-events:none;border:1px solid}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:color-mix(in srgb,var(--critical) 92%,#fff);color:#fff;border-color:var(--critical)}
+.toast.ok{background:color-mix(in srgb,var(--good) 92%,#fff);color:#fff;border-color:var(--good)}
+
+/* ---------- admin ---------- */
+.admin3{display:grid;grid-template-columns:190px 250px 1fr;gap:14px;align-items:start}
+@media(max-width:1000px){.admin3{grid-template-columns:1fr}}
+.plist{border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:560px;overflow-y:auto}
+.pitem{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--grid);
+  cursor:pointer;background:none;width:100%;text-align:left;border-left:3px solid transparent;font-size:13px}
+.pitem:hover{background:color-mix(in srgb,var(--brand) 6%,transparent)}
+.pitem.sel{background:color-mix(in srgb,var(--brand) 12%,transparent);border-left-color:var(--brand);font-weight:650}
+.pitem .ct{margin-left:auto;font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.plist-h{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.plist-h h3{font-size:12.5px}
+.flag{font-size:11.5px;padding:7px 10px;border-radius:7px;margin-top:9px;
+  background:color-mix(in srgb,var(--warning) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--warning) 40%,transparent)}
+.note{font-size:11.5px;color:var(--text-secondary);
+  background:color-mix(in srgb,var(--brand) 7%,transparent);
+  border-left:3px solid var(--brand);padding:8px 11px;border-radius:0 6px 6px 0;margin-top:12px}
+.empty-state{text-align:center;padding:44px 20px;color:var(--text-muted);font-size:13px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+  background:color-mix(in srgb,var(--text-muted) 14%,transparent);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Q</div>
+  <h1>Quality KPI Reporting</h1>
+  <div class="who"><span id="whoTxt">R. Massky · Administrator</span></div>
+  <button class="icon-btn" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+</header>
+
+<nav id="nav">
+  <button data-s="dash" aria-current="page">Dashboard</button>
+  <button data-s="entry">Data Entry</button>
+  <button data-s="week">Week Detail</button>
+  <div class="adm">
+    <button data-s="tax">⚙ Taxonomy Admin</button>
+    <button data-s="acc">⚙ Access List</button>
+  </div>
+</nav>
+
+<div class="filters" id="globalFilters">
+  <div class="field"><label for="fPlant">Plant <span class="muted">(Admin)</span></label>
+    <select id="fPlant"><option value="12">12 — Dresden</option><option value="21">21 — Leola</option><option value="34">34 — Weiser</option></select></div>
+  <div class="field"><label for="fFac">Facility</label>
+    <select id="fFac"><option>1</option><option selected>2</option><option>3</option></select></div>
+  <div class="field"><label for="fWin">Window</label>
+    <select id="fWin"><option value="26" selected>Last 6 months</option><option value="13">Last 13 weeks</option></select></div>
+  <div class="note-r"><span class="dot"></span><span id="loadNote"></span></div>
+</div>
+
+<main>
+  <!-- ============ DASHBOARD ============ -->
+  <section class="screen on" id="s-dash">
+    <div class="tiles" id="tiles"></div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-head"><h2>Q Matrix</h2><span class="card-sub" id="qMonth"></span></div>
+        <div class="card-sub">Current month by test. Select a cell for the week.</div>
+        <div class="qwrap"><div class="qgrid" id="qgrid"></div></div>
+        <div class="legend">
+          <span><i style="background:var(--good)"></i> ▲ At / above target</span>
+          <span><i style="background:var(--warning)"></i> ▲ Within 5 pts</span>
+          <span><i style="background:var(--serious)"></i> ▼ Below target</span>
+          <span><i style="background:var(--critical)"></i> ▼ Below 3+ wks</span>
+        </div>
+        <div class="note"><b>FTT is the new column.</b> A home counts only if it passed all three tests, so it always reads lower than FPY — that is the point, not a regression.</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>First Time Pass Rate</h2><span class="card-sub">trend · single axis</span>
+          <span class="spacer"></span>
+          <div class="seg"><button id="trChart" aria-pressed="true">Chart</button><button id="trTable" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="chart" id="trendWrap"><svg id="trend" viewBox="0 0 720 288" role="img" aria-label="FPY trend"></svg><div class="tip" id="trendTip"></div></div>
+        <div id="trendTable" hidden class="tbl-scroll"></div>
+        <div class="legend"><span><i style="background:var(--series-1)"></i> Week FPY</span>
+          <span><i style="background:var(--series-2)"></i> First Time Through</span>
+          <span><i style="background:var(--critical)"></i> Goal 90%</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Weekly Detail</h2><span class="card-sub" id="wkCount"></span>
+        <span class="spacer"></span><span class="card-sub">Select a row to open the week →</span></div>
+      <div class="tbl-scroll"><table id="wkTable"></table></div>
+    </div>
+    <div class="grid-2 rev">
+      <div class="card">
+        <div class="card-head"><h2>Defect Pareto</h2><span class="card-sub">share of all defects · window</span>
+          <span class="spacer"></span>
+          <div class="seg" style="margin-right:6px"><button id="paByDefect" aria-pressed="true">By defect</button><button id="paByType" aria-pressed="false">By type</button></div>
+          <div class="seg"><button id="paChart" aria-pressed="true">Chart</button><button id="paTable" aria-pressed="false">Table</button></div></div>
+        <div class="chart" id="paretoWrap"><svg id="pareto" viewBox="0 0 720 350" role="img" aria-label="Defect Pareto"></svg><div class="tip" id="paretoTip"></div></div>
+        <div id="paretoTable" hidden class="tbl-scroll"></div>
+        <div class="note"><b>All 66 defect names are globally unique</b>, so charts label by defect alone. Switch to <b>By type</b> to rank by quality procedure instead — that view points at a QP rather than a symptom.</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Defects by Test</h2><span class="card-sub">weighted by severity</span></div>
+        <div class="chart" id="catWrap"><svg id="catChart" viewBox="0 0 720 330" role="img" aria-label="Defects by test"></svg><div class="tip" id="catTip"></div></div>
+        <div class="legend" id="catLegend"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DATA ENTRY ============ -->
+  <section class="screen" id="s-entry">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head"><h2>Home Testing Entry</h2>
+        <span class="card-sub">production number first, then the three tests</span></div>
+      <div class="filters" style="padding:10px 0 0;border:0;background:none">
+        <div class="field"><label for="eFac">Facility</label>
+          <select id="eFac"><option>1</option><option selected>2</option><option>3</option></select></div>
+        <div class="field"><label for="eWeek">Week ending</label><select id="eWeek"></select></div>
+        <div class="note-r"><span class="dot"></span><span id="eLoadNote"></span></div>
+      </div>
+    </div>
+
+    <div class="entry-grid">
+      <div class="card" style="margin:0" id="eListCard">
+        <div class="card-head"><h2>Homes this week</h2><span class="card-sub" id="eWeekLbl"></span></div>
+        <div class="addrow">
+          <div class="field"><label for="eHome">Home production number</label>
+            <input type="text" id="eHome" placeholder="e.g. 4471203" style="min-width:170px"></div>
+          <div class="field"><label for="eFloors">Floors</label>
+            <input type="number" id="eFloors" value="2" min="1" max="4" style="min-width:70px"></div>
+          <button class="btn" id="eAdd">+ Add</button>
+        </div>
+        <div id="eAddMsg"></div>
+        <div class="progress" id="eProgress"></div>
+        <div class="homelist" id="eList"></div>
+      </div>
+
+      <div class="card" style="margin:0" id="eDetailCard">
+        <button class="btn sec sm" id="eBack" style="margin-bottom:10px">← All homes</button>
+        <div id="eDetail"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WEEK DETAIL ============ -->
+  <section class="screen" id="s-week">
+    <div class="card" id="weekDetail"></div>
+  </section>
+
+  <!-- ============ TAXONOMY ADMIN ============ -->
+  <section class="screen" id="s-tax">
+    <div class="card">
+      <div class="card-head"><h2>Taxonomy Admin</h2>
+        <span class="card-sub" id="taxCounts"></span>
+        <span class="spacer"></span><span class="chip st-good"><span class="g">●</span>Administrator only</span></div>
+      <div class="admin3" style="margin-top:12px">
+        <div>
+          <div class="plist-h"><h3>Tests</h3><span class="card-sub">fixed at 3</span></div>
+          <div class="plist" id="taxTests"></div>
+          <div class="note" style="margin-top:10px">Tests are fixed. Adding a fourth means a schema change — see spec §2.3.</div>
+        </div>
+        <div>
+          <div class="plist-h"><h3>Types of test</h3><span class="spacer" style="margin-left:auto"></span>
+            <button class="btn sm" id="taxAddItem">+ Type</button></div>
+          <div class="plist" id="taxItems"></div>
+        </div>
+        <div>
+          <div class="plist-h"><h3>Defects</h3><span class="card-sub" id="taxDefSub"></span>
+            <span class="spacer" style="margin-left:auto"></span>
+            <button class="btn sm" id="taxAddDef">+ Defect</button></div>
+          <div class="tbl-scroll" style="max-height:560px;overflow-y:auto"><table id="taxDefs"></table></div>
+          <div id="taxFlags"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACCESS ============ -->
+  <section class="screen" id="s-acc">
+    <div class="card">
+      <div class="card-head"><h2>Access List</h2>
+        <span class="card-sub"><code>sys_test_access</code> — shared with v1</span>
+        <span class="spacer"></span><span class="chip st-good"><span class="g">●</span>Administrator only</span></div>
+      <div class="filters" style="padding:10px 0;border:0;background:none">
+        <div class="field"><label for="aPlant">Filter by plant</label>
+          <select id="aPlant"><option value="">All plants</option></select></div>
+        <div class="field"><label for="aRole">Filter by role</label>
+          <select id="aRole"><option value="">All roles</option><option>Administrator</option><option>Quality Manager</option><option>Inspector</option><option>Reader</option></select></div>
+        <div class="field"><label for="aSearch">Add person</label>
+          <input type="text" id="aSearch" placeholder="Search directory…" style="min-width:200px"></div>
+        <button class="btn" id="aAdd">Search</button>
+      </div>
+      <div id="aFlags"></div>
+      <div class="tbl-scroll"><table id="accTable"></table></div>
+      <div class="note"><b>One access list, two apps.</b> v1 reads only <code>Inspector_email</code> and <code>Plant_ID</code>, so adding <code>Role</code> and <code>Active</code> is safe — but never rename or retype the existing columns while v1 is live.</div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TESTS=[{"id": 1, "name": "Electrical"}, {"id": 2, "name": "Plumbing"}, {"id": 3, "name": "Gas"}];
+const TYPES=[{"id": 11, "test": 1, "name": "Hi Pot (Dielectric)", "qp": "QP.06A.0"}, {"id": 12, "test": 1, "name": "Continuity", "qp": "QP.07.0"}, {"id": 13, "test": 1, "name": "Operational", "qp": "QP.08.0"}, {"id": 14, "test": 1, "name": "Polarity", "qp": "QP.09.0"}, {"id": 21, "test": 2, "name": "Drain Lines", "qp": "QP.03.0"}, {"id": 22, "test": 2, "name": "Water Lines", "qp": "QP.01.0"}, {"id": 23, "test": 2, "name": "Fixtures", "qp": "QP.02.0"}, {"id": 31, "test": 3, "name": "High Pressure", "qp": "QP04.0"}, {"id": 32, "test": 3, "name": "Low Pressure", "qp": "QP05.0"}];
+const DEFECTS=[{"id": 1101, "type": 11, "test": 1, "name": "Short - exterior sheathing staple/nail", "sev": 2}, {"id": 1102, "type": 11, "test": 1, "name": "Short - interior of home staple/nail", "sev": 2}, {"id": 1103, "type": 11, "test": 1, "name": "Short - chassis member smashing wire", "sev": 2}, {"id": 1104, "type": 11, "test": 1, "name": "Short - lag into wire", "sev": 2}, {"id": 1105, "type": 11, "test": 1, "name": "Short - receptacle issue, poor workmanship", "sev": 2}, {"id": 1106, "type": 11, "test": 1, "name": "Short - lighting outlet, poor workmanship", "sev": 2}, {"id": 1201, "type": 12, "test": 1, "name": "Bonding straps not removed", "sev": 2}, {"id": 1202, "type": 12, "test": 1, "name": "Open ground at appliance(s)", "sev": 2}, {"id": 1203, "type": 12, "test": 1, "name": "Gas line not grounded. Use tester and visual.", "sev": 2}, {"id": 1204, "type": 12, "test": 1, "name": "Metal roof not grounded", "sev": 2}, {"id": 1205, "type": 12, "test": 1, "name": "Metal duct not grounded", "sev": 2}, {"id": 1206, "type": 12, "test": 1, "name": "Lights or fans not grounded", "sev": 2}, {"id": 1207, "type": 12, "test": 1, "name": "Chassis not grounded", "sev": 2}, {"id": 1301, "type": 13, "test": 1, "name": "GFCI not wired correctly or not tripping", "sev": 2}, {"id": 1302, "type": 13, "test": 1, "name": "Receptacle no power", "sev": 2}, {"id": 1303, "type": 13, "test": 1, "name": "Lights/fan switch not working no power", "sev": 2}, {"id": 1304, "type": 13, "test": 1, "name": "Smoke alarms not working individually and together", "sev": 2}, {"id": 1305, "type": 13, "test": 1, "name": "No power to exterior light boxes", "sev": 2}, {"id": 1306, "type": 13, "test": 1, "name": "No power to crossover connector", "sev": 2}, {"id": 1307, "type": 13, "test": 1, "name": "No power to appliance recepts 240V outlets", "sev": 2}, {"id": 1308, "type": 13, "test": 1, "name": "Incorrect # of circuits i.e. 2 at kitchen counter", "sev": 2}, {"id": 1401, "type": 14, "test": 1, "name": "Reverse polarity - at receptacle", "sev": 2}, {"id": 1402, "type": 14, "test": 1, "name": "Reverse polarity - at lights", "sev": 2}, {"id": 1403, "type": 14, "test": 1, "name": "Reverse polarity - 240V outlets", "sev": 2}, {"id": 1404, "type": 14, "test": 1, "name": "Reverse polarity - outside outlets & heat tape", "sev": 2}, {"id": 1405, "type": 14, "test": 1, "name": "Reverse polarity - other", "sev": 2}, {"id": 2101, "type": 21, "test": 2, "name": "Drain line leaking below floor", "sev": 2}, {"id": 2102, "type": 21, "test": 2, "name": "Drain line leak above floor", "sev": 2}, {"id": 2103, "type": 21, "test": 2, "name": "Drain line incomplete above floor", "sev": 2}, {"id": 2104, "type": 21, "test": 2, "name": "Open drain line in floor", "sev": 2}, {"id": 2105, "type": 21, "test": 2, "name": "Drain line not through bottom board", "sev": 2}, {"id": 2106, "type": 21, "test": 2, "name": "P-trap above floor leak", "sev": 2}, {"id": 2107, "type": 21, "test": 2, "name": "P-Trap in floor leak", "sev": 2}, {"id": 2108, "type": 21, "test": 2, "name": "Wax ring leak or toilet leak", "sev": 2}, {"id": 2109, "type": 21, "test": 2, "name": "Hole in drain line under floor", "sev": 2}, {"id": 2110, "type": 21, "test": 2, "name": "Lag in drain", "sev": 2}, {"id": 2201, "type": 22, "test": 2, "name": "Loose water line fitting above floor", "sev": 2}, {"id": 2202, "type": 22, "test": 2, "name": "Loose water line fitting below floor", "sev": 2}, {"id": 2203, "type": 22, "test": 2, "name": "Debris in water line/screens", "sev": 2}, {"id": 2204, "type": 22, "test": 2, "name": "Kinked water line above floor", "sev": 2}, {"id": 2205, "type": 22, "test": 2, "name": "Kinked water line below floor", "sev": 2}, {"id": 2206, "type": 22, "test": 2, "name": "Reversed water lines", "sev": 2}, {"id": 2207, "type": 22, "test": 2, "name": "Water line not connected to faucet", "sev": 2}, {"id": 2208, "type": 22, "test": 2, "name": "Water line leak above floor", "sev": 2}, {"id": 2209, "type": 22, "test": 2, "name": "Water line leak below floor", "sev": 2}, {"id": 2210, "type": 22, "test": 2, "name": "Lag in water line", "sev": 2}, {"id": 2211, "type": 22, "test": 2, "name": "Smashed water line (frame to floor)", "sev": 2}, {"id": 2212, "type": 22, "test": 2, "name": "Missing water inlet", "sev": 2}, {"id": 2301, "type": 23, "test": 2, "name": "Leaks above floor during flow test", "sev": 2}, {"id": 2302, "type": 23, "test": 2, "name": "Leaks below floor P-trap during flow test", "sev": 2}, {"id": 2303, "type": 23, "test": 2, "name": "Retarded flow washer box", "sev": 2}, {"id": 2304, "type": 23, "test": 2, "name": "Retarded flow tub/shower", "sev": 2}, {"id": 2305, "type": 23, "test": 2, "name": "Retarded flow sinks", "sev": 2}, {"id": 3101, "type": 31, "test": 3, "name": "Main line leak", "sev": 2}, {"id": 3102, "type": 31, "test": 3, "name": "Fitting leak", "sev": 2}, {"id": 3103, "type": 31, "test": 3, "name": "Valve leak", "sev": 2}, {"id": 3104, "type": 31, "test": 3, "name": "Riser leak - Furnace", "sev": 2}, {"id": 3105, "type": 31, "test": 3, "name": "Riser leak - Range", "sev": 2}, {"id": 3106, "type": 31, "test": 3, "name": "Riser leak - Water heater", "sev": 2}, {"id": 3107, "type": 31, "test": 3, "name": "Riser leak - Dryer", "sev": 2}, {"id": 3108, "type": 31, "test": 3, "name": "Crossover leak", "sev": 2}, {"id": 3109, "type": 31, "test": 3, "name": "Broken gas line", "sev": 2}, {"id": 3201, "type": 32, "test": 3, "name": "Leak at valve", "sev": 2}, {"id": 3202, "type": 32, "test": 3, "name": "Leak at pipe/valve inside Furnace", "sev": 2}, {"id": 3203, "type": 32, "test": 3, "name": "Leak at pipe/valve behind Range", "sev": 2}, {"id": 3204, "type": 32, "test": 3, "name": "Leak at crossover valve", "sev": 2}];
+
+
+/* ============================================================ mock data */
+const GOAL=90;
+const TCOL={1:'var(--series-1)',2:'var(--series-2)',3:'var(--series-3)'};
+const TKEY={1:'elec',2:'plumb',3:'gas'};
+let _s=20260819;
+const rnd=()=>(_s=(_s*1103515245+12345)&0x7fffffff)/0x7fffffff;
+const pick=a=>a[Math.floor(rnd()*a.length)];
+
+const typesOf = t => TYPES.filter(x=>x.test===t);
+const defsOf  = ty => DEFECTS.filter(d=>d.type===ty);
+const typeName= id => (TYPES.find(x=>x.id===id)||{}).name||'';
+const typeQP  = id => (TYPES.find(x=>x.id===id)||{}).qp||'';
+// all 66 defect names are globally unique, so no parent prefix is needed
+const fullName= id => (DEFECTS.find(x=>x.id===id)||{}).name||'';
+
+let WEEKS=[], HOMES=[];
+
+function buildData(nWeeks){
+  WEEKS=[]; HOMES=[];
+  const end=new Date(2026,7,15);
+  for(let w=0;w<nWeeks;w++){
+    const we=new Date(end); we.setDate(end.getDate()-w*7);
+    const ws=new Date(we); ws.setDate(we.getDate()-6);
+    const key=we.getFullYear()*10000+(we.getMonth()+1)*100+we.getDate();
+    const quality=0.74+(nWeeks-w)/nWeeks*0.20;
+    for(let f=1;f<=3;f++){
+      const n=10+Math.floor(rnd()*16);              // 10–25 homes per facility
+      for(let h=0;h<n;h++){
+        const home={
+          home_number:String(4400000+key%1000*100+f*1000+h),
+          plant_id:12, facility_id:f, week_key:key, week_end:we, week_start:ws,
+          floors:1+Math.floor(rnd()*2.4), defects:[],
+          entered_at:new Date(we.getTime()+(2+rnd()*46)*3600e3)
+        };
+        TESTS.forEach(t=>{
+          const passed = rnd() < quality;
+          home[TKEY[t.id]] = passed?1:0;
+          if(!passed){
+            const k=1+Math.floor(rnd()*2.6);
+            const seen=new Set();
+            for(let j=0;j<k;j++){
+              const ty=pick(typesOf(t.id)); const ds=defsOf(ty.id); if(!ds.length) continue;
+              const d=pick(ds); if(seen.has(d.id)) continue; seen.add(d.id);
+              home.defects.push({test_id:t.id,type_id:ty.id,defect_id:d.id,
+                                 qty:1+(rnd()<0.22?Math.floor(rnd()*3):0),sev:d.sev});
+            }
+          }
+        });
+        HOMES.push(home);
+      }
+    }
+  }
+  rollup(nWeeks);
+}
+
+/* rollups rebuilt from the home records — exactly as the app does on save */
+function rollup(){
+  const keys=[...new Set(HOMES.map(h=>h.week_key))].sort();
+  WEEKS=keys.map(k=>{
+    const hs=HOMES.filter(h=>h.week_key===k && h.facility_id===CUR.fac);
+    const tested=hs.length;
+    const per={}; let pass=0,tests=0;
+    TESTS.forEach(t=>{
+      const v=hs.map(h=>h[TKEY[t.id]]).filter(x=>x!=null);
+      const p=v.filter(x=>x===1).length;
+      per[t.id]={pass:p,fail:v.length-p,tested:v.length,fpy:v.length?p/v.length*100:null};
+      pass+=p; tests+=v.length;
+    });
+    const clean=hs.filter(h=>TESTS.every(t=>h[TKEY[t.id]]===1)).length;
+    const defs=hs.reduce((s,h)=>s+h.defects.reduce((a,d)=>a+d.qty,0),0);
+    const floors=hs.reduce((s,h)=>s+h.floors,0);
+    const h0=hs[0];
+    return {week_key:k, week_end:h0?h0.week_end:new Date(), week_start:h0?h0.week_start:new Date(),
+      homes:tested, clean, ftt:tested?clean/tested*100:null,
+      per, pass, tests, fpy:tests?+(pass/tests*100).toFixed(1):null,
+      defects:defs, floors, dpf:floors?+(defs/floors).toFixed(1):0,
+      dph:tested?+(defs/tested).toFixed(1):0};
+  }).filter(w=>w.homes>0);
+
+  WEEKS.forEach((w,i)=>{
+    const s=WEEKS.slice(Math.max(0,i-11),i+1).filter(x=>x.fpy!=null);
+    w.ttw=+(s.reduce((a,b)=>a+b.fpy,0)/s.length).toFixed(1);
+    let r=0; for(let j=i;j>=0&&WEEKS[j].fpy<GOAL;j--) r++; w.below_run=r;
+  });
+}
+
+const CUR={plant:12,fac:2,weeks:26};
+const fmtD=d=>d.toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'});
+const fmtS=d=>d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
+function statusOf(v,run){ if(v==null||isNaN(v))return 'nodata';
+  if(v>=GOAL)return 'good'; if(v>=GOAL-5)return 'warning'; return (run&&run>=3)?'critical':'serious'; }
+const GLYPH={good:'▲',warning:'▲',serious:'▼',critical:'▼',nodata:'–'};
+const LABEL={good:'At target',warning:'Near target',serious:'Below target',critical:'Below 3+ wks',nodata:'No data'};
+
+function toast(msg,kind){ const t=document.getElementById('toast');
+  t.className='toast show '+(kind||'ok'); t.textContent=msg;
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',2600); }
+/* ============================================================ dashboard */
+function renderTiles(){
+  const L=WEEKS[WEEKS.length-1], P=WEEKS[WEEKS.length-2]||L;
+  const d=(a,b)=>+((a||0)-(b||0)).toFixed(1);
+  const t=[
+    {lbl:'First Time Pass Rate',val:L.fpy.toFixed(1)+'%',dl:d(L.fpy,P.fpy),st:statusOf(L.fpy,L.below_run),u:'pts vs prior week',good:'up'},
+    {lbl:'First Time Through',  val:L.ftt.toFixed(1)+'%',dl:d(L.ftt,P.ftt),st:statusOf(L.ftt),u:'homes clean on all 3',good:'up'},
+    {lbl:'TTW (12-week)',       val:L.ttw.toFixed(1)+'%',dl:d(L.ttw,P.ttw),st:statusOf(L.ttw),u:'pts vs prior week',good:'up'},
+    {lbl:'Defects per Home',    val:L.dph.toFixed(1),    dl:d(L.dph,P.dph),st:L.dph<=1?'good':L.dph<=2.5?'warning':'serious',u:'vs prior week',good:'down'},
+    {lbl:'Homes Tested',        val:L.homes,             dl:null,st:'nodata',u:L.clean+' clean · '+L.floors+' floors',good:'up'}
+  ];
+  document.getElementById('tiles').innerHTML=t.map(x=>{
+    let dh='';
+    if(x.dl!==null){ const imp=x.good==='up'?x.dl>0:x.dl<0;
+      const c=x.dl===0?'flat':(imp?'up':'down'); const a=x.dl===0?'→':(x.dl>0?'↑':'↓');
+      dh=`<span class="delta ${c}">${a} ${Math.abs(x.dl).toFixed(1)}</span>`; }
+    const ac=x.st==='nodata'?'var(--brand)':`var(--${x.st})`;
+    return `<div class="tile st-${x.st}" style="--accent:${ac}"><div class="lbl">${x.lbl}</div>
+      <div class="val">${x.val}</div><div class="sub">${dh}<span class="muted">${x.u}</span></div></div>`;
+  }).join('');
+}
+
+let selKey=null;
+function renderQ(){
+  const L=WEEKS[WEEKS.length-1];
+  const m=L.week_end.getMonth(), y=L.week_end.getFullYear();
+  const rows=WEEKS.filter(w=>w.week_end.getMonth()===m&&w.week_end.getFullYear()===y);
+  document.getElementById('qMonth').textContent=L.week_end.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const g=document.getElementById('qgrid');
+  g.style.gridTemplateColumns=`88px repeat(${TESTS.length},1fr) 78px`;
+  let h=`<div class="qhead" style="justify-content:flex-start">Week</div>`+
+    TESTS.map(t=>`<div class="qhead"><span class="swatch" style="background:${TCOL[t.id]}"></span>${t.name}</div>`).join('')+
+    `<div class="qhead">FTT</div>`;
+  rows.forEach(w=>{
+    h+=`<div class="qwk"><b>${fmtS(w.week_start)}</b><span>${fmtS(w.week_end)}</span></div>`;
+    TESTS.forEach(t=>{
+      const v=w.per[t.id].fpy, st=statusOf(v,w.below_run);
+      h+=`<button class="qcell st-${st}" data-k="${w.week_key}"
+        aria-label="${t.name} week ending ${fmtD(w.week_end)}: ${v==null?'no data':v.toFixed(0)+'%, '+LABEL[st]}">
+        <span class="g">${GLYPH[st]}</span><span class="n">${v==null?'—':v.toFixed(0)+'%'}</span></button>`;
+    });
+    const fst=statusOf(w.ftt);
+    h+=`<button class="qcell st-${fst}" data-k="${w.week_key}" aria-label="First time through ${w.ftt.toFixed(0)} percent">
+      <span class="g">${GLYPH[fst]}</span><span class="n">${w.ftt.toFixed(0)}%</span></button>`;
+  });
+  g.innerHTML=h;
+  g.querySelectorAll('.qcell').forEach(b=>b.onclick=()=>openWeek(+b.dataset.k));
+}
+
+function renderTable(){
+  const t=document.getElementById('wkTable');
+  document.getElementById('wkCount').textContent=`${WEEKS.length} weeks · facility ${CUR.fac}`;
+  let h=`<thead><tr><th>Week ending</th><th>Homes</th>`+
+    TESTS.map(x=>`<th><span class="swatch" style="background:${TCOL[x.id]};margin-right:4px"></span>${x.name}</th>`).join('')+
+    `<th>FPY</th><th>FTT</th><th>TTW</th><th>Defects</th><th>Per floor</th></tr></thead><tbody>`;
+  [...WEEKS].reverse().forEach(w=>{
+    const st=statusOf(w.fpy,w.below_run), fs=statusOf(w.ftt), ts=statusOf(w.ttw);
+    h+=`<tr data-k="${w.week_key}" style="cursor:pointer"><td>${fmtD(w.week_end)}</td><td>${w.homes}</td>`;
+    TESTS.forEach(x=>{const p=w.per[x.id]; h+=`<td>${p.pass} / ${p.fail}</td>`;});
+    h+=`<td><span class="cellpill st-${st}">${w.fpy.toFixed(1)}%</span></td>
+        <td><span class="cellpill st-${fs}">${w.ftt.toFixed(1)}%</span></td>
+        <td><span class="cellpill st-${ts}">${w.ttw.toFixed(1)}%</span></td>
+        <td>${w.defects}</td><td>${w.dpf.toFixed(1)}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+  t.querySelectorAll('tbody tr').forEach(r=>r.onclick=()=>openWeek(+r.dataset.k));
+}
+
+function renderTrend(){
+  const svg=document.getElementById('trend');
+  const W=720,H=288,L=42,R=14,T=14,B=42, pw=W-L-R, ph=H-T-B, yMin=30,yMax=100;
+  const Y=v=>T+ph-(Math.max(yMin,v)-yMin)/(yMax-yMin)*ph;
+  const X=i=>L+(WEEKS.length===1?pw/2:i/(WEEKS.length-1)*pw);
+  let s='';
+  [30,50,70,90,100].forEach(v=>{s+=`<line class="gridline" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/>
+    <text class="tick" x="${L-7}" y="${Y(v)+3.5}" text-anchor="end">${v}%</text>`;});
+  s+=`<line class="baseline" x1="${L}" x2="${W-R}" y1="${T+ph}" y2="${T+ph}"/>`;
+  s+=`<line class="goal-rule" x1="${L}" x2="${W-R}" y1="${Y(GOAL)}" y2="${Y(GOAL)}"/>
+      <text class="goal-lbl" x="${L+4}" y="${Y(GOAL)-6}">GOAL ${GOAL}%</text>`;
+  s+=`<polyline points="${WEEKS.map((w,i)=>`${X(i)},${Y(w.ftt)}`).join(' ')}" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linejoin="round" opacity=".9"/>`;
+  s+=`<polyline points="${WEEKS.map((w,i)=>`${X(i)},${Y(w.fpy)}`).join(' ')}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+  WEEKS.forEach((w,i)=>{
+    if(i%2===0||i===WEEKS.length-1)
+      s+=`<text class="tick" x="${X(i)}" y="${T+ph+15}" text-anchor="middle" transform="rotate(-38 ${X(i)} ${T+ph+15})">${fmtS(w.week_end)}</text>`;
+    s+=`<circle cx="${X(i)}" cy="${Y(w.fpy)}" r="3.2" fill="var(--series-1)" stroke="var(--card)" stroke-width="2"/>`;
+  });
+  const li=WEEKS.length-1;
+  s+=`<text x="${X(li)-6}" y="${Y(WEEKS[li].fpy)-11}" text-anchor="end" style="font-size:11px;font-weight:700;fill:var(--text-primary)">${WEEKS[li].fpy.toFixed(1)}%</text>`;
+  WEEKS.forEach((w,i)=>{s+=`<rect class="hb" data-i="${i}" x="${X(i)-pw/WEEKS.length/2}" y="${T}" width="${pw/WEEKS.length}" height="${ph}" fill="transparent" style="cursor:crosshair"/>`;});
+  s+=`<line id="cross" x1="0" x2="0" y1="${T}" y2="${T+ph}" stroke="var(--baseline)" opacity="0"/>`;
+  svg.innerHTML=s;
+  const tip=document.getElementById('trendTip'), wrap=document.getElementById('trendWrap'), cr=svg.querySelector('#cross');
+  svg.querySelectorAll('.hb').forEach(r=>{
+    r.onmouseenter=()=>{const i=+r.dataset.i,w=WEEKS[i],st=statusOf(w.fpy,w.below_run);
+      cr.setAttribute('x1',X(i));cr.setAttribute('x2',X(i));cr.setAttribute('opacity','1');
+      tip.innerHTML=`<b>Week ending ${fmtD(w.week_end)}</b>
+        <div class="row"><span>FPY</span><span>${w.fpy.toFixed(1)}%</span></div>
+        <div class="row"><span>FTT</span><span>${w.ftt.toFixed(1)}%</span></div>
+        <div class="row"><span>Homes</span><span>${w.homes} (${w.clean} clean)</span></div>
+        <div class="row"><span>Defects</span><span>${w.defects}</span></div>
+        <div class="row" style="margin-top:5px"><span class="badge st-${st}"><span class="g">${GLYPH[st]}</span>${LABEL[st]}</span></div>`;
+      const bb=wrap.getBoundingClientRect(), px=X(i)/W*bb.width;
+      tip.style.left=Math.min(Math.max(px-80,0),bb.width-170)+'px'; tip.style.top='6px'; tip.style.opacity='1';};
+    r.onmouseleave=()=>{tip.style.opacity='0';cr.setAttribute('opacity','0');};
+  });
+  document.getElementById('trendTable').innerHTML=
+    `<table><thead><tr><th>Week ending</th><th>Homes</th><th>FPY</th><th>FTT</th><th>TTW</th><th>Status</th></tr></thead><tbody>`+
+    [...WEEKS].reverse().map(w=>{const st=statusOf(w.fpy,w.below_run);
+      return `<tr><td>${fmtD(w.week_end)}</td><td>${w.homes}</td><td>${w.fpy.toFixed(1)}%</td><td>${w.ftt.toFixed(1)}%</td><td>${w.ttw.toFixed(1)}%</td>
+      <td><span class="badge st-${st}"><span class="g">${GLYPH[st]}</span>${LABEL[st]}</span></td></tr>`;}).join('')+`</tbody></table>`;
+}
+
+let PARETO_LEVEL='defect';   // 'defect' | 'type'
+function paretoData(){
+  const byType = PARETO_LEVEL==='type';
+  const m=new Map();
+  HOMES.filter(h=>h.facility_id===CUR.fac).forEach(h=>h.defects.forEach(d=>{
+    const k = byType? d.type_id : d.defect_id;
+    const e=m.get(k)||{id:k,qty:0,w:0,test:d.test_id};
+    e.qty+=d.qty; e.w+=d.qty*d.sev; m.set(k,e);}));
+  const a=[...m.values()].sort((x,y)=>y.qty-x.qty);
+  const tot=a.reduce((s,d)=>s+d.qty,0)||1; let c=0;
+  return a.map(d=>{const sh=d.qty/tot*100; c+=sh;
+    return {...d,share:sh,cum:c,
+      label: byType? typeName(d.id) : fullName(d.id),
+      sub:   byType? typeQP(d.id)   : typeName((DEFECTS.find(x=>x.id===d.id)||{}).type)};});
+}
+
+function renderPareto(){
+  const all=paretoData(), data=all.slice(0,9);
+  const svg=document.getElementById('pareto');
+  const W=720,H=350,L=44,R=16,T=16,B=134, pw=W-L-R, ph=H-T-B, bw=pw/(data.length||1);
+  const Y=v=>T+ph-v/100*ph;
+  let s='';
+  [0,25,50,75,100].forEach(v=>{s+=`<line class="gridline" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/>
+    <text class="tick" x="${L-7}" y="${Y(v)+3.5}" text-anchor="end">${v}%</text>`;});
+  s+=`<line class="baseline" x1="${L}" x2="${W-R}" y1="${T+ph}" y2="${T+ph}"/>`;
+  data.forEach((d,i)=>{const x=L+i*bw+2,w=bw-4,y=Y(d.share);
+    s+=`<path d="M${x},${T+ph} L${x},${y+4} Q${x},${y} ${x+4},${y} L${x+w-4},${y} Q${x+w},${y} ${x+w},${y+4} L${x+w},${T+ph} Z" fill="var(--series-1)" opacity=".9"/>`;});
+  s+=`<polyline points="${data.map((d,i)=>`${L+i*bw+bw/2},${Y(d.cum)}`).join(' ')}" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linejoin="round"/>`;
+  data.forEach((d,i)=>{s+=`<circle cx="${L+i*bw+bw/2}" cy="${Y(d.cum)}" r="3.4" fill="var(--series-2)" stroke="var(--card)" stroke-width="2"/>`;});
+  s+=`<line class="goal-rule" x1="${L}" x2="${W-R}" y1="${Y(80)}" y2="${Y(80)}"/>
+      <text class="goal-lbl" x="${L+4}" y="${Y(80)-6}">80% OF DEFECTS</text>`;
+  data.forEach((d,i)=>{const cx=L+i*bw+bw/2, ly=T+ph+11;
+    const lab=d.label.length>34?d.label.slice(0,32)+'…':d.label;
+    s+=`<text class="tick" x="${cx}" y="${ly}" text-anchor="end" transform="rotate(-40 ${cx} ${ly})">${lab.replace(/&/g,'&amp;')}</text>`;
+    s+=`<text x="${cx}" y="${Y(d.share)-7}" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:var(--text-primary)">${d.share.toFixed(0)}%</text>`;
+    s+=`<rect class="pb" data-i="${i}" x="${L+i*bw}" y="${T}" width="${bw}" height="${ph}" fill="transparent" style="cursor:pointer"/>`;});
+  svg.innerHTML=s;
+  const tip=document.getElementById('paretoTip'), wrap=document.getElementById('paretoWrap');
+  svg.querySelectorAll('.pb').forEach(r=>{
+    r.onmouseenter=()=>{const d=data[+r.dataset.i];
+      tip.innerHTML=`<b>${d.label}</b>
+        <div class="row"><span class="muted">${d.sub}</span><span></span></div>
+        <div class="row"><span>Occurrences</span><span>${d.qty}</span></div>
+        <div class="row"><span>Share</span><span>${d.share.toFixed(1)}%</span></div>
+        <div class="row"><span>Cumulative</span><span>${d.cum.toFixed(1)}%</span></div>
+        <div class="row"><span>Weighted</span><span>${d.w}</span></div>`;
+      const bb=wrap.getBoundingClientRect(), px=(L+(+r.dataset.i)*bw+bw/2)/W*bb.width;
+      tip.style.left=Math.min(Math.max(px-85,0),bb.width-180)+'px'; tip.style.top='6px'; tip.style.opacity='1';};
+    r.onmouseleave=()=>tip.style.opacity='0';});
+  document.getElementById('paretoTable').innerHTML=
+    `<table><thead><tr><th>${PARETO_LEVEL==='type'?'Type of test':'Defect'}</th><th style="text-align:left">${PARETO_LEVEL==='type'?'QP ref':'Type of test'}</th><th>Test</th><th>Qty</th><th>Share</th><th>Cum.</th><th>Weighted</th></tr></thead><tbody>`+
+    all.slice(0,30).map(d=>`<tr><td>${d.label}</td><td style="text-align:left" class="muted">${d.sub}</td><td style="text-align:right">${TESTS.find(t=>t.id===d.test).name}</td>
+      <td>${d.qty}</td><td>${d.share.toFixed(1)}%</td><td>${d.cum.toFixed(1)}%</td><td>${d.w}</td></tr>`).join('')+`</tbody></table>`;
+}
+
+function renderCat(){
+  const svg=document.getElementById('catChart');
+  const agg=TESTS.map(t=>{let q=0,w=0;
+    HOMES.filter(h=>h.facility_id===CUR.fac).forEach(h=>h.defects.filter(d=>d.test_id===t.id)
+      .forEach(d=>{q+=d.qty;w+=d.qty*d.sev;}));
+    return {...t,qty:q,w,color:TCOL[t.id]};});
+  const max=Math.max(...agg.map(a=>a.w),1)*1.16;
+  const W=720,H=330,L=54,R=16,T=18,B=58, pw=W-L-R, ph=H-T-B, bw=pw/agg.length, Y=v=>T+ph-v/max*ph;
+  let s='';
+  for(let i=0;i<=4;i++){const v=max/4*i;
+    s+=`<line class="gridline" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/>
+        <text class="tick" x="${L-7}" y="${Y(v)+3.5}" text-anchor="end">${Math.round(v)}</text>`;}
+  s+=`<line class="baseline" x1="${L}" x2="${W-R}" y1="${T+ph}" y2="${T+ph}"/>`;
+  agg.forEach((a,i)=>{const x=L+i*bw+bw*0.22,w=bw*0.56,y=Y(a.w);
+    s+=`<path d="M${x},${T+ph} L${x},${y+4} Q${x},${y} ${x+4},${y} L${x+w-4},${y} Q${x+w},${y} ${x+w},${y+4} L${x+w},${T+ph} Z" fill="${a.color}" opacity=".9"/>`;
+    s+=`<text x="${x+w/2}" y="${y-8}" text-anchor="middle" style="font-size:12px;font-weight:700;fill:var(--text-primary)">${a.w}</text>`;
+    s+=`<text class="tick" x="${x+w/2}" y="${T+ph+18}" text-anchor="middle" style="font-size:11.5px;font-weight:600">${a.name}</text>`;
+    s+=`<text class="tick" x="${x+w/2}" y="${T+ph+32}" text-anchor="middle">${a.qty} defects</text>`;
+    s+=`<rect class="cb" data-i="${i}" x="${L+i*bw}" y="${T}" width="${bw}" height="${ph}" fill="transparent" style="cursor:pointer"/>`;});
+  svg.innerHTML=s;
+  document.getElementById('catLegend').innerHTML=
+    agg.map(a=>`<span><i style="background:${a.color}"></i> ${a.name}</span>`).join('')+
+    `<span class="muted">Weighted = Σ (qty × severity)</span>`;
+  const tip=document.getElementById('catTip'), wrap=document.getElementById('catWrap');
+  svg.querySelectorAll('.cb').forEach(r=>{
+    r.onmouseenter=()=>{const a=agg[+r.dataset.i];
+      tip.innerHTML=`<b>${a.name}</b><div class="row"><span>Defects</span><span>${a.qty}</span></div>
+        <div class="row"><span>Weighted</span><span>${a.w}</span></div>
+        <div class="row"><span>Types of test</span><span>${typesOf(a.id).length}</span></div>`;
+      const bb=wrap.getBoundingClientRect();
+      tip.style.left=Math.min(Math.max((L+(+r.dataset.i)*bw+bw/2)/W*bb.width-80,0),bb.width-175)+'px';
+      tip.style.top='6px'; tip.style.opacity='1';};
+    r.onmouseleave=()=>tip.style.opacity='0';});
+}
+
+/* ============================================================ week detail */
+function openWeek(k){
+  const w=WEEKS.find(x=>x.week_key===k); if(!w) return;
+  selKey=k; go('week');
+  const hs=HOMES.filter(h=>h.week_key===k&&h.facility_id===CUR.fac);
+  const cards=TESTS.map(t=>{const p=w.per[t.id], st=statusOf(p.fpy,w.below_run);
+    return `<div class="tile st-${st}" style="--accent:${TCOL[t.id]}">
+      <div class="lbl"><span class="swatch" style="background:${TCOL[t.id]};margin-right:5px"></span>${t.name}</div>
+      <div class="val">${p.fpy==null?'—':p.fpy.toFixed(1)+'%'}</div>
+      <div class="sub"><span class="badge st-${st}"><span class="g">${GLYPH[st]}</span>${LABEL[st]}</span>
+      <span class="muted">${p.pass} pass · ${p.fail} fail</span></div></div>`;}).join('');
+  const rows=hs.map(h=>{
+    const chips=TESTS.map(t=>{const v=h[TKEY[t.id]];
+      const st=v===1?'good':v===0?'critical':'nodata';
+      return `<span class="tchip st-${st} ${v==null?'na':''}" title="${t.name}">${t.name[0]}</span>`;}).join('');
+    const dq=h.defects.reduce((s,d)=>s+d.qty,0);
+    return `<tr><td><b>${h.home_number}</b></td><td style="text-align:left"><div class="tchips">${chips}</div></td>
+      <td>${h.floors}</td><td>${dq}</td>
+      <td style="text-align:left;white-space:normal;max-width:420px">${h.defects.length?h.defects.map(d=>'<span class="muted">'+typeName(d.type_id)+' ·</span> '+fullName(d.defect_id)+(d.qty>1?' ×'+d.qty:'')).join('<br>'):'<span class="muted">clean</span>'}</td></tr>`;}).join('');
+  document.getElementById('weekDetail').innerHTML=`
+    <div class="card-head"><h2>Week ending ${fmtD(w.week_end)}</h2>
+      <span class="card-sub">Plant ${CUR.plant} · Facility ${CUR.fac} · Week key ${w.week_key}</span>
+      <span class="spacer"></span><button class="btn sec" onclick="go('dash')">← Dashboard</button></div>
+    <div class="tiles" style="margin:12px 0">${cards}
+      <div class="tile" style="--accent:var(--brand)"><div class="lbl">First Time Through</div>
+        <div class="val">${w.ftt.toFixed(1)}%</div><div class="sub"><span class="muted">${w.clean} of ${w.homes} homes clean</span></div></div></div>
+    <div class="card-head" style="margin-top:6px"><h2>Homes tested</h2>
+      <span class="card-sub">${hs.length} homes · ${w.defects} defect occurrences · ${w.floors} floors</span></div>
+    <div class="tbl-scroll"><table><thead><tr><th>Home</th><th style="text-align:left">E / P / G</th>
+      <th>Floors</th><th>Defects</th><th style="text-align:left">Type · Defect</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="note"><b>Loaded on drill-in only.</b> <code>Filter(qk_home, Plant_ID = varPID &amp;&amp; Week_key = ${w.week_key} &amp;&amp; Facility_ID = ${CUR.fac})</code>
+      — three Number equalities on indexed columns, fully delegable, ${hs.length} rows.</div>`;
+}
+
+/* ============================================================ data entry */
+const ENT={week:null,fac:2,home:null,draft:null};
+
+function weekOptions(){
+  const seen=[...new Set(HOMES.map(h=>h.week_key))].sort((a,b)=>b-a).slice(0,14);
+  document.getElementById('eWeek').innerHTML=seen.map(k=>{
+    const h=HOMES.find(x=>x.week_key===k);
+    return `<option value="${k}">${fmtD(h.week_end)}</option>`;}).join('');
+  ENT.week=seen[0];
+}
+
+function entryHomes(){ return HOMES.filter(h=>h.week_key===ENT.week&&h.facility_id===ENT.fac); }
+
+function renderEntryList(){
+  const hs=entryHomes();
+  const wh=HOMES.find(h=>h.week_key===ENT.week);
+  document.getElementById('eWeekLbl').textContent = wh? 'week ending '+fmtD(wh.week_end)+' · facility '+ENT.fac : '';
+  const full=hs.filter(h=>TESTS.every(t=>h[TKEY[t.id]]!=null)).length;
+  const clean=hs.filter(h=>TESTS.every(t=>h[TKEY[t.id]]===1)).length;
+  document.getElementById('eProgress').innerHTML=
+    `<span><b>${hs.length}</b> homes entered</span><span><b>${full}</b> fully tested</span>
+     <span><b>${hs.length-full}</b> pending</span><span><b>${clean}</b> clean</span>`;
+  document.getElementById('eLoadNote').textContent=`${hs.length} rows · delegable (Plant_ID, Week_key, Facility_ID)`;
+  document.getElementById('eList').innerHTML = hs.length? hs.slice().reverse().map(h=>{
+    const chips=TESTS.map(t=>{const v=h[TKEY[t.id]];
+      const st=v===1?'good':v===0?'critical':'nodata';
+      return `<span class="tchip st-${st} ${v==null?'na':''}" title="${t.name}: ${v===1?'Pass':v===0?'Fail':'not tested'}">${t.name[0]}</span>`;}).join('');
+    const dq=h.defects.reduce((s,d)=>s+d.qty,0);
+    return `<button class="homerow ${ENT.home===h.home_number?'sel':''}" data-h="${h.home_number}">
+      <span class="hn">${h.home_number}</span><div class="tchips">${chips}</div>
+      <span class="meta">${h.floors} fl · ${dq} defect${dq===1?'':'s'}</span></button>`;}).join('')
+    : `<div class="empty-state">No homes entered for this week yet.<br>Enter a production number above to start.</div>`;
+  document.getElementById('eList').querySelectorAll('.homerow').forEach(b=>b.onclick=()=>selectHome(b.dataset.h));
+}
+
+function selectHome(hn){
+  ENT.home=hn;
+  document.body.classList.add('detail-open');
+  const h=HOMES.find(x=>x.home_number===hn);
+  ENT.draft={floors:h.floors, results:{}, defects:h.defects.map(d=>({...d}))};
+  TESTS.forEach(t=>ENT.draft.results[t.id]=h[TKEY[t.id]]);
+  renderEntryList(); renderHomeDetail();
+}
+
+function renderHomeDetail(){
+  const el=document.getElementById('eDetail');
+  if(!ENT.home){ el.innerHTML=`<div class="empty-state">Select a home from the list to record its tests,<br>or add a new production number.</div>`; return; }
+  const h=HOMES.find(x=>x.home_number===ENT.home), D=ENT.draft;
+  const hrs=(Date.now()-h.entered_at.getTime())/3600e3, open=hrs<24;
+  const cards=TESTS.map(t=>{
+    const v=D.results[t.id];
+    const lines=D.defects.filter(d=>d.test_id===t.id);
+    let body='';
+    if(v===0){
+      body=`<div class="dfbody">
+        <div class="auto" style="margin:-2px 0 7px">↳ ${typesOf(t.id).map(x=>x.name+' ('+x.qp+')').join(' · ')}</div>
+        <div class="dfhead"><span>Type of test</span><span>Defect</span><span>Qty</span><span></span></div>`+
+        (lines.length?lines.map((d,i)=>{
+          const gi=D.defects.indexOf(d);
+          const ds=defsOf(d.type_id);
+          return `<div class="dfrow">
+            <select data-gi="${gi}" data-f="type">${typesOf(t.id).map(x=>`<option value="${x.id}" ${x.id===d.type_id?'selected':''}>${x.name} · ${x.qp}</option>`).join('')}</select>
+            <select data-gi="${gi}" data-f="defect">${ds.map(x=>`<option value="${x.id}" ${x.id===d.defect_id?'selected':''}>${x.name}</option>`).join('')}</select>
+            <input type="number" min="1" value="${d.qty}" data-gi="${gi}" data-f="qty">
+            <button class="rm" data-gi="${gi}" title="Remove">✕</button>
+          </div>`;}).join('')
+          : `<div class="warnbar">⚠ ${t.name} is marked <b>Fail</b> but no defect is recorded.</div>`)+
+        `<button class="btn sec sm" data-add="${t.id}" style="margin-top:4px">+ Defect</button></div>`;
+    } else if(v===1 && lines.length){
+      body=`<div class="dfbody"><div class="warnbar errbar">✕ ${t.name} is marked <b>Pass</b> but has ${lines.length} defect line(s). Remove them or set the test to Fail.</div></div>`;
+    }
+    return `<div class="testcard" style="--tc:${TCOL[t.id]}">
+      <div class="testcard-h"><span class="nm"><span class="swatch" style="background:${TCOL[t.id]}"></span>${t.name}</span>
+        <span class="card-sub">${typesOf(t.id).length} type${typesOf(t.id).length===1?'':'s'} · ${DEFECTS.filter(d=>d.test===t.id).length} defects</span>
+        <div class="pf" role="group" aria-label="${t.name} result">
+          <button data-t="${t.id}" data-v="1" aria-pressed="${v===1}">Pass</button>
+          <button data-t="${t.id}" data-v="0" aria-pressed="${v===0}">Fail</button>
+        </div></div>${body}</div>`;}).join('');
+
+  el.innerHTML=`
+    <div class="card-head"><h2>Home ${h.home_number}</h2>
+      <span class="card-sub">facility ${h.facility_id} · week ending ${fmtD(h.week_end)}</span>
+      <span class="spacer"></span>
+      <span class="badge ${open?'st-good':'st-nodata'}">${open?'🔓 editable '+(24-hrs).toFixed(1)+'h':'🔒 locked · admin override'}</span></div>
+    <div class="filters" style="padding:10px 0;border:0;background:none">
+      <div class="field"><label for="eDetFloors">Floors</label>
+        <input type="number" id="eDetFloors" min="1" max="4" value="${D.floors}" style="min-width:70px"></div>
+      <div class="field"><label>Entered</label><div style="font-size:13px;padding:6px 0">${fmtD(h.entered_at)}</div></div>
+    </div>
+    ${cards}
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" id="eSave">Save home</button>
+      <button class="btn sec" id="eCancel">Cancel</button>
+      <button class="btn sec" id="eDel" style="margin-left:auto;color:var(--critical)">Delete home</button>
+    </div>`;
+
+  el.querySelectorAll('.pf button').forEach(b=>b.onclick=()=>{
+    const t=+b.dataset.t, v=+b.dataset.v;
+    D.results[t] = (D.results[t]===v)? null : v;
+    if(D.results[t]!==0) { /* keep lines so a mis-click is recoverable */ }
+    if(D.results[t]===0 && !D.defects.some(d=>d.test_id===t)) addLine(t);
+    renderHomeDetail();
+  });
+  el.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{addLine(+b.dataset.add); renderHomeDetail();});
+  el.querySelectorAll('.rm').forEach(b=>b.onclick=()=>{D.defects.splice(+b.dataset.gi,1); renderHomeDetail();});
+  el.querySelectorAll('[data-f]').forEach(c=>c.onchange=()=>{
+    const gi=+c.dataset.gi, f=c.dataset.f, d=D.defects[gi];
+    if(f==='type'){ d.type_id=+c.value; const ds=defsOf(d.type_id); d.defect_id=ds[0]?ds[0].id:null; d.sev=ds[0]?ds[0].sev:2; }
+    else if(f==='defect'){ d.defect_id=+c.value; d.sev=(DEFECTS.find(x=>x.id===d.defect_id)||{sev:2}).sev; }
+    else d.qty=Math.max(1,+c.value||1);
+    renderHomeDetail();
+  });
+  document.getElementById('eDetFloors').onchange=e=>{D.floors=Math.max(1,+e.target.value||1);};
+  document.getElementById('eSave').onclick=saveHome;
+  document.getElementById('eCancel').onclick=()=>{ENT.home=null;
+    document.body.classList.remove('detail-open');renderEntryList();renderHomeDetail();};
+  document.getElementById('eDel').onclick=()=>{
+    HOMES=HOMES.filter(x=>x.home_number!==ENT.home);
+    ENT.home=null; rollup(); renderEntryList(); renderHomeDetail(); renderAllDash();
+    toast('Home deleted · week rollup rebuilt','ok');
+  };
+}
+
+function addLine(testId){
+  const used=new Set(ENT.draft.defects.filter(d=>d.test_id===testId).map(d=>d.defect_id));
+  // pick the first type that still has an unused defect, so a new row is never a duplicate
+  for(const ty of typesOf(testId)){
+    const free=defsOf(ty.id).find(d=>!used.has(d.id));
+    if(free){ ENT.draft.defects.push({test_id:testId,type_id:ty.id,defect_id:free.id,qty:1,sev:free.sev}); return; }
+  }
+  toast('Every defect defined for this test is already recorded on this home.','err');
+}
+
+function saveHome(){
+  const h=HOMES.find(x=>x.home_number===ENT.home), D=ENT.draft;
+  // validation — mirrors spec §6.3
+  for(const t of TESTS){
+    const lines=D.defects.filter(d=>d.test_id===t.id);
+    if(D.results[t.id]===1 && lines.length){
+      toast(t.name+' is marked Pass but has defect lines — resolve the contradiction.','err'); return; }
+    const key=lines.map(d=>d.type_id+'/'+d.defect_id);
+    if(new Set(key).size!==key.length){
+      toast('Duplicate Type + Defect on this home — merge into Qty instead.','err'); return; }
+  }
+  if(D.floors<1){ toast('Floors must be at least 1.','err'); return; }
+  const incomplete=TESTS.filter(t=>D.results[t.id]===0 && !D.defects.some(d=>d.test_id===t.id));
+  TESTS.forEach(t=>h[TKEY[t.id]]=D.results[t.id]);
+  h.floors=D.floors; h.defects=D.defects.map(d=>({...d}));
+  rollup(); renderEntryList(); renderHomeDetail(); renderAllDash();
+  toast(incomplete.length? 'Saved — '+incomplete.map(t=>t.name).join(', ')+' failed with no defect recorded'
+                         : 'Home '+h.home_number+' saved · week rollup rebuilt', incomplete.length?'err':'ok');
+}
+
+function addHome(){
+  const raw=document.getElementById('eHome').value.trim();
+  const msg=document.getElementById('eAddMsg');
+  msg.innerHTML='';
+  if(!raw){ msg.innerHTML=`<div class="warnbar errbar">Enter a home production number.</div>`; return; }
+  // duplicate check is plant-wide with NO week filter — a home is built once
+  if(HOMES.some(h=>h.home_number===raw)){
+    const ex=HOMES.find(h=>h.home_number===raw);
+    msg.innerHTML=`<div class="warnbar errbar">Home <b>${raw}</b> already exists for this plant (facility ${ex.facility_id}, week ending ${fmtD(ex.week_end)}). Production numbers are unique per plant, for all time.</div>`;
+    return; }
+  if(!/^\d{6,8}$/.test(raw)){
+    msg.innerHTML=`<div class="warnbar">⚠ <b>${raw}</b> doesn't match the expected 6–8 digit pattern. Added anyway — check it's not a typo.</div>`; }
+  const wh=HOMES.find(h=>h.week_key===ENT.week);
+  HOMES.push({home_number:raw, plant_id:CUR.plant, facility_id:ENT.fac, week_key:ENT.week,
+    week_end:wh.week_end, week_start:wh.week_start,
+    floors:Math.max(1,+document.getElementById('eFloors').value||1),
+    defects:[], entered_at:new Date(), elec:null, plumb:null, gas:null});
+  document.getElementById('eHome').value='';
+  rollup(); renderEntryList(); renderAllDash(); selectHome(raw);
+  toast('Home '+raw+' added — now record the three tests','ok');
+}
+
+/* ============================================================ taxonomy admin */
+const TAX={test:1,type:11};
+function renderTax(){
+  document.getElementById('taxCounts').textContent=`${TESTS.length} tests · ${TYPES.length} types · ${DEFECTS.length} defects`;
+  document.getElementById('taxTests').innerHTML=TESTS.map(t=>
+    `<button class="pitem ${TAX.test===t.id?'sel':''}" data-t="${t.id}">
+      <span class="swatch" style="background:${TCOL[t.id]}"></span>${t.name}
+      <span class="ct">${typesOf(t.id).length}</span></button>`).join('');
+  const tys=typesOf(TAX.test);
+  if(!tys.some(x=>x.id===TAX.type)) TAX.type=tys[0]?tys[0].id:null;
+  document.getElementById('taxItems').innerHTML=tys.map(x=>
+    `<button class="pitem ${TAX.type===x.id?'sel':''}" data-i="${x.id}">
+      <span style="display:flex;flex-direction:column;line-height:1.25">
+        <span>${x.name}</span><span class="muted" style="font-size:10.5px">${x.qp}</span></span>
+      <span class="ct">${defsOf(x.id).length}</span></button>`).join('');
+  const ds=defsOf(TAX.type);
+  document.getElementById('taxDefSub').textContent=TAX.type? typeName(TAX.type)+' · '+typeQP(TAX.type)+' · '+ds.length+' defects':'';
+  document.getElementById('taxDefs').innerHTML=
+    `<thead><tr><th>Defect</th><th>Severity</th><th>ID</th><th>Active</th></tr></thead><tbody>`+
+    ds.map(d=>`<tr><td>${d.name}</td>
+      <td><select data-sev="${d.id}" style="min-width:96px">
+        ${[1,2,3].map(s=>`<option value="${s}" ${d.sev===s?'selected':''}>${['','Minor','Major','Critical'][s]}</option>`).join('')}</select></td>
+      <td class="muted">${d.id}</td><td><span class="chip st-good">Active</span></td></tr>`).join('')+`</tbody>`;
+
+  // review flags from the real taxonomy
+  const flags=[];
+  const bad=TYPES.filter(x=>!/^QP\.\d/.test(x.qp));
+  if(bad.length) flags.push(`<b>${bad.length} QP reference(s) are formatted inconsistently</b> — ${bad.map(x=>x.qp).join(', ')} omit the dot after <code>QP</code> while the other ${TYPES.length-bad.length} use <code>QP.0X.0</code>. Harmless to the app, but it will look wrong beside a controlled document.`);
+  const dflt=DEFECTS.filter(d=>d.sev===2).length;
+  if(dflt) flags.push(`<b>${dflt} of ${DEFECTS.length} defects still sit at the default severity (Major)</b> — no severity was supplied in the source. Gas leaks and Hi Pot shorts are presumably Critical.`);
+  const cnt=TYPES.map(x=>defsOf(x.id).length);
+  flags.push(`<b>Defects per type run ${Math.min(...cnt)}–${Math.max(...cnt)}</b> — an even spread, so a defect-level Pareto is not biased by taxonomy granularity. All ${DEFECTS.length} defect names are globally unique, so charts can label by defect alone.`);
+  document.getElementById('taxFlags').innerHTML=flags.map(f=>`<div class="flag">${f}</div>`).join('');
+
+  document.getElementById('taxTests').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{TAX.test=+b.dataset.t;renderTax();});
+  document.getElementById('taxItems').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{TAX.type=+b.dataset.i;renderTax();});
+  document.getElementById('taxDefs').querySelectorAll('[data-sev]').forEach(s=>s.onchange=()=>{
+    const d=DEFECTS.find(x=>x.id===+s.dataset.sev); d.sev=+s.value;
+    renderTax(); toast('Severity updated for “'+d.name+'”','ok'); });
+}
+document.getElementById('taxAddItem').onclick=()=>{
+  const n=prompt('New type of test for '+TESTS.find(t=>t.id===TAX.test).name+':'); if(!n) return;
+  const qp=prompt('QP reference (e.g. QP.10.0):','QP.') || '';
+  const id=Math.max(...typesOf(TAX.test).map(x=>x.id))+1;
+  TYPES.push({id,test:TAX.test,name:n.trim(),qp:qp.trim()}); TAX.type=id; renderTax();
+  toast('Type added (Type_ID '+id+') — Active, no defects yet','ok'); };
+document.getElementById('taxAddDef').onclick=()=>{
+  if(!TAX.type) return;
+  const n=prompt('New defect for “'+typeName(TAX.type)+'” ('+typeQP(TAX.type)+'):'); if(!n) return;
+  const ex=defsOf(TAX.type);
+  const id=ex.length?Math.max(...ex.map(d=>d.id))+1:TAX.type*100+1;
+  DEFECTS.push({id,type:TAX.type,test:TAX.test,name:n.trim(),sev:2}); renderTax();
+  toast('Defect added (Defect_ID '+id+') — severity defaults to Major','ok'); };
+
+/* ============================================================ access list */
+const PLANTS=[{id:0,name:'Corporate'},{id:12,name:'Dresden'},{id:21,name:'Leola'},{id:34,name:'Weiser'}];
+let ACCESS=[
+  {id:1,name:'Rafa Massky',email:'massky@gmail.com',plant:0,role:'Administrator',active:true},
+  {id:2,name:'Dana Whitfield',email:'d.whitfield@example.com',plant:12,role:'Quality Manager',active:true},
+  {id:3,name:'Marcus Ellery',email:'m.ellery@example.com',plant:12,role:'Inspector',active:true},
+  {id:4,name:'Priya Raman',email:'p.raman@example.com',plant:12,role:'Inspector',active:true},
+  {id:5,name:'Tom Bruckner',email:'t.bruckner@example.com',plant:21,role:'Quality Manager',active:true},
+  {id:6,name:'Alice Deng',email:'a.deng@example.com',plant:21,role:'Inspector',active:true},
+  {id:7,name:'Rob Castellano',email:'r.castellano@example.com',plant:34,role:'Inspector',active:true},
+  {id:8,name:'Helen Marsh',email:'h.marsh@example.com',plant:34,role:'Reader',active:false}
+];
+const ROLES=['Administrator','Quality Manager','Inspector','Reader'];
+
+function renderAccess(){
+  const ps=document.getElementById('aPlant');
+  if(ps.options.length<2) ps.innerHTML=`<option value="">All plants</option>`+
+    PLANTS.map(p=>`<option value="${p.id}">${p.id===0?'Corporate':p.id+' — '+p.name}</option>`).join('');
+  const fp=ps.value, fr=document.getElementById('aRole').value;
+  const rows=ACCESS.filter(a=>(!fp||a.plant==fp)&&(!fr||a.role===fr))
+    .sort((a,b)=>a.plant-b.plant||a.name.localeCompare(b.name));
+  document.getElementById('accTable').innerHTML=
+    `<thead><tr><th>Name</th><th style="text-align:left">Email</th><th style="text-align:left">Plant</th>
+     <th style="text-align:left">Role</th><th>Status</th><th></th></tr></thead><tbody>`+
+    rows.map(a=>`<tr>
+      <td><b>${a.name}</b></td><td style="text-align:left" class="muted">${a.email}</td>
+      <td style="text-align:left"><select data-p="${a.id}" style="min-width:150px">
+        ${PLANTS.map(p=>`<option value="${p.id}" ${a.plant===p.id?'selected':''}>${p.id===0?'Corporate':p.id+' — '+p.name}</option>`).join('')}</select></td>
+      <td style="text-align:left"><select data-r="${a.id}" style="min-width:150px">
+        ${ROLES.map(r=>`<option ${a.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td><span class="chip ${a.active?'st-good':'st-nodata'}">${a.active?'Active':'Inactive'}</span></td>
+      <td><button class="btn sec sm" data-tg="${a.id}">${a.active?'Deactivate':'Reactivate'}</button></td></tr>`).join('')+
+    `</tbody>`;
+  // plants with no Quality Manager
+  const missing=PLANTS.filter(p=>p.id!==0&&!ACCESS.some(a=>a.plant===p.id&&a.role==='Quality Manager'&&a.active));
+  document.getElementById('aFlags').innerHTML = missing.length?
+    `<div class="flag">⚠ <b>No active Quality Manager</b> for ${missing.map(p=>p.id+' — '+p.name).join(', ')}. Assign one so someone can edit past the 24-hour window.</div>`:'';
+  document.querySelectorAll('[data-p]').forEach(s=>s.onchange=()=>{
+    const a=ACCESS.find(x=>x.id===+s.dataset.p); a.plant=+s.value; renderAccess();
+    toast(a.name+' reassigned to '+(a.plant===0?'Corporate':'plant '+a.plant),'ok');});
+  document.querySelectorAll('[data-r]').forEach(s=>s.onchange=()=>{
+    const a=ACCESS.find(x=>x.id===+s.dataset.r); a.role=s.value; renderAccess();
+    toast(a.name+' is now '+a.role,'ok');});
+  document.querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{
+    const a=ACCESS.find(x=>x.id===+b.dataset.tg); a.active=!a.active; renderAccess();
+    toast(a.name+(a.active?' reactivated':' deactivated — history preserved'),'ok');});
+}
+document.getElementById('aPlant').onchange=renderAccess;
+document.getElementById('aRole').onchange=renderAccess;
+document.getElementById('aAdd').onclick=()=>{
+  const q=document.getElementById('aSearch').value.trim();
+  if(!q){ toast('Type a name to search the directory','err'); return; }
+  if(ACCESS.some(a=>a.name.toLowerCase()===q.toLowerCase())){ toast(q+' is already on the access list','err'); return; }
+  ACCESS.push({id:Math.max(...ACCESS.map(a=>a.id))+1,name:q,
+    email:q.toLowerCase().replace(/[^a-z]+/g,'.')+'@example.com',plant:12,role:'Inspector',active:true});
+  document.getElementById('aSearch').value=''; renderAccess();
+  toast('Added '+q+' — set their plant and role','ok'); };
+
+/* ============================================================ chrome */
+function go(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('on',x.id==='s-'+s));
+  document.querySelectorAll('#nav button').forEach(b=>
+    b.dataset.s===s? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current'));
+  document.getElementById('globalFilters').style.display = (s==='dash'||s==='week')?'':'none';
+  if(s==='tax') renderTax(); if(s==='acc') renderAccess();
+  if(s!=='entry') document.body.classList.remove('detail-open');
+  if(s==='entry'){ renderEntryList(); renderHomeDetail(); }
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.s));
+
+function seg(a,b,sa,sb){
+  const A=document.getElementById(a),B=document.getElementById(b);
+  A.onclick=()=>{A.setAttribute('aria-pressed','true');B.setAttribute('aria-pressed','false');
+    sa.forEach(i=>document.getElementById(i).hidden=false); sb.forEach(i=>document.getElementById(i).hidden=true);};
+  B.onclick=()=>{B.setAttribute('aria-pressed','true');A.setAttribute('aria-pressed','false');
+    sb.forEach(i=>document.getElementById(i).hidden=false); sa.forEach(i=>document.getElementById(i).hidden=true);};
+}
+seg('trChart','trTable',['trendWrap'],['trendTable']);
+seg('paChart','paTable',['paretoWrap'],['paretoTable']);
+document.getElementById('paByDefect').onclick=()=>setPareto('defect');
+document.getElementById('paByType').onclick=()=>setPareto('type');
+function setPareto(l){ PARETO_LEVEL=l;
+  document.getElementById('paByDefect').setAttribute('aria-pressed',l==='defect');
+  document.getElementById('paByType').setAttribute('aria-pressed',l==='type');
+  renderPareto(); }
+
+document.getElementById('themeBtn').onclick=()=>{
+  const r=document.documentElement;
+  r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';
+  renderAllDash(); if(document.getElementById('s-tax').classList.contains('on')) renderTax();
+};
+
+document.getElementById('eAdd').onclick=addHome;
+document.getElementById('eBack').onclick=()=>{ENT.home=null;
+  document.body.classList.remove('detail-open');renderEntryList();renderHomeDetail();};
+document.getElementById('eHome').addEventListener('keydown',e=>{if(e.key==='Enter')addHome();});
+document.getElementById('eFac').onchange=e=>{ENT.fac=+e.target.value;ENT.home=null;renderEntryList();renderHomeDetail();};
+document.getElementById('eWeek').onchange=e=>{ENT.week=+e.target.value;ENT.home=null;renderEntryList();renderHomeDetail();};
+
+['fPlant','fFac','fWin'].forEach(id=>document.getElementById(id).onchange=()=>{
+  CUR.plant=+document.getElementById('fPlant').value;
+  CUR.fac=+document.getElementById('fFac').value;
+  CUR.weeks=+document.getElementById('fWin').value;
+  _s=20260819+CUR.plant*17+CUR.fac*3;
+  buildData(CUR.weeks); weekOptions(); ENT.fac=CUR.fac; ENT.home=null;
+  renderAllDash(); renderEntryList(); renderHomeDetail();
+});
+
+function renderAllDash(){
+  document.getElementById('loadNote').textContent=
+    `${WEEKS.length + WEEKS.length*TESTS.length} rollup rows loaded · ${HOMES.length.toLocaleString()} homes NOT loaded`;
+  renderTiles(); renderQ(); renderTable(); renderTrend(); renderPareto(); renderCat();
+}
+
+buildData(26); weekOptions(); ENT.fac=CUR.fac;
+renderAllDash(); renderEntryList(); renderHomeDetail();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+﻿,Corporate User Admin,Corporate User Non- Admin,Plant Quality Manager,Plant Inspector,Other Users
+Corporate Home,Yes,Yes,Yes,Yes,Yes
+Dashboard,Yes,Yes,Yes,Yes,Yes
+Data Entry,Yes,No,Yes,Yes,No
+Week Detail,Yes,Yes,Yes,Yes,Yes
+History,Yes,Yes,Yes,Yes,Yes
+Taxonomy,Yes,No,No,No,No
+Access,Yes,No,Yes,No,No

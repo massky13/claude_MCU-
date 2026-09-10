@@ -1,0 +1,236 @@
+Screens:
+  scr_ParetoTest:
+    Properties:
+      Fill: =PageBg
+      OnVisible: =Set(varParetoAxisMax, Max(Max(col_pareto, Share_pct) * 1.1, 1))
+    Children:
+      - cnt_root_test:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =16
+            Width: =Parent.Width
+          Children:
+            - lbl_test_title:
+                Control: ModernText
+                Properties:
+                  Color: =TextPrimary
+                  FontWeight: =FontWeight.Bold
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =20
+                  Text: ="Custom Pareto Bars (Test)"
+                  Wrap: =false
+            - cnt_pareto_bars_card:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =CardBg
+                  FillPortions: =0
+                  Height: =320
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =12
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - cnt_chart_plot:
+                      Control: GroupContainer
+                      Variant: ManualLayout
+                      Properties:
+                        Height: =280
+                        Width: =640
+                      Children:
+                        - rect_grid_100:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =600
+                              X: =40
+                        - rect_grid_75:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =600
+                              X: =40
+                              Y: =60
+                        - rect_grid_50:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =600
+                              X: =40
+                              Y: =120
+                        - rect_grid_25:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =600
+                              X: =40
+                              Y: =180
+                        - rect_grid_0:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =600
+                              X: =40
+                              Y: =240
+                        - rect_axis_line:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =TextMuted
+                              Height: =240
+                              Width: =2
+                              X: =38
+                        - lbl_axis_100:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: =TextMuted
+                              Height: =14
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =4
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =Text(varParetoAxisMax, "0.0")
+                              Width: =34
+                              Wrap: =false
+                        - lbl_axis_75:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: =TextMuted
+                              Height: =14
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =4
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =Text(varParetoAxisMax * 0.75, "0.0")
+                              Width: =34
+                              Wrap: =false
+                              Y: =53
+                        - lbl_axis_50:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: =TextMuted
+                              Height: =14
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =4
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =Text(varParetoAxisMax * 0.5, "0.0")
+                              Width: =34
+                              Wrap: =false
+                              Y: =113
+                        - lbl_axis_25:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: =TextMuted
+                              Height: =14
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =4
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =Text(varParetoAxisMax * 0.25, "0.0")
+                              Width: =34
+                              Wrap: =false
+                              Y: =173
+                        - lbl_axis_0:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: =TextMuted
+                              Height: =14
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =4
+                              PaddingTop: =0
+                              Size: =9
+                              Text: ="0.0"
+                              Width: =34
+                              Wrap: =false
+                              Y: =233
+                        - gal_pareto_bars:
+                            Control: Gallery
+                            Variant: Horizontal
+                            Properties:
+                              Height: =280
+                              Items: =FirstN(SortByColumns(col_pareto, "Share_pct", SortOrder.Descending), 5)
+                              ShowScrollbar: =false
+                              TemplatePadding: =0
+                              TemplateSize: =120
+                              Width: =600
+                              X: =40
+                            Children:
+                              - cnt_bar_col:
+                                  Control: GroupContainer
+                                  Variant: ManualLayout
+                                  Properties:
+                                    Height: =Parent.TemplateHeight
+                                    Width: =Parent.TemplateWidth
+                                  Children:
+                                    - lbl_bar_value:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =TextPrimary
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =16
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: =Text(ThisItem.Share_pct, "0.0") & "%"
+                                          Width: =120
+                                          Wrap: =false
+                                          Y: =240 - 240 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1)) - 18
+                                    - rect_bar:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =AlertRed
+                                          Height: =240 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1))
+                                          Width: =72
+                                          X: =24
+                                          Y: =240 - 240 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1))
+                                    - lbl_bar_name:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =TextMuted
+                                          Height: =36
+                                          PaddingBottom: =0
+                                          PaddingLeft: =2
+                                          PaddingRight: =2
+                                          PaddingTop: =2
+                                          Size: =9
+                                          Text: =ThisItem.Pareto_name
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =120
+                                          Y: =244

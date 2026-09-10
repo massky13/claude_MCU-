@@ -1,0 +1,10 @@
+﻿Type_ID,Test_ID,Test_name,Type_name,QP_ref,Sort_order,Active
+11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,1,Yes
+12,1,Electrical,Continuity,QP.07.0,2,Yes
+13,1,Electrical,Operational,QP.08.0,3,Yes
+14,1,Electrical,Polarity,QP.09.0,4,Yes
+21,2,Plumbing,Drain Lines,QP.03.0,1,Yes
+22,2,Plumbing,Water Lines,QP.01.0,2,Yes
+23,2,Plumbing,Fixtures,QP.02.0,3,Yes
+31,3,Gas,High Pressure,QP04.0,1,Yes
+32,3,Gas,Low Pressure,QP05.0,2,Yes

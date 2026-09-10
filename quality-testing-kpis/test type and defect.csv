@@ -1,0 +1,68 @@
+﻿Test,Type,Defect
+Electrical,Hi Pot (Dielectric) per QP.06A.0,Short - exterior sheathing staple/nail
+Electrical,Hi Pot (Dielectric) per QP.06A.0,Short - interior of home staple/nail
+Electrical,Hi Pot (Dielectric) per QP.06A.0,Short - chassis member smashing wire
+Electrical,Hi Pot (Dielectric) per QP.06A.0,Short - lag into wire
+Electrical,Hi Pot (Dielectric) per QP.06A.0,"Short - receptacle issue, poor workmanship"
+Electrical,Hi Pot (Dielectric) per QP.06A.0,"Short - lighting outlet, poor workmanship"
+Electrical,Continuity per QP.07.0,Bonding straps not removed
+Electrical,Continuity per QP.07.0,Open ground at appliance(s)
+Electrical,Continuity per QP.07.0,Gas line not grounded. Use tester and visual.
+Electrical,Continuity per QP.07.0,Metal roof not grounded
+Electrical,Continuity per QP.07.0,Metal duct not grounded
+Electrical,Continuity per QP.07.0,Lights or fans not grounded
+Electrical,Continuity per QP.07.0,Chassis not grounded
+Electrical,Operational per QP.08.0,GFCI not wired correctly or not tripping
+Electrical,Operational per QP.08.0,Receptacle no power
+Electrical,Operational per QP.08.0,Lights/fan switch not working no power
+Electrical,Operational per QP.08.0,Smoke alarms not working individually and together
+Electrical,Operational per QP.08.0,No power to exterior light boxes
+Electrical,Operational per QP.08.0,No power to crossover connector
+Electrical,Operational per QP.08.0,No power to appliance recepts 240V outlets
+Electrical,Operational per QP.08.0,Incorrect # of circuits i.e. 2 at kitchen counter
+Electrical,Polarity per QP.09.0,Reverse polarity - at receptacle
+Electrical,Polarity per QP.09.0,Reverse polarity - at lights
+Electrical,Polarity per QP.09.0,Reverse polarity - 240V outlets
+Electrical,Polarity per QP.09.0,Reverse polarity - outside outlets & heat tape
+Electrical,Polarity per QP.09.0,Reverse polarity - other
+Plumbing,Drain Lines per QP.03.0,Drain line leaking below floor
+Plumbing,Drain Lines per QP.03.0,Drain line leak above floor
+Plumbing,Drain Lines per QP.03.0,Drain line incomplete above floor
+Plumbing,Drain Lines per QP.03.0,Open drain line in floor
+Plumbing,Drain Lines per QP.03.0,Drain line not through bottom board
+Plumbing,Drain Lines per QP.03.0,P-trap above floor leak
+Plumbing,Drain Lines per QP.03.0,P-Trap in floor leak 
+Plumbing,Drain Lines per QP.03.0,Wax ring leak or toilet leak
+Plumbing,Drain Lines per QP.03.0,Hole in drain line under floor
+Plumbing,Drain Lines per QP.03.0,Lag in drain
+Plumbing,Water Lines per QP.01.0,Loose water line fitting above floor
+Plumbing,Water Lines per QP.01.0,Loose water line fitting below floor
+Plumbing,Water Lines per QP.01.0,Debris in water line/screens
+Plumbing,Water Lines per QP.01.0,Kinked water line above floor
+Plumbing,Water Lines per QP.01.0,Kinked water line below floor
+Plumbing,Water Lines per QP.01.0,Reversed water lines
+Plumbing,Water Lines per QP.01.0,Water line not connected to faucet
+Plumbing,Water Lines per QP.01.0,Water line leak above floor
+Plumbing,Water Lines per QP.01.0,Water line leak below floor
+Plumbing,Water Lines per QP.01.0,Lag in water line
+Plumbing,Water Lines per QP.01.0,Smashed water line (frame to floor)
+Plumbing,Water Lines per QP.01.0,Missing water inlet
+Plumbing,Fixtures per QP.02.0,Leaks above floor during flow test
+Plumbing,Fixtures per QP.02.0,Leaks below floor P-trap during flow test
+Plumbing,Fixtures per QP.02.0,Retarded flow washer box
+Plumbing,Fixtures per QP.02.0,Retarded flow tub/shower
+Plumbing,Fixtures per QP.02.0,Retarded flow sinks
+Gas,High Pressure per QP04.0,Main line leak
+Gas,High Pressure per QP04.0,Fitting leak
+Gas,High Pressure per QP04.0,Valve leak
+Gas,High Pressure per QP04.0,Riser leak - Furnace
+Gas,High Pressure per QP04.0,Riser leak - Range
+Gas,High Pressure per QP04.0,Riser leak - Water heater
+Gas,High Pressure per QP04.0,Riser leak - Dryer
+Gas,High Pressure per QP04.0,Crossover leak
+Gas,High Pressure per QP04.0,Broken gas line
+Gas,Low Pressure per QP05.0,Leak at valve
+Gas,Low Pressure per QP05.0,Leak at pipe/valve inside Furnace
+Gas,Low Pressure per QP05.0,Leak at pipe/valve behind Range
+Gas,Low Pressure per QP05.0,Leak at pipe/valve inside Furnace
+Gas,Low Pressure per QP05.0,Leak at crossover valve

@@ -1,0 +1,1525 @@
+Screens:
+  scr_Entry:
+    Properties:
+      Fill: =PageBg
+      OnVisible: |-
+        =Reset(tabs_main_en);
+        Set(varHomeOpen, Coalesce(varHomeOpen, false));
+        Set(varToday, Today());
+
+        // Pre-select the current week - the calendar row that contains today. Only when
+        // varWeekKey is still blank, so a week the user picked earlier survives navigating
+        // away and back. gal_week_picker highlights whichever button matches varWeekKey,
+        // and btn_add_home / the rollup writes read varWeekStart/End + the Fiscal_* vars,
+        // so all of them are set together exactly as btn_week_pick.OnSelect does.
+        // If no calendar row covers today, varCurWeekRow is blank, varWeekKey stays blank
+        // and the load below simply doesn't fire - no bad write.
+        Set(varCurWeekRow, LookUp(col_calendar, W_start <= varToday && W_end >= varToday));
+        Set(varNeedWeekDefault, IsBlank(varWeekKey) && !IsBlank(varCurWeekRow));
+        If(varNeedWeekDefault, Set(varWeekStart, varCurWeekRow.W_start));
+        If(varNeedWeekDefault, Set(varWeekEnd, varCurWeekRow.W_end));
+        If(varNeedWeekDefault, Set(varFiscalYear, varCurWeekRow.Fiscal_year));
+        If(varNeedWeekDefault, Set(varFiscalQuarter, varCurWeekRow.Fiscal_quarter));
+        If(varNeedWeekDefault, Set(varWeekNumber, varCurWeekRow.Week));
+        If(varNeedWeekDefault, Set(varWeekKey, Value(Text(varCurWeekRow.W_end, "yyyymmdd"))));
+
+        If(!IsBlank(varFacility) && !IsBlank(varWeekKey),
+            Select(btn_load_week),
+            false
+        )
+    Children:
+      - cnt_root_en:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width
+          Children:
+            - cnt_header_en:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =ChampionBlue
+                  FillPortions: =0
+                  Height: =56
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  Width: =Parent.Width
+                Children:
+                  - cnt_header_left_en:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - img_logo_en:
+                            Control: Image
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =4
+                              Height: =Parent.Height
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              Image: =quality_logo
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =RGBA(0, 0, 0, 0)
+                              Width: =Parent.Height
+                        - lbl_title_en:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              AutoHeight: =true
+                              Color: =RGBA(255, 255, 255, 1)
+                              FillPortions: =1
+                              Font: =Font.Arial
+                              FontWeight: =FontWeight.Bold
+                              Height: =Parent.Height
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: ="Quality KPI Reporting"
+                              Width: =300
+                              Wrap: =false
+                  - cnt_header_right_en:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - lbl_plant_en:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =RGBA(255, 255, 255, 1)
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Semibold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: |-
+                                =If(IsBlank(varPID), "Select a plant",
+                                    Text(varPID) & " - " & LookUp(col_plants, Plant_ID = varPID, Plant_Names)) & ", facility:"
+                              Wrap: =false
+                        - drp_facility_en:
+                            Control: ModernDropdown
+                            Properties:
+                              AccessibleLabel: ="Facility"
+                              AlignInContainer: =AlignInContainer.Center
+                              Default: =LookUp(col_plants, Plant_ID = varPID && Value(Facility) = 1)
+                              ItemDisplayText: =ThisItem.Facility
+                              Items: =Sort(Filter(col_plants, Plant_ID = varPID), Value(Facility))
+                              OnChange: |-
+                                =Set(varFacility, Value(drp_facility_en.Selected.Facility));
+                                Set(varHomeOpen, false);
+                                Select(btn_load_week)
+                              Width: =60
+            - cnt_nav_en:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =CardBg
+                  FillPortions: =0
+                  Height: =48
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  Width: =Parent.Width
+                Children:
+                  - tabs_main_en:
+                      Control: ModernTabList
+                      Properties:
+                        AlignInContainer: =AlignInContainer.End
+                        Default: |-
+                          ={Value: "Data Entry"}
+                        FillPortions: =1
+                        Items: |-
+                          =If(varIsAdmin,
+                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
+                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
+                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"})
+                              ),
+                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
+                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}),
+                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
+                              )
+                          )
+                        LayoutMinHeight: =38
+                        OnChange: |-
+                          =If(tabs_main_en.Selected.Value = "Corporate Home", Navigate(scr_CorporateHome, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "Dashboard", Navigate(scr_Dashboard, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "Data Entry", Navigate(scr_Entry, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "Week Detail", Navigate(scr_WeekDetail, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "History", Navigate(scr_History, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "Taxonomy", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "Access", Navigate(scr_AccessAdmin, ScreenTransition.None))
+            - cnt_filters_en:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =CardBg
+                  FillPortions: =0
+                  Height: =64
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  Width: =Parent.Width
+                Children:
+                  - gal_week_picker:
+                      Control: Gallery
+                      Variant: Horizontal
+                      Properties:
+                        AccessibleLabel: ="Week ending"
+                        AlignInContainer: =AlignInContainer.Center
+                        FillPortions: =100
+                        Height: =48
+                        Items: |-
+                          =Sort(
+                              FirstN(
+                                  Sort(Filter(col_calendar, W_end <= EntryWeekAnchorEnd), W_end, SortOrder.Descending),
+                                  20),
+                              W_end, SortOrder.Descending)
+                        ShowScrollbar: =false
+                        TemplatePadding: =4
+                        TemplateSize: =60
+                        Width: =616
+                      Children:
+                        - btn_week_pick:
+                            Control: ModernButton
+                            Properties:
+                              Appearance: =If(Value(Text(ThisItem.W_end, "yyyymmdd")) = varWeekKey, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                              BasePaletteColor: =ChampionBlue
+                              Height: =Parent.TemplateHeight
+                              OnSelect: |-
+                                =Set(varWeekStart, ThisItem.W_start);
+                                Set(varWeekEnd, ThisItem.W_end);
+                                Set(varWeekKey, Value(Text(ThisItem.W_end, "yyyymmdd")));
+                                Set(varFiscalYear, ThisItem.Fiscal_year);
+                                Set(varFiscalQuarter, ThisItem.Fiscal_quarter);
+                                Set(varWeekNumber, ThisItem.Week);
+                                Set(varHomeOpen, false);
+                                Select(btn_load_week)
+                              Text: =Text(ThisItem.W_end, "mmm d")
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =Parent.TemplateWidth
+                  - lbl_loaded_en:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="Last loaded timestamp"
+                        Align: =Align.Right
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =TextMuted
+                        FillPortions: =1
+                        LayoutMinWidth: =105
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =11
+                        Text: ="Week ending on... " & If(IsBlank(varLoadedAt), "", "Loaded " & Text(varLoadedAt, "hh:mm:ss"))
+            - cnt_main_en:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =PageBg
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =12
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                  Width: =Parent.Width
+                Children:
+                  - btn_load_week:
+                      Control: Button
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Start
+                        Height: =1
+                        OnSelect: |-
+                          =ClearCollect(col_homes,
+                              Filter(qk_home, Plant_ID = varPID && Week_key = varWeekKey && Facility_ID = varFacility));
+                          ClearCollect(col_week_defects,
+                              Filter(qk_home_defect, Plant_ID = varPID && Week_key = varWeekKey && Facility_ID = varFacility));
+                          Set(varLoadedAt, Now());
+                          Set(varHomeOpen, false)
+                        Text: =""
+                        Visible: =false
+                        Width: =1
+                  - cnt_entry_grid:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =720
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =16
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - cnt_week_homes:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =CardBorder
+                              BorderThickness: =1
+                              Fill: =CardBg
+                              FillPortions: =4
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                            Children:
+                              - cnt_add_row:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - txt_home_number:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="Home production number (floor suffix is added automatically)"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          FillPortions: =1
+                                          Placeholder: ="e.g. 4471203"
+                                    - num_floors:
+                                        Control: ModernNumberInput
+                                        Properties:
+                                          AccessibleLabel: ="Number of floors"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Default: =1
+                                          Max: =6
+                                          Min: =1
+                                          Width: =80
+                                    - btn_add_home:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add home"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          BasePaletteColor: =ChampionBlue
+                                          DisplayMode: =If(varCanEdit, DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =// ===== Add a home as one qk_home row PER FLOOR =====
+                                            // Home_number itself carries the floor suffix and is the per-floor unique key:
+                                            //   1 floor  -> "4471203"        (bare, unchanged)
+                                            //   2 floors -> "4471203A", "4471203B"
+                                            //   3 floors -> "4471203A", "4471203B", "4471203C"  ... and so on
+                                            // Floor_number carries the ordinal (1, 2, 3) so sorting and per-floor rollups never
+                                            // have to parse the letter back out of the text.
+                                            // Because the suffix is inside Home_number, CLAUDE.md §9's uniqueness rule stays a
+                                            // single indexed Text equality per plant - still delegable, just now per floor.
+                                            Set(varBaseHome, Trim(txt_home_number.Text));
+                                            Set(varFloorCount, Coalesce(num_floors.Value, 0));
+
+                                            // Build the floor rows BEFORE validating, so the duplicate check and the write both
+                                            // test exactly the same generated names - they can never disagree.
+                                            ClearCollect(col_new_floors,
+                                                ForAll(Sequence(Max(varFloorCount, 1)) As S,
+                                                    {
+                                                        fnum: S.Value,
+                                                        hname: varBaseHome &
+                                                            If(varFloorCount <= 1, "", Char(64 + S.Value))
+                                                    }
+                                                )
+                                            );
+
+                                            // One delegable LookUp per generated name (Plant_ID leads, Home_number indexed).
+                                            // Checks every floor, not just the first - adding 2 floors when "...A" already
+                                            // exists but "...B" does not must still be blocked as a whole.
+                                            Set(varDupFloors,
+                                                Concat(
+                                                    Filter(col_new_floors,
+                                                        !IsBlank(LookUp(qk_home, Plant_ID = varPID && Home_number = hname))),
+                                                    hname, ", "));
+
+                                            If( IsBlank(varBaseHome),
+                                                Notify("Enter a home production number.", NotificationType.Error),
+
+                                                varFloorCount < 1,
+                                                Notify("Enter how many floors this home has.", NotificationType.Error),
+
+                                                // The suffix scheme is A-Z, so 26 floors is the hard ceiling.
+                                                varFloorCount > 26,
+                                                Notify("A home cannot have more than 26 floors.", NotificationType.Error),
+
+                                                !IsBlank(varDupFloors),
+                                                Notify("Already recorded for this plant: " & varDupFloors & ".",
+                                                       NotificationType.Error),
+
+                                                // Batched two-table Patch, same shape the defect reconcile already uses -
+                                                // one call for the whole home rather than a Patch per floor.
+                                                IfError(
+                                                    Patch(qk_home,
+                                                        ForAll(col_new_floors As F, Defaults(qk_home)),
+                                                        ForAll(col_new_floors As F, {
+                                                            Title:        varPID & "." & varFacility & "." & F.hname,
+                                                            Plant_ID:     varPID,
+                                                            Facility_ID:  varFacility,
+                                                            Week_key:     varWeekKey,
+                                                            Week_start:   varWeekStart,
+                                                            Week_end:     varWeekEnd,
+                                                            Home_number:  F.hname,
+                                                            Floor_number: F.fnum,
+                                                            // Floors stays the home's total floor count, repeated on each floor row -
+                                                            // it is what tells the gallery "floor 2 of 3" without a second query.
+                                                            Floors:       varFloorCount,
+                                                            Fiscal_year:  varFiscalYear,
+                                                            Fiscal_quarter: varFiscalQuarter,
+                                                            Week_number:  varWeekNumber,
+                                                            Entered_at:   Now(),
+                                                            Entered_by:   varUserEmail
+                                                        })
+                                                    ),
+                                                    Notify("Could not save floors. " & FirstError.Message, NotificationType.Error)
+                                                );
+                                                Notify(If(varFloorCount = 1,
+                                                          "Added " & varBaseHome & ".",
+                                                          "Added " & varFloorCount & " floors: " &
+                                                              Concat(col_new_floors, hname, ", ") & "."),
+                                                       NotificationType.Success);
+                                                Reset(txt_home_number);
+                                                Reset(num_floors);
+                                                // Reload the week FIRST so col_homes contains the floors just added, then rebuild -
+                                                // btn_rebuild_rollups computes every rollup figure from col_homes (CLAUDE.md §8.6).
+                                                Select(btn_load_week);
+                                                Select(btn_rebuild_rollups)
+                                            )
+                                          Text: ="+ Add"
+                              - lbl_progress:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextSecondary
+                                    Height: =18
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      ="Floors entered " & CountRows(col_homes) & " . Fully tested " &
+                                      CountRows(Filter(col_homes, !IsBlank(Elec_result) && !IsBlank(Plumb_result) && !IsBlank(Gas_result))) &
+                                      " . Pending " &
+                                      CountRows(Filter(col_homes, IsBlank(Elec_result) || IsBlank(Plumb_result) || IsBlank(Gas_result)))
+                                    Wrap: =false
+                              - progress_homes:
+                                  Control: Progress
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Height: =6
+                                    Max: =Max(1, CountRows(col_homes))
+                                    ProgressColor: ='Progress.ProgressColor'.Brand
+                                    Value: =CountRows(Filter(col_homes, !IsBlank(Elec_result) && !IsBlank(Plumb_result) && !IsBlank(Gas_result)))
+                              - gal_week_homes:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Floors tested this week"
+                                    Items: =Sort(col_homes, Created, SortOrder.Descending)
+                                    LayoutMinWidth: =0
+                                    ShowNavigation: =true
+                                    ShowScrollbar: =false
+                                    TabIndex: =0
+                                    TemplateSize: =56
+                                  Children:
+                                    - cnt_home_row_wrap:
+                                        Control: GroupContainer
+                                        Variant: ManualLayout
+                                        Properties:
+                                          Height: =56
+                                          Width: =Parent.Width-Parent.X
+                                        Children:
+                                          - cnt_home_row:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                BorderColor: =GridLine
+                                                BorderThickness: =1
+                                                Fill: =If(varHomeNumberNum=ThisItem.Home_number && varHomeOpen,RGBA(156,212,234,1),RGBA(0, 0, 0, 0))
+                                                Height: =56
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =6
+                                                LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                                Width: =Parent.Width
+                                              Children:
+                                                - lbl_row_home:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      FontWeight: =FontWeight.Semibold
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =13
+                                                      Text: =Text(ThisItem.Home_number, "0")
+                                                      Width: =80
+                                                      Wrap: =false
+                                                - badge_row_elec:
+                                                    Control: Badge
+                                                    Properties:
+                                                      AccessibleLabel: ="Electrical result"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: ='BadgeCanvas.Appearance'.Filled
+                                                      BasePaletteColor: |-
+                                                        =With({r: ThisItem.Elec_result},
+                                                            StatusColorOf(If(r=1,"good",r=0,"critical","nodata")))
+                                                      Content: |-
+                                                        =With({r: ThisItem.Elec_result},
+                                                            "E " & StatusGlyphOf(If(r=1,"good",r=0,"critical","nodata")) &
+                                                            " " & If(r=1,"Pass",r=0,"Fail","-"))
+                                                      FontColor: =RGBA(255,255,255,1)
+                                                      Height: =20
+                                                      Shape: ='BadgeCanvas.Shape'.Rounded
+                                                      Width: =80
+                                                - badge_row_plumb:
+                                                    Control: Badge
+                                                    Properties:
+                                                      AccessibleLabel: ="Plumbing result"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: ='BadgeCanvas.Appearance'.Filled
+                                                      BasePaletteColor: |-
+                                                        =With({r: ThisItem.Plumb_result},
+                                                            StatusColorOf(If(r=1,"good",r=0,"critical","nodata")))
+                                                      Content: |-
+                                                        =With({r: ThisItem.Plumb_result},
+                                                            "P " & StatusGlyphOf(If(r=1,"good",r=0,"critical","nodata")) &
+                                                            " " & If(r=1,"Pass",r=0,"Fail","-"))
+                                                      FontColor: =RGBA(255,255,255,1)
+                                                      Height: =20
+                                                      Shape: ='BadgeCanvas.Shape'.Rounded
+                                                      Width: =80
+                                                - badge_row_gas:
+                                                    Control: Badge
+                                                    Properties:
+                                                      AccessibleLabel: ="Gas result"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: ='BadgeCanvas.Appearance'.Filled
+                                                      BasePaletteColor: |-
+                                                        =With({r: ThisItem.Gas_result},
+                                                            StatusColorOf(If(r=1,"good",r=0,"critical","nodata")))
+                                                      Content: |-
+                                                        =With({r: ThisItem.Gas_result},
+                                                            "G " & StatusGlyphOf(If(r=1,"good",r=0,"critical","nodata")) &
+                                                            " " & If(r=1,"Pass",r=0,"Fail","-"))
+                                                      FontColor: =RGBA(255,255,255,1)
+                                                      Height: =20
+                                                      Shape: ='BadgeCanvas.Shape'.Rounded
+                                                      Width: =80
+                                                - lbl_row_floors:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =TextSecondary
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =11
+                                                      Text: =If(ThisItem.Floors=1,ThisItem.Floors & " Floor", ThisItem.Floors & " Floors")
+                                                      Width: =50
+                                                      Wrap: =false
+                                                - lbl_row_defects:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =TextMuted
+                                                      FillPortions: =1
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =11
+                                                      Text: |-
+                                                        =Coalesce(
+                                                            Sum(Filter(col_week_defects, Home_number = Text(ThisItem.Home_number, "0")), Coalesce(Qty, 1)),
+                                                            0) &
+                                                        " defects"
+                                                      Wrap: =false
+                                          - btn_row_overlay:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Open home"
+                                                Appearance: =ButtonAppearance.Transparent
+                                                BorderThickness: =0
+                                                Height: =Parent.Height
+                                                OnSelect: |-
+                                                  =Set(varHomeNumberNum, ThisItem.Home_number);
+                                                  Set(varHomeNumberText, Text(ThisItem.Home_number, "0"));
+                                                  Set(varFloorNumber, ThisItem.Floor_number);
+                                                  Set(varFloorsOnHome, ThisItem.Floors);
+                                                  Set(varElecResult, ThisItem.Elec_result);
+                                                  Set(varPlumbResult, ThisItem.Plumb_result);
+                                                  Set(varGasResult, ThisItem.Gas_result);
+                                                  Set(varHomeEditable, varCanEdit);
+                                                  ClearCollect(col_home_defects,
+                                                      Filter(qk_home_defect, Plant_ID = varPID && Home_number = Text(ThisItem.Home_number, "0")));
+                                                  ClearCollect(col_defect_edit, col_home_defects);
+                                                  Set(varHomeOpen, true)
+                                                Text: =""
+                                                Width: =Parent.Width
+                        - cnt_home_detail:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =CardBorder
+                              BorderThickness: =1
+                              Fill: =CardBg
+                              FillPortions: =6
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =10
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                            Children:
+                              - row_home_header:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =12
+                                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lbl_home_header:
+                                        Control: ModernText
+                                        Properties:
+                                          Color: =RGBA(0, 0, 0, 1)
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =26
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: |-
+                                            =If(varHomeOpen,
+                                                "Floor " & varHomeNumberText &
+                                                    If(Coalesce(varFloorsOnHome, 1) > 1,
+                                                        "  (floor " & Text(varFloorNumber, "0") & " of " &
+                                                            Text(varFloorsOnHome, "0") & ")", ""),
+                                                "Please select a floor from the list")
+                                          Wrap: =false
+                                    - btn_save_home:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Save home"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ChampionBlue
+                                          DisplayMode: =If(varCanEdit, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =40
+                                          Icon: ="Save"
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =If(!varHomeOpen,
+                                                Notify("Select a floor first.", NotificationType.Error),
+
+                                                (varElecResult = 1 && CountRows(Filter(col_defect_edit, Test_ID = 1)) > 0) ||
+                                                (varPlumbResult = 1 && CountRows(Filter(col_defect_edit, Test_ID = 2)) > 0) ||
+                                                (varGasResult = 1 && CountRows(Filter(col_defect_edit, Test_ID = 3)) > 0),
+                                                Notify("A test marked Pass cannot have defect rows. Remove them or mark the test Fail.",
+                                                       NotificationType.Error),
+
+                                                CountRows(col_defect_edit) <> CountRows(Distinct(col_defect_edit, Type_ID & "-" & Defect_ID)),
+                                                Notify("Duplicate defect rows found for the same type and defect. Merge them into one row with a combined quantity.",
+                                                       NotificationType.Error),
+
+                                                IfError(
+                                                    Patch(qk_home,
+                                                        LookUp(qk_home, Plant_ID = varPID && Home_number = varHomeNumberNum),
+                                                        {
+                                                            Elec_result: varElecResult,
+                                                            Plumb_result: varPlumbResult,
+                                                            Gas_result: varGasResult
+                                                        }
+                                                    ); true,
+                                                    Notify("Could not save test results. " & FirstError.Message, NotificationType.Error); false
+                                                );
+                                                // Single batched upsert instead of a per-row ForAll+Patch - one write, one FirstError to check.
+                                                IfError(
+                                                    Patch(qk_home_defect,
+                                                        ForAll(col_defect_edit As DefectRow,
+                                                            Coalesce(
+                                                                LookUp(qk_home_defect, Plant_ID = varPID && Home_number = varHomeNumberText &&
+                                                                    Type_ID = DefectRow.Type_ID && Defect_ID = DefectRow.Defect_ID),
+                                                                Defaults(qk_home_defect)
+                                                            )
+                                                        ),
+                                                        ForAll(col_defect_edit As DefectRow, {
+                                                            // varHomeNumberText already carries the floor suffix, so this
+                                                            // Title stays unique per floor x defect without a floor segment.
+                                                            Title: varPID & "." & varFacility & "." & varHomeNumberText & "." & Text(DefectRow.Defect_ID, "0"),
+                                                            Plant_ID: varPID, Facility_ID: varFacility, Week_key: varWeekKey,
+                                                            Home_number: varHomeNumberText,
+                                                            Floor_number: varFloorNumber,
+                                                            Test_ID: DefectRow.Test_ID, Type_ID: DefectRow.Type_ID,
+                                                            Defect_ID: DefectRow.Defect_ID, Qty: Coalesce(DefectRow.Qty, 1),
+                                                            Severity: DefectRow.Severity,
+                                                            // Denormalised UNIT cost, parallel to Severity - the extended
+                                                            // cost is Qty * Defect_cost, computed where it is needed.
+                                                            // Stamping it here is what stops past weeks repricing when
+                                                            // an admin edits the taxonomy cost later.
+                                                            Defect_cost: Coalesce(DefectRow.Defect_cost,
+                                                                LookUp(col_defect_all, Value(Title) = DefectRow.Defect_ID,
+                                                                    Defect_cost), 0)
+                                                        })
+                                                    ); true,
+                                                    Notify("Could not save defect rows. " & FirstError.Message, NotificationType.Error); false
+                                                );
+                                                // Single batched removal of dropped defect rows instead of a per-row ForAll+Remove.
+                                                With({varRemovedKeys: AddColumns(col_defect_edit As EditedRow, Key, EditedRow.Type_ID & "-" & EditedRow.Defect_ID).Key},
+                                                    IfError(
+                                                        Remove(qk_home_defect,
+                                                            ForAll(
+                                                                Filter(col_home_defects, !(Type_ID & "-" & Defect_ID in varRemovedKeys)) As RemovedRow,
+                                                                LookUp(qk_home_defect, Plant_ID = varPID && Home_number = varHomeNumberText &&
+                                                                    Type_ID = RemovedRow.Type_ID && Defect_ID = RemovedRow.Defect_ID)
+                                                            )
+                                                        ); true,
+                                                        Notify("Could not remove stale defect rows. " & FirstError.Message, NotificationType.Error); false
+                                                    )
+                                                );
+                                                Notify(
+                                                    If(
+                                                        (IsBlank(varElecResult) || (varElecResult = 0 && CountRows(Filter(col_defect_edit, Test_ID = 1)) = 0)) ||
+                                                        (IsBlank(varPlumbResult) || (varPlumbResult = 0 && CountRows(Filter(col_defect_edit, Test_ID = 2)) = 0)) ||
+                                                        (IsBlank(varGasResult) || (varGasResult = 0 && CountRows(Filter(col_defect_edit, Test_ID = 3)) = 0)),
+                                                        "Saved - this home has an incomplete or unexplained fail.",
+                                                        "Floor saved."
+                                                    ),
+                                                    NotificationType.Success
+                                                );
+                                                Select(btn_rebuild_rollups)
+                                            )
+                                          Text: ="Save"
+                                          Visible: =varHomeOpen
+                                          Width: =120
+                              - lbl_edit_lock:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(varHomeOpen && !varHomeEditable, AlertRed, TextMuted)
+                                    Height: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: |-
+                                      =If(varHomeOpen && !varHomeEditable,
+                                          "View only - your role does not have edit access",
+                                          "")
+                                    Wrap: =false
+                              - card_elec:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =CardBorder
+                                    BorderThickness: =1
+                                    Fill: =CardBg
+                                    FillPortions: =0
+                                    Height: |-
+                                      =If(varElecResult = 0,
+                                          92 + CountRows(Filter(col_defect_edit, Test_ID = 1)) * 40 +
+                                          If(CountRows(Filter(col_defect_edit, Test_ID = 1)) = 0, 34, 0),
+                                          48)
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =6
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    Visible: =varHomeOpen
+                                  Children:
+                                    - row_elec_header:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =32
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lbl_elec_name:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ElecColor
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =Parent.Height
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: ="Electrical"
+                                                Wrap: =false
+                                          - btn_elec_pass:
+                                              Control: ModernButton
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =If(varElecResult=1, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                                                BasePaletteColor: =StatusGoodColor
+                                                DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                OnSelect: =Set(varElecResult, 1)
+                                                Text: ="Pass"
+                                                Width: =70
+                                          - btn_elec_fail:
+                                              Control: ModernButton
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =If(varElecResult=0, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                                                BasePaletteColor: =StatusCriticalColor
+                                                DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                OnSelect: =Set(varElecResult, 0)
+                                                Text: ="Fail"
+                                                Width: =70
+                                    - gal_elec_defects:
+                                        Control: Gallery
+                                        Variant: Vertical
+                                        Properties:
+                                          FillPortions: =0
+                                          Height: =CountRows(Filter(col_defect_edit, Test_ID = 1)) * 40
+                                          Items: =Filter(col_defect_edit, Test_ID = 1)
+                                          ShowScrollbar: =false
+                                          TemplateSize: =40
+                                          Visible: =varElecResult = 0
+                                        Children:
+                                          - row_elec_defect:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Height: =36
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =4
+                                                Width: =Parent.Width
+                                              Children:
+                                                - drp_elec_type:
+                                                    Control: ModernDropdown
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =LookUp(col_type, Value(Title) = ThisItem.Type_ID)
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      FillPortions: =4
+                                                      ItemDisplayText: =ThisItem.Type_name & " . " & ThisItem.QP_ref
+                                                      Items: =Sort(Filter(col_type, Test_ID = 1), Sort_order)
+                                                      LayoutMinWidth: =0
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem,
+                                                            {Type_ID: Value(drp_elec_type.Selected.Title), Defect_ID: Blank(), Severity: Blank(),
+                                                             Defect_cost: Blank()})
+                                                - drp_elec_defect:
+                                                    Control: ModernDropdown
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =LookUp(col_defect, Value(Title) = ThisItem.Defect_ID)
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      FillPortions: =7
+                                                      ItemDisplayText: =ThisItem.Defect_name
+                                                      Items: =Sort(Filter(col_defect, Type_ID = Value(drp_elec_type.Selected.Title)), Sort_order)
+                                                      LayoutMinWidth: =0
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem,
+                                                            {Defect_ID: Value(drp_elec_defect.Selected.Title), Severity: drp_elec_defect.Selected.Severity,
+                                                             Defect_cost: drp_elec_defect.Selected.Defect_cost})
+                                                - num_elec_qty:
+                                                    Control: ModernNumberInput
+                                                    Properties:
+                                                      AccessibleLabel: ="Electrical defect quantity"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =ThisItem.Qty
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      Min: =1
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem, {Qty: Coalesce(num_elec_qty.Value, 1)})
+                                                      Width: =60
+                                                - btn_elec_remove:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Subtle
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Icon: ="Delete"
+                                                      Layout: =ButtonLayout.IconOnly
+                                                      OnSelect: =Remove(col_defect_edit, ThisItem)
+                                                      Width: =32
+                                    - btn_elec_add:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =ButtonAppearance.Subtle
+                                          DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =With(
+                                                {availDefect: First(Filter(col_defect, Test_ID = 1 &&
+                                                    !(Value(Title) in col_defect_edit.Defect_ID)))},
+                                                If(IsBlank(availDefect),
+                                                    Notify("All Electrical defects are already recorded on this home.", NotificationType.Warning),
+                                                    Collect(col_defect_edit, {
+                                                        Test_ID: 1,
+                                                        Type_ID: availDefect.Type_ID,
+                                                        Defect_ID: Value(availDefect.Title),
+                                                        Qty: 1,
+                                                        Severity: availDefect.Severity,
+                                                        Defect_cost: availDefect.Defect_cost
+                                                    })
+                                                )
+                                            )
+                                          Text: ="+ Add defect"
+                                          Visible: =varElecResult = 0
+                                    - lbl_elec_warning:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =StatusWarningColor
+                                          Height: =28
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: ="No defects recorded for this fail - will be flagged incomplete."
+                                          Visible: =varElecResult = 0 && CountRows(Filter(col_defect_edit, Test_ID = 1)) = 0
+                              - card_plumb:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =CardBorder
+                                    BorderThickness: =1
+                                    Fill: =CardBg
+                                    FillPortions: =0
+                                    Height: |-
+                                      =If(varPlumbResult = 0,
+                                          92 + CountRows(Filter(col_defect_edit, Test_ID = 2)) * 40 +
+                                          If(CountRows(Filter(col_defect_edit, Test_ID = 2)) = 0, 34, 0),
+                                          48)
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =6
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    Visible: =varHomeOpen
+                                  Children:
+                                    - row_plumb_header:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =32
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lbl_plumb_name:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =PlumbColor
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =Parent.Height
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: ="Plumbing"
+                                                Wrap: =false
+                                          - btn_plumb_pass:
+                                              Control: ModernButton
+                                              Properties:
+                                                Appearance: =If(varPlumbResult=1, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                                                BasePaletteColor: =StatusGoodColor
+                                                DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                OnSelect: =Set(varPlumbResult, 1)
+                                                Text: ="Pass"
+                                                Width: =70
+                                          - btn_plumb_fail:
+                                              Control: ModernButton
+                                              Properties:
+                                                Appearance: =If(varPlumbResult=0, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                                                BasePaletteColor: =StatusCriticalColor
+                                                DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                OnSelect: =Set(varPlumbResult, 0)
+                                                Text: ="Fail"
+                                                Width: =70
+                                    - gal_plumb_defects:
+                                        Control: Gallery
+                                        Variant: Vertical
+                                        Properties:
+                                          FillPortions: =0
+                                          Height: =CountRows(Filter(col_defect_edit, Test_ID = 2)) * 40
+                                          Items: =Filter(col_defect_edit, Test_ID = 2)
+                                          ShowScrollbar: =false
+                                          TemplateSize: =40
+                                          Visible: =varPlumbResult = 0
+                                        Children:
+                                          - row_plumb_defect:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Height: =36
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =4
+                                                Width: =Parent.Width
+                                              Children:
+                                                - drp_plumb_type:
+                                                    Control: ModernDropdown
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =LookUp(col_type, Value(Title) = ThisItem.Type_ID)
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      FillPortions: =4
+                                                      ItemDisplayText: =ThisItem.Type_name & " . " & ThisItem.QP_ref
+                                                      Items: =Sort(Filter(col_type, Test_ID = 2), Sort_order)
+                                                      LayoutMinWidth: =0
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem,
+                                                            {Type_ID: Value(drp_plumb_type.Selected.Title), Defect_ID: Blank(), Severity: Blank(),
+                                                             Defect_cost: Blank()})
+                                                - drp_plumb_defect:
+                                                    Control: ModernDropdown
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =LookUp(col_defect, Value(Title) = ThisItem.Defect_ID)
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      FillPortions: =7
+                                                      ItemDisplayText: =ThisItem.Defect_name
+                                                      Items: =Sort(Filter(col_defect, Type_ID = Value(drp_plumb_type.Selected.Title)), Sort_order)
+                                                      LayoutMinWidth: =0
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem,
+                                                            {Defect_ID: Value(drp_plumb_defect.Selected.Title), Severity: drp_plumb_defect.Selected.Severity,
+                                                             Defect_cost: drp_plumb_defect.Selected.Defect_cost})
+                                                - num_plumb_qty:
+                                                    Control: ModernNumberInput
+                                                    Properties:
+                                                      AccessibleLabel: ="Plumbing defect quantity"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =ThisItem.Qty
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      Min: =1
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem, {Qty: Coalesce(num_plumb_qty.Value, 1)})
+                                                      Width: =60
+                                                - btn_plumb_remove:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Subtle
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Icon: ="Delete"
+                                                      Layout: =ButtonLayout.IconOnly
+                                                      OnSelect: =Remove(col_defect_edit, ThisItem)
+                                                      Width: =32
+                                    - btn_plumb_add:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =ButtonAppearance.Subtle
+                                          DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =With(
+                                                {availDefect: First(Filter(col_defect, Test_ID = 2 &&
+                                                    !(Value(Title) in col_defect_edit.Defect_ID)))},
+                                                If(IsBlank(availDefect),
+                                                    Notify("All Plumbing defects are already recorded on this home.", NotificationType.Warning),
+                                                    Collect(col_defect_edit, {
+                                                        Test_ID: 2,
+                                                        Type_ID: availDefect.Type_ID,
+                                                        Defect_ID: Value(availDefect.Title),
+                                                        Qty: 1,
+                                                        Severity: availDefect.Severity,
+                                                        Defect_cost: availDefect.Defect_cost
+                                                    })
+                                                )
+                                            )
+                                          Text: ="+ Add defect"
+                                          Visible: =varPlumbResult = 0
+                                    - lbl_plumb_warning:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =StatusWarningColor
+                                          Height: =28
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: ="No defects recorded for this fail - will be flagged incomplete."
+                                          Visible: =varPlumbResult = 0 && CountRows(Filter(col_defect_edit, Test_ID = 2)) = 0
+                              - card_gas:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =CardBorder
+                                    BorderThickness: =1
+                                    Fill: =CardBg
+                                    FillPortions: =0
+                                    Height: |-
+                                      =If(varGasResult = 0,
+                                          92 + CountRows(Filter(col_defect_edit, Test_ID = 3)) * 40 +
+                                          If(CountRows(Filter(col_defect_edit, Test_ID = 3)) = 0, 34, 0),
+                                          48)
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =6
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    Visible: =varHomeOpen
+                                  Children:
+                                    - row_gas_header:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =35
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lbl_gas_name:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =GasColor
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =Parent.Height
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: ="Gas"
+                                                Wrap: =false
+                                          - btn_gas_pass:
+                                              Control: ModernButton
+                                              Properties:
+                                                Appearance: =If(varGasResult=1, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                                                BasePaletteColor: =StatusGoodColor
+                                                DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                OnSelect: =Set(varGasResult, 1)
+                                                Text: ="Pass"
+                                                Width: =70
+                                          - btn_gas_fail:
+                                              Control: ModernButton
+                                              Properties:
+                                                Appearance: =If(varGasResult=0, ButtonAppearance.Primary, ButtonAppearance.Outline)
+                                                BasePaletteColor: =StatusCriticalColor
+                                                DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                OnSelect: =Set(varGasResult, 0)
+                                                Text: ="Fail"
+                                                Width: =70
+                                    - gal_gas_defects:
+                                        Control: Gallery
+                                        Variant: Vertical
+                                        Properties:
+                                          FillPortions: =0
+                                          Height: =CountRows(Filter(col_defect_edit, Test_ID = 3)) * 40
+                                          Items: =Filter(col_defect_edit, Test_ID = 3)
+                                          ShowScrollbar: =false
+                                          TemplateSize: =40
+                                          Visible: =varGasResult = 0
+                                        Children:
+                                          - row_gas_defect:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Height: =36
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =4
+                                                Width: =Parent.Width
+                                              Children:
+                                                - drp_gas_type:
+                                                    Control: ModernDropdown
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =LookUp(col_type, Value(Title) = ThisItem.Type_ID)
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      FillPortions: =4
+                                                      ItemDisplayText: =ThisItem.Type_name & " . " & ThisItem.QP_ref
+                                                      Items: =Sort(Filter(col_type, Test_ID = 3), Sort_order)
+                                                      LayoutMinWidth: =0
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem,
+                                                            {Type_ID: Value(drp_gas_type.Selected.Title), Defect_ID: Blank(), Severity: Blank(),
+                                                             Defect_cost: Blank()})
+                                                - drp_gas_defect:
+                                                    Control: ModernDropdown
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =LookUp(col_defect, Value(Title) = ThisItem.Defect_ID)
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      FillPortions: =7
+                                                      ItemDisplayText: =ThisItem.Defect_name
+                                                      Items: =Sort(Filter(col_defect, Type_ID = Value(drp_gas_type.Selected.Title)), Sort_order)
+                                                      LayoutMinWidth: =0
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem,
+                                                            {Defect_ID: Value(drp_gas_defect.Selected.Title), Severity: drp_gas_defect.Selected.Severity,
+                                                             Defect_cost: drp_gas_defect.Selected.Defect_cost})
+                                                - num_gas_qty:
+                                                    Control: ModernNumberInput
+                                                    Properties:
+                                                      AccessibleLabel: ="Gas defect quantity"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Default: =ThisItem.Qty
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.View)
+                                                      Min: =1
+                                                      OnChange: |-
+                                                        =Patch(col_defect_edit, ThisItem, {Qty: Coalesce(num_gas_qty.Value, 1)})
+                                                      Width: =60
+                                                - btn_gas_remove:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Subtle
+                                                      DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Icon: ="Delete"
+                                                      Layout: =ButtonLayout.IconOnly
+                                                      OnSelect: =Remove(col_defect_edit, ThisItem)
+                                                      Width: =32
+                                    - btn_gas_add:
+                                        Control: ModernButton
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =ButtonAppearance.Subtle
+                                          DisplayMode: =If(varHomeEditable, DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =With(
+                                                {availDefect: First(Filter(col_defect, Test_ID = 3 &&
+                                                    !(Value(Title) in col_defect_edit.Defect_ID)))},
+                                                If(IsBlank(availDefect),
+                                                    Notify("All Gas defects are already recorded on this home.", NotificationType.Warning),
+                                                    Collect(col_defect_edit, {
+                                                        Test_ID: 3,
+                                                        Type_ID: availDefect.Type_ID,
+                                                        Defect_ID: Value(availDefect.Title),
+                                                        Qty: 1,
+                                                        Severity: availDefect.Severity,
+                                                        Defect_cost: availDefect.Defect_cost
+                                                    })
+                                                )
+                                            )
+                                          Text: ="+ Add defect"
+                                          Visible: =varGasResult = 0
+                                    - lbl_gas_warning:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =StatusWarningColor
+                                          Height: =28
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: ="No defects recorded for this fail - will be flagged incomplete."
+                                          Visible: =varGasResult = 0 && CountRows(Filter(col_defect_edit, Test_ID = 3)) = 0
+                  - btn_rebuild_rollups:
+                      Control: Button
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Start
+                        Height: =1
+                        OnSelect: |-
+                          =// col_homes is now one row PER FLOOR, so every count below is a floor count.
+                          // varFloors        - floors entered for the facility-week (tested or not)
+                          // varFloorsTested  - floors with ALL THREE results present. This is the FTT
+                          //                    denominator and the fix for the old bug: the previous code
+                          //                    divided by every row entered, so a floor added but not yet
+                          //                    tested counted as a failure and FTT read low all week,
+                          //                    self-correcting only once the last floor was tested.
+                          // varFloorsClean   - floors that passed all three first time (the FTT numerator).
+                          // A partially tested floor is now in NEITHER - it cannot be clean, and it is no
+                          // longer forced into the denominator.
+                          Set(varFloors, CountRows(col_homes));
+                          Set(varFloorsTested,
+                              CountRows(Filter(col_homes,
+                                  !IsBlank(Elec_result) && !IsBlank(Plumb_result) && !IsBlank(Gas_result))));
+                          Set(varFloorsClean,
+                              CountRows(Filter(col_homes,
+                                  Elec_result = 1 && Plumb_result = 1 && Gas_result = 1)));
+                          // Distinct production numbers behind those floors, for Homes_tested/Defects_per_home.
+                          // Home_number carries the floor suffix, so a multi-floor home is several rows sharing
+                          // a base - count distinct bases by stripping the suffix off suffixed rows.
+                          Set(varHomes,
+                              CountRows(Distinct(col_homes,
+                                  If(Floors <= 1, Home_number, Left(Home_number, Len(Home_number) - 1)))));
+                          Set(varPass, Sum(col_homes, Coalesce(Elec_result,0) + Coalesce(Plumb_result,0) + Coalesce(Gas_result,0)));
+                          Set(varTests, Sum(col_homes, If(IsBlank(Elec_result),0,1) + If(IsBlank(Plumb_result),0,1) + If(IsBlank(Gas_result),0,1)));
+                          // One row = one floor, so the week's floor total is the row count, not a Sum of
+                          // the per-home Floors column (which would multiply each home by its own count).
+                          Set(varTotalFloors, varFloors);
+                          ClearCollect(col_week_defects,
+                              Filter(qk_home_defect, Plant_ID = varPID && Week_key = varWeekKey && Facility_ID = varFacility));
+                          Set(varTotalDefects, Sum(col_week_defects, Coalesce(Qty, 1)));
+                          // Cost of poor quality for the facility-week. Extended = Qty * unit cost,
+                          // read from the stamp on each qk_home_defect row so it matches what the
+                          // by-test chart computes. Falls back to the live taxonomy only for rows
+                          // written before the stamp existed.
+                          Set(varTotalCost,
+                              Sum(col_week_defects,
+                                  Coalesce(Qty, 1) *
+                                      Coalesce(Defect_cost,
+                                          LookUp(col_defect_all, Value(Title) = Defect_ID, Defect_cost),
+                                          0)));
+                          IfError(
+                              // Base record MUST be Coalesce(LookUp(...), Defaults(...)) - never the four-argument
+                              // Patch(src, LookUp(...), Defaults(...), {fields}) form that was here. That overload
+                              // merges Defaults and the field record onto whatever LookUp returned, and on the FIRST
+                              // save of a facility-week LookUp returns Blank(): Patch cannot create a row from a blank
+                              // base, so no rollup row was written at all. Because the dashboard reads qk_week_summary
+                              // / qk_test_summary and never qk_home*, that newest week then stayed invisible on every
+                              // dashboard read while already-existing weeks kept updating normally. The defect
+                              // reconcile above already used the Coalesce form - these four did not.
+                              Patch(qk_week_summary,
+                                  Coalesce(
+                                      LookUp(qk_week_summary, Plant_ID = varPID && Facility_ID = varFacility && Week_key = varWeekKey),
+                                      Defaults(qk_week_summary)
+                                  ),
+                                  {
+                                      Title: varPID & "." & varFacility & "." & Text(varWeekKey, "0"),
+                                      Plant_ID: varPID, Facility_ID: varFacility, Week_key: varWeekKey,
+                                      Week_start: varWeekStart, Week_end: varWeekEnd,
+                                      Homes_tested: varHomes,
+                                      Homes_clean: varFloorsClean,
+                                      Floors_tested: varFloorsTested,
+                                      Floors_clean: varFloorsClean,
+                                      // FTT is now floors-through, not homes-through (CLAUDE.md §7 updated):
+                                      // floors passing all three / floors fully tested.
+                                      FTT_pct: If(varFloorsTested > 0,
+                                          Round(varFloorsClean / varFloorsTested * 100, 1), Blank()),
+                                      Total_tests: varTests, Total_pass: varPass, Total_fail: varTests - varPass,
+                                      Week_FPY: If(varTests > 0, Round(varPass / varTests * 100, 1), Blank()),
+                                      Total_floors: varTotalFloors, Total_defects: varTotalDefects,
+                                      Total_cost: varTotalCost,
+                                      Defects_per_floor: If(varFloorsTested > 0, Round(varTotalDefects / varFloorsTested, 1), 0),
+                                      Defects_per_home: If(varHomes > 0, Round(varTotalDefects / varHomes, 1), 0),
+                                      Fiscal_year: varFiscalYear,
+                                      Fiscal_quarter: varFiscalQuarter,
+                                      Week_number: varWeekNumber
+                                  }
+                              ),
+                              Notify("Could not update the week summary. " & FirstError.Message, NotificationType.Error)
+                          );
+                          Set(varElecHomes, CountRows(Filter(col_homes, !IsBlank(Elec_result))));
+                          Set(varElecPass, CountRows(Filter(col_homes, Elec_result = 1)));
+                          Set(varPlumbHomes, CountRows(Filter(col_homes, !IsBlank(Plumb_result))));
+                          Set(varPlumbPass, CountRows(Filter(col_homes, Plumb_result = 1)));
+                          Set(varGasHomes, CountRows(Filter(col_homes, !IsBlank(Gas_result))));
+                          Set(varGasPass, CountRows(Filter(col_homes, Gas_result = 1)));
+                          IfError(
+                              Patch(qk_test_summary,
+                                  Coalesce(
+                                      LookUp(qk_test_summary, Plant_ID = varPID && Facility_ID = varFacility && Week_key = varWeekKey && Test_ID = 1),
+                                      Defaults(qk_test_summary)
+                                  ),
+                                  {
+                                      Title: varPID & "." & varFacility & "." & Text(varWeekKey, "0") & ".1",
+                                      Plant_ID: varPID, Facility_ID: varFacility, Week_key: varWeekKey, Test_ID: 1,
+                                      Homes_tested: varElecHomes, Pass: varElecPass, Fail: varElecHomes - varElecPass,
+                                      Test_FPY: If(varElecHomes > 0, Round(varElecPass / varElecHomes * 100, 1), Blank())
+                                  }
+                              ),
+                              Notify("Could not update Electrical test summary. " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                              Patch(qk_test_summary,
+                                  Coalesce(
+                                      LookUp(qk_test_summary, Plant_ID = varPID && Facility_ID = varFacility && Week_key = varWeekKey && Test_ID = 2),
+                                      Defaults(qk_test_summary)
+                                  ),
+                                  {
+                                      Title: varPID & "." & varFacility & "." & Text(varWeekKey, "0") & ".2",
+                                      Plant_ID: varPID, Facility_ID: varFacility, Week_key: varWeekKey, Test_ID: 2,
+                                      Homes_tested: varPlumbHomes, Pass: varPlumbPass, Fail: varPlumbHomes - varPlumbPass,
+                                      Test_FPY: If(varPlumbHomes > 0, Round(varPlumbPass / varPlumbHomes * 100, 1), Blank())
+                                  }
+                              ),
+                              Notify("Could not update Plumbing test summary. " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                              Patch(qk_test_summary,
+                                  Coalesce(
+                                      LookUp(qk_test_summary, Plant_ID = varPID && Facility_ID = varFacility && Week_key = varWeekKey && Test_ID = 3),
+                                      Defaults(qk_test_summary)
+                                  ),
+                                  {
+                                      Title: varPID & "." & varFacility & "." & Text(varWeekKey, "0") & ".3",
+                                      Plant_ID: varPID, Facility_ID: varFacility, Week_key: varWeekKey, Test_ID: 3,
+                                      Homes_tested: varGasHomes, Pass: varGasPass, Fail: varGasHomes - varGasPass,
+                                      Test_FPY: If(varGasHomes > 0, Round(varGasPass / varGasHomes * 100, 1), Blank())
+                                  }
+                              ),
+                              Notify("Could not update Gas test summary. " & FirstError.Message, NotificationType.Error)
+                          );
+                          // ===== Plant rollup (qk_plant_summary) - the tier above qk_week_summary =====
+                          // Runs AFTER the week/test patches above so the query below picks up the row we just
+                          // wrote. col_week cannot be reused here: RunFullPlantLoad() has not run yet at this
+                          // point, so it is still holding the pre-save snapshot.
+                          //
+                          // This exists because scr_CorporateHome previously read qk_week_summary unbounded
+                          // across every plant - one row per plant x facility x week, ~720 rows for 40 plants,
+                          // which silently truncated at the app's data row limit and corrupted EVERY plant's
+                          // number at once. One row per plant collapses that to ~40 rows.
+                          //
+                          // Plant-wide on purpose: NO facility filter. Corporate consolidates to plants.
+                          Set(varPSCutoffKey, Value(Text(DateAdd(varWeekEnd, -84, TimeUnit.Days), "yyyymmdd")));
+                          ClearCollect(col_plant_window,
+                              Filter(qk_week_summary, Plant_ID = varPID && Week_key >= varPSCutoffKey));
+
+                          // Exactly 12 distinct weeks - the date cutoff alone can straddle 13 week-endings
+                          // depending on what day of the week it is.
+                          Set(varPSWeeks,
+                              FirstN(Sort(Distinct(col_plant_window, Week_key), Value, SortOrder.Descending), 12));
+                          Set(varPSStartKey, Min(varPSWeeks, Value));
+                          Set(varPSEndKey,   Max(varPSWeeks, Value));
+                          ClearCollect(col_plant_12, Filter(col_plant_window, Week_key >= varPSStartKey));
+
+                          // Store the COMPONENTS, not just the percentages. Regions roll up as
+                          // Sum(pass)/Sum(tests) across plants - weighted, never a mean of plant percentages,
+                          // which would let a 4-floor plant swing the region as hard as a 400-floor one
+                          // (CLAUDE.md §7, §8.0).
+                          Set(varPSTests,   Sum(col_plant_12, Total_tests));
+                          Set(varPSPass,    Sum(col_plant_12, Total_pass));
+                          Set(varPSFloorsT, Sum(col_plant_12, Floors_tested));
+                          Set(varPSFloorsC, Sum(col_plant_12, Floors_clean));
+                          Set(varPSHomes,   Sum(col_plant_12, Homes_tested));
+                          Set(varPSDefects, Sum(col_plant_12, Total_defects));
+                          Set(varPSCost,    Sum(col_plant_12, Total_cost));
+
+                          IfError(
+                              Patch(qk_plant_summary,
+                                  Coalesce(
+                                      LookUp(qk_plant_summary, Plant_ID = varPID),
+                                      Defaults(qk_plant_summary)
+                                  ),
+                                  {
+                                      Title:        Text(varPID, "0"),
+                                      Plant_ID:     varPID,
+                                      // Region written deliberately per plant, rather than corporate picking
+                                      // whichever facility row happened to sort first out of Plant_List.
+                                      Plant_name:   LookUp(col_plants, Plant_ID = varPID, Plant_Names),
+                                      Plant_Region: LookUp(col_plants, Plant_ID = varPID, Plant_Region),
+                                      Total_tests:   varPSTests,
+                                      Total_pass:    varPSPass,
+                                      Floors_tested: varPSFloorsT,
+                                      Floors_clean:  varPSFloorsC,
+                                      Homes_tested:  varPSHomes,
+                                      Total_defects: varPSDefects,
+                                      Total_cost:    varPSCost,
+                                      // TTW is the WEIGHTED trailing-12 FPY - one definition, used by this
+                                      // tile, the corporate plant card and the region roll-up alike.
+                                      TTW_FPY: If(varPSTests > 0,
+                                          Round(varPSPass / varPSTests * 100, 1), Blank()),
+                                      FTT_pct: If(varPSFloorsT > 0,
+                                          Round(varPSFloorsC / varPSFloorsT * 100, 1), Blank()),
+                                      // A trailing window moves with the calendar, not with data entry - a plant
+                                      // that stops reporting keeps a figure computed over a window that has since
+                                      // slid. These three make that visible instead of silently wrong.
+                                      Window_start_key: varPSStartKey,
+                                      Window_end_key:   varPSEndKey,
+                                      Weeks_counted:    CountRows(varPSWeeks),
+                                      Updated_at:       Now(),
+                                      Updated_by:       varUserEmail
+                                  }
+                              ),
+                              Notify("Could not update the plant summary. " & FirstError.Message,
+                                  NotificationType.Error)
+                          );
+                          RunFullPlantLoad();
+                          Select(btn_load_week)
+                        Text: =""
+                        Visible: =false
+                        Width: =1

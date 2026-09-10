@@ -1,0 +1,1987 @@
+Screens:
+  scr_Dashboard:
+    Properties:
+      Fill: =PageBg
+      OnVisible: |-
+        =Reset(tabs_main_db);
+        Set(varParetoLevel, Coalesce(varParetoLevel, "defect"));
+        Set(varShowDrill, false);
+        If(IsBlank(varPID) && varIsAdmin,
+            false,
+            Select(btn_refresh_dashboard)
+        )
+    Children:
+      - cnt_root_db:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width
+          Children:
+            - cnt_header_db:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =RGBA(2, 66, 109, 1)
+                  FillPortions: =0
+                  Height: =56
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  Width: =Parent.Width
+                Children:
+                  - cnt_header_left_db:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - Image2:
+                            Control: Image
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =4
+                              Height: =Parent.Height
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              Image: =quality_logo
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =RGBA(0, 0, 0, 0)
+                              Width: =Parent.Height
+                        - lbl_title_db:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: ="Quality KPI Reporting"
+                              Width: =300
+                              Wrap: =false
+                  - cnt_header_right_db:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =32
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - ico_admin_db:
+                            Control: ModernIcon
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Icon: ="Settings"
+                              IconColor: =RGBA(255, 255, 255, 1)
+                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
+                              Tooltip: ="Admin"
+                              Visible: =varIsAdmin
+                        - btn_load_plant:
+                            Control: Button
+                            Properties:
+                              Height: =1
+                              OnSelect: =RunFullPlantLoad()
+                              Visible: =false
+                              Width: =1
+                        - btn_refresh_dashboard:
+                            Control: Button
+                            Properties:
+                              Height: =1
+                              OnSelect: =RunFullPlantLoad()
+                              Visible: =false
+                              Width: =1
+                        - btn_build_pareto:
+                            Control: Button
+                            Properties:
+                              Height: =1
+                              OnSelect: =RunFullPlantLoad()
+                              Visible: =false
+                              Width: =1
+                        - lbl_plant_db:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =RGBA(255, 255, 255, 1)
+                              FontWeight: =FontWeight.Bold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: |-
+                                =If(IsBlank(varPID), "Select a plant",
+                                    Text(varPID) & " - " & LookUp(col_plants, Plant_ID = varPID, Plant_Names))
+                              Wrap: =false
+            - cnt_nav_db:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =CardBg
+                  FillPortions: =0
+                  Height: =48
+                  LayoutAlignItems: =VerticalAlign.Middle
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingLeft: =16
+                  Width: =Parent.Width
+                Children:
+                  - tabs_main_db:
+                      Control: ModernTabList
+                      Properties:
+                        AlignInContainer: =AlignInContainer.End
+                        Default: |-
+                          ={Value: "Dashboard"}
+                        FillPortions: =3
+                        Items: |-
+                          =If(varIsAdmin,
+                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
+                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
+                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"})
+                              ),
+                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
+                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}),
+                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
+                              )
+                          )
+                        LayoutMinHeight: =38
+                        OnChange: |-
+                          =If(tabs_main_db.Selected.Value = "Corporate Home", Navigate(scr_CorporateHome, ScreenTransition.None),
+                              tabs_main_db.Selected.Value = "Dashboard", Navigate(scr_Dashboard, ScreenTransition.None),
+                              tabs_main_db.Selected.Value = "Data Entry", Navigate(scr_Entry, ScreenTransition.None),
+                              tabs_main_db.Selected.Value = "Week Detail", Navigate(scr_WeekDetail, ScreenTransition.None),
+                              tabs_main_db.Selected.Value = "History", Navigate(scr_History, ScreenTransition.None),
+                              tabs_main_db.Selected.Value = "Taxonomy", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
+                              tabs_main_db.Selected.Value = "Access", Navigate(scr_AccessAdmin, ScreenTransition.None))
+                  - cnt_filters_db:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.None
+                        Height: =Parent.Height
+                        LayoutAlignItems: =VerticalAlign.Middle
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =8
+                        X: =40
+                        Y: =40
+                      Children:
+                        - drp_plant:
+                            Control: ModernDropdown
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              ItemDisplayText: =ThisItem.Plant_Label
+                              Items: |-
+                                =AddColumns(col_plant_picker As PP, Plant_Label,
+                                    LookUp(col_plants, Plant_ID = PP.Plant_ID_Value, Plant_Names))
+                              OnChange: |-
+                                =Set(varPID, drp_plant.Selected.Plant_ID_Value);
+                                Set(varFacility, 1);
+                                Select(btn_load_plant)
+                              Visible: =varIsAdmin
+                              Width: =200
+                        - lbl_loaded_1:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =TextMuted
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: ="Facility:"
+                              Width: =130
+                              Wrap: =false
+                        - drp_facility:
+                            Control: ModernDropdown
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Default: =LookUp(col_plants, Plant_ID = varPID && Value(Facility) = 1)
+                              ItemDisplayText: =ThisItem.Facility
+                              Items: =Sort(Filter(col_plants, Plant_ID = varPID), Value(Facility))
+                              OnChange: |-
+                                =Set(varFacility, Value(drp_facility.Selected.Facility));
+                                Select(btn_load_plant)
+                              Width: =60
+                        - lbl_loaded:
+                            Control: ModernText
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =TextMuted
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: =If(IsBlank(varLoadedAt), "Not loaded", "Loaded " & Text(varLoadedAt, "h:mm AM/PM"))
+                              Width: =130
+                              Wrap: =false
+                        - ico_refresh:
+                            Control: ModernIcon
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Icon: ="ArrowClockwise"
+                              IconColor: =ChampionBlue
+                              OnSelect: =Select(btn_load_plant)
+                              Tooltip: ="Refresh"
+            - cnt_main_db:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =PageBg
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =10
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =10
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  PaddingTop: =10
+                  Width: =Parent.Width
+                Children:
+                  - lbl_empty_state:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Center
+                        Color: =TextMuted
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="Select a plant above to load its dashboard."
+                        Visible: =IsBlank(varPID)
+                        Width: =Parent.Width
+                        Wrap: =false
+                  - cnt_tiles:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.None
+                        FillPortions: '=1   '
+                        Height: =80
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                        Visible: =!IsBlank(varPID)
+                        Width: =Parent.Width
+                      Children:
+                        - tile_fpy:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Fill: =CardBg
+                              Height: =Parent.Height-4
+                              LayoutMinHeight: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =false
+                              Width: =220
+                            Children:
+                              - rect_fpy_accent:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: =StatusColorOf(StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY))
+                                    Height: =Parent.Height
+                                    Width: =3
+                              - btn_fpy_overlay:
+                                  Control: Button
+                                  Properties:
+                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                    BorderThickness: =0
+                                    Height: =Parent.Height
+                                    OnSelect: |-
+                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      Navigate(scr_WeekDetail, ScreenTransition.None)
+                                    Text: =""
+                                    Width: =220
+                              - badge_fpy_delta:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =StatusGlyphOf(StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY)) & " " &
+                                          Text(varLatestWeek.Week_FPY - varPriorWeek.Week_FPY, "0.0")
+                                    Height: '=Parent.Height*0.6   '
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: |-
+                                      =If(StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                          'BadgeCanvas.ThemeColor'.Danger)
+                                    Width: =80
+                                    X: =Parent.Width*1.2/2
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - lbl_fpy_value:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =47
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =28
+                                    Text: =Text(varLatestWeek.Week_FPY, "0.0") & "%"
+                                    Width: =107
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =7
+                              - lbl_fpy_label:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="FIRST TIME PASS RATE"
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =50
+                        - tile_ftt:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Fill: =CardBg
+                              Height: =Parent.Height-4
+                              LayoutMinHeight: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Width: =220
+                            Children:
+                              - rect_ftt_accent:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: =StatusColorOf(StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT))
+                                    Height: =Parent.Height
+                                    Width: =3
+                              - btn_ftt_overlay:
+                                  Control: Button
+                                  Properties:
+                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                    BorderThickness: =0
+                                    Height: =71
+                                    OnSelect: |-
+                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      Navigate(scr_WeekDetail, ScreenTransition.None)
+                                    Text: =""
+                                    Width: =220
+                              - badge_ftt_delta:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =StatusGlyphOf(StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT)) & " " &
+                                          Text(varLatestWeek.FTT_pct - varPriorWeek.FTT_pct, "0.0")
+                                    Height: =Parent.Height*0.6
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: |-
+                                      =If(StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                          'BadgeCanvas.ThemeColor'.Danger)
+                                    Width: =80
+                                    X: =Parent.Width*1.2/2
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - lbl_ftt_value:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =47
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =28
+                                    Text: =Text(varLatestWeek.FTT_pct, "0.0") & "%"
+                                    Width: =107
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =7
+                              - lbl_ftt_label:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="FIRST TIME PASS RATE"
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =50
+                        - tile_ttw:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Fill: =CardBg
+                              Height: =Parent.Height-4
+                              LayoutMinHeight: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Width: =220
+                            Children:
+                              - rect_ttw_accent:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: =StatusColorOf(StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY))
+                                    Height: =Parent.Height
+                                    Width: =3
+                              - btn_ttw_overlay:
+                                  Control: Button
+                                  Properties:
+                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                    BorderThickness: =0
+                                    Height: =71
+                                    OnSelect: |-
+                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      Navigate(scr_WeekDetail, ScreenTransition.None)
+                                    Text: =""
+                                    Width: =220
+                              - badge_ttw_delta:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =StatusGlyphOf(StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY)) & " " &
+                                          Text(Coalesce(varPlantSummary.Weeks_counted, 0), "0") & " wks"
+                                    Height: '=Parent.Height*0.6   '
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: |-
+                                      =If(StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                          'BadgeCanvas.ThemeColor'.Danger)
+                                    Width: =80
+                                    X: =Parent.Width*1.2/2
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - lbl_ttw_value:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =47
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =28
+                                    Text: =Text(varPlantSummary.TTW_FPY, "0.0") & "%"
+                                    Width: =107
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =7
+                              - lbl_ttw_label:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="TRAILING 12 WEEKS (TTW)"
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =50
+                        - tile_dph:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.Regular
+                              Fill: =CardBg
+                              Height: =Parent.Height-4
+                              LayoutMinHeight: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Width: =220
+                            Children:
+                              - rect_dph_accent:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: |-
+                                      =If((varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home) <= 0,
+                                          StatusGoodColor, StatusSeriousColor)
+                                    Height: =Parent.Height
+                                    Width: =3
+                              - btn_dph_overlay:
+                                  Control: Button
+                                  Properties:
+                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                    BorderThickness: =0
+                                    Height: =71
+                                    OnSelect: |-
+                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      Navigate(scr_WeekDetail, ScreenTransition.None)
+                                    Text: =""
+                                    Width: =220
+                              - badge_dph_delta:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =If((varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home) <= 0, "▼ ", "▲ ") &
+                                          Text(Abs(varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home), "0.0")
+                                    Height: =Parent.Height*0.6
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: |-
+                                      =If(IsBlank(varLatestWeek.Defects_per_home), 'BadgeCanvas.ThemeColor'.Subtle,
+                                          (varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home) <= 0,
+                                              'BadgeCanvas.ThemeColor'.Success,
+                                          'BadgeCanvas.ThemeColor'.Danger)
+                                    Width: =80
+                                    X: =Parent.Width*1.2/2
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - lbl_dph_value:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =47
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =28
+                                    Text: =Text(varLatestWeek.Defects_per_home, "0.0")
+                                    Width: =107
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =7
+                              - lbl_dph_label:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="DEFECTS PER FLOOR"
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =50
+                        - tile_cost:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.Regular
+                              Fill: =CardBg
+                              Height: =Parent.Height-4
+                              LayoutMinHeight: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =false
+                              Width: =220
+                            Children:
+                              - rect_cost_accent:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: |-
+                                      =If((varLatestWeek.Total_cost - varPriorWeek.Total_cost) <= 0,
+                                          StatusGoodColor, StatusSeriousColor)
+                                    Height: =Parent.Height
+                                    Width: =3
+                              - btn_cost_overlay:
+                                  Control: Button
+                                  Properties:
+                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                    BorderThickness: =0
+                                    Height: =71
+                                    OnSelect: |-
+                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      Navigate(scr_WeekDetail, ScreenTransition.None)
+                                    Text: =""
+                                    Width: =220
+                              - badge_cost_delta:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =If((varLatestWeek.Total_cost - varPriorWeek.Total_cost) <= 0, "▼ ", "▲ ") &
+                                          Text(Abs(varLatestWeek.Total_cost - varPriorWeek.Total_cost), "[$-en-US]$#,##0")
+                                    Height: =Parent.Height*0.6
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: |-
+                                      =If(IsBlank(varLatestWeek.Total_cost), 'BadgeCanvas.ThemeColor'.Subtle,
+                                          (varLatestWeek.Total_cost - varPriorWeek.Total_cost) <= 0,
+                                              'BadgeCanvas.ThemeColor'.Success,
+                                          'BadgeCanvas.ThemeColor'.Danger)
+                                    Width: =92
+                                    X: =Parent.Width*1.2/2
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - lbl_cost_value:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =47
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =28
+                                    Text: =Text(varLatestWeek.Total_cost, "[$-en-US]$#,##0")
+                                    Width: =107
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =7
+                              - lbl_cost_label:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="COST OF POOR QUALITY"
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =50
+                        - tile_homes:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              DropShadow: =DropShadow.Regular
+                              Fill: =CardBg
+                              Height: =Parent.Height-4
+                              LayoutMinHeight: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Width: =220
+                            Children:
+                              - rect_homes_accent:
+                                  Control: Rectangle
+                                  Properties:
+                                    Fill: =ChampionBlue
+                                    Height: =Parent.Height
+                                    Width: =3
+                              - btn_homes_overlay:
+                                  Control: Button
+                                  Properties:
+                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                    BorderThickness: =0
+                                    Height: =71
+                                    OnSelect: |-
+                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      Navigate(scr_WeekDetail, ScreenTransition.None)
+                                    Text: =""
+                                    Width: =220
+                              - badge_homes_delta:
+                                  Control: Badge
+                                  Properties:
+                                    Content: |-
+                                      =If((varLatestWeek.Floors_tested - varPriorWeek.Floors_tested) > 0, "▲ ",
+                                          (varLatestWeek.Floors_tested - varPriorWeek.Floors_tested) < 0, "▼ ", "- ") &
+                                          Text(Abs(varLatestWeek.Floors_tested - varPriorWeek.Floors_tested), "0")
+                                    Height: =Parent.Height*0.6
+                                    Shape: ='BadgeCanvas.Shape'.Rounded
+                                    ThemeColor: ='BadgeCanvas.ThemeColor'.Informative
+                                    Width: =80
+                                    X: =Parent.Width*1.2/2
+                                    Y: =(Parent.Height-Self.Height)/2
+                              - lbl_homes_value:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =47
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =28
+                                    Text: =Text(varLatestWeek.Floors_tested, "0")
+                                    Width: =107
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =7
+                              - lbl_homes_label:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="FLOORS TESTED"
+                                    Wrap: =false
+                                    X: =20
+                                    Y: =50
+                  - cnt_qmatrix_trend_row:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.None
+                        FillPortions: =3
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =16
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - cnt_qmatrix:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Height: =276
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMaxHeight: '=0   '
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =!IsBlank(varPID)
+                              Width: =Parent.Width*11/32
+                            Children:
+                              - lbl_qmatrix_title:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextPrimary
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Bold
+                                    LayoutMinHeight: =20
+                                    PaddingBottom: =0
+                                    PaddingLeft: =10
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Testing Matrix"
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Wrap: =false
+                              - cnt_qmatrix_header:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =14
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingLeft: =10
+                                    Width: =Parent.Width-8
+                                  Children:
+                                    - lbl_qh_week:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Center
+                                          AutoHeight: =true
+                                          BorderThickness: =0
+                                          Color: =TextMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =12
+                                          LayoutMinHeight: =12
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =8
+                                          Text: ="WEEK"
+                                          Width: =(cnt_qmatrix.Width-cnt_qmatrix.X)/5-13
+                                          Wrap: =false
+                                    - gal_qh_tests:
+                                        Control: Gallery
+                                        Variant: Horizontal
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          Height: =Parent.Height
+                                          Items: =Sort(col_test, Sort_order)
+                                          LayoutMaxHeight: =15
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          ShowScrollbar: =false
+                                          TemplatePadding: =0
+                                          TemplateSize: =(cnt_qmatrix.Width-cnt_qmatrix.X)/4
+                                          Width: '=270 '
+                                        Children:
+                                          - lbl_qh_test_name:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Center
+                                                AutoHeight: =true
+                                                Color: =TextMuted
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =12
+                                                PaddingBottom: =0
+                                                PaddingLeft: =20
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =10
+                                                Text: =Upper(ThisItem.Test_name)
+                                                Width: =120
+                                                Wrap: =false
+                              - gal_qmatrix:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    FillPortions: =100
+                                    Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                                    Items: |-
+                                      =// Three test columns only - the FTT column was removed from this matrix,
+                                      // so the FTT_pct column this AddColumns used to compute (a weighted
+                                      // Homes_clean / Homes_tested across the week's facilities) is gone with it.
+                                      // Nothing in the row template read it any more. NOTE: this diverges from
+                                      // CLAUDE.md §8.1, which still specifies "plus a fourth FTT column".
+                                      // FTT itself is still surfaced by tile_ftt and by scr_History.
+                                      Sort(
+                                          AddColumns(
+                                              FirstN(
+                                                  Sort(Distinct(varWeekView, Week_key), Value, SortOrder.Descending),
+                                                  3),
+                                              Week_key, Value,
+                                              Week_end, LookUp(varWeekView, Week_key = Value, Week_end)
+                                          ),
+                                          Week_key, SortOrder.Descending)
+                                    LayoutMaxWidth: =cnt_qmatrix.Width
+                                    LayoutMinHeight: '=0   '
+                                    LayoutMinWidth: =0
+                                    ShowScrollbar: =false
+                                    TemplatePadding: =0
+                                    TemplateSize: =(Parent.Height-Self.Y-2)/3
+                                    Width: =Parent.Width
+                                  Children:
+                                    - cnt_qmatrix_row:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          PaddingLeft: =10
+                                          PaddingRight: =10
+                                          Width: =Parent.Width
+                                        Children:
+                                          - lbl_qm_week:
+                                              Control: ModernText
+                                              Properties:
+                                                Color: =TextPrimary
+                                                FillPortions: =1
+                                                Height: =gal_qmatrix.TemplateHeight
+                                                LayoutMinWidth: =(cnt_qmatrix.Width-cnt_qmatrix.X)/5-13
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =Text(ThisItem.Week_end, "mmm d")
+                                                Width: '=(cnt_qmatrix.Width-cnt_qmatrix.X)/6 '
+                                                Wrap: =false
+                                          - gal_qm_tests:
+                                              Control: Gallery
+                                              Variant: Horizontal
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Center
+                                                FillPortions: =100
+                                                Height: =gal_qmatrix.TemplateHeight
+                                                Items: |-
+                                                  =AddColumns(Sort(col_test, Sort_order),
+                                                      Week_key, ThisItem.Week_key,
+                                                      Test_ID, Value(Title))
+                                                LayoutMinWidth: =0
+                                                ShowScrollbar: =false
+                                                TemplatePadding: =4
+                                                TemplateSize: =(cnt_qmatrix.Width-cnt_qmatrix.X)/4
+                                                Width: =270
+                                              Children:
+                                                - lbl_qm_cell_value:
+                                                    Control: Badge
+                                                    Properties:
+                                                      Content: |-
+                                                        =StatusGlyphOf(StatusOf(
+                                                            LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY),
+                                                            varGoalFPY,
+                                                            0)) & " " &
+                                                            Text(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), "0.0")
+                                                      Height: '=gal_qm_tests.TemplateHeight-4   '
+                                                      Shape: ='BadgeCanvas.Shape'.Rounded
+                                                      ThemeColor: |-
+                                                        =If(StatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), varGoalFPY, 0) = "good",
+                                                                'BadgeCanvas.ThemeColor'.Success,
+                                                            StatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), varGoalFPY, 0) = "warning",
+                                                                'BadgeCanvas.ThemeColor'.Warning,
+                                                            StatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), varGoalFPY, 0) = "nodata",
+                                                                'BadgeCanvas.ThemeColor'.Subtle,
+                                                            'BadgeCanvas.ThemeColor'.Danger)
+                                                      Width: '=(cnt_qmatrix.Width-cnt_qmatrix.X)/4 '
+                                                      X: =2
+                                                      Y: =2
+                                                - btn_qm_cell_overlay:
+                                                    Control: Button
+                                                    Properties:
+                                                      Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                                      BorderThickness: =0
+                                                      Height: =gal_qm_tests.TemplateHeight
+                                                      OnSelect: |-
+                                                        =Set(varWeekKey, ThisItem.Week_key);
+                                                        Navigate(scr_WeekDetail, ScreenTransition.None)
+                                                      Text: =""
+                                                      Width: =(cnt_qmatrix.Width-cnt_qmatrix.X)/4
+                        - cnt_trend:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              Fill: =RGBA(255, 255, 255, 1)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =!IsBlank(varPID)
+                            Children:
+                              - cnt_trend_chart_wrap:
+                                  Control: GroupContainer
+                                  Variant: ManualLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    Height: =260
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =Parent.Width
+                                  Children:
+                                    - img_trend_db:
+                                        Control: Image
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderStyle: =BorderStyle.None
+                                          Height: =Parent.Height
+                                          Image: |-
+                                            ="data:image/svg+xml;utf8," & EncodeUrl(
+                                              // The viewBox width tracks the control's own aspect ratio, so ImagePosition.Fit
+                                              // scales the drawing to fill the container edge to edge with no letterboxing and
+                                              // no distortion. A fixed viewBox width could not do both: the container is far
+                                              // wider than it is tall on a desktop, so a fixed-aspect drawing gets
+                                              // height-constrained and leaves dead space down each side.
+                                              // Because the aspect always matches, the render scale is Parent.Height/250 - a
+                                              // constant - so type stays the same physical size at every screen width.
+                                              With({VBW: Round(250 * Parent.Width / Max(Parent.Height, 1), 0)},
+                                              With({PX0: 44,
+                                                    PXR: Round(250 * Parent.Width / Max(Parent.Height, 1), 0) - 16,
+                                                    SPAN: Round(250 * Parent.Width / Max(Parent.Height, 1), 0) - 60,
+                                                    N: Max(CountRows(col_trend_chart) - 1, 1)},
+
+                                              "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 " & VBW & " 250'>" &
+                                              "<rect x='0' y='0' width='" & VBW & "' height='250' fill='#ffffff'/>" &
+
+                                              // --- y gridlines + labels, five steps from varTrendFloor up to 100 ---
+                                              Concat([0,1,2,3,4] As g,
+                                                  "<line x1='" & PX0 & "' x2='" & PXR & "' y1='" &
+                                                  Text(184 - g.Value/4*172, "[$-en-US]0.0") & "' y2='" &
+                                                  Text(184 - g.Value/4*172, "[$-en-US]0.0") &
+                                                  "' stroke='#e1e0d9' stroke-width='1'/>" &
+                                                  "<text x='37' y='" & Text(184 - g.Value/4*172 + 3.5, "[$-en-US]0.0") &
+                                                  "' font-size='10' fill='#898781' text-anchor='end'>" &
+                                                  Text(varTrendFloor + g.Value/4*(100-varTrendFloor), "[$-en-US]0") &
+                                                  "%</text>") &
+
+                                              // --- baseline ---
+                                              "<line x1='" & PX0 & "' x2='" & PXR & "' y1='184' y2='184' stroke='#c3c2b7' stroke-width='1'/>" &
+
+                                              // --- week-ending ticks + rotated date labels, one per week ---
+                                              Concat(col_trend_chart,
+                                                  "<line x1='" & Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") &
+                                                  "' x2='" & Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") &
+                                                  "' y1='184' y2='190' stroke='#c3c2b7' stroke-width='1'/>" &
+                                                  "<text x='" & Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") &
+                                                  "' y='196' font-size='10' fill='#898781' text-anchor='end' transform='rotate(-45 " &
+                                                  Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") &
+                                                  " 196)'>" & lbl & "</text>") &
+
+                                              // --- goal reference rule (CLAUDE.md §8.1) ---
+                                              "<line x1='" & PX0 & "' x2='" & PXR & "' y1='" &
+                                                  Text(184 - (varGoalFPY-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & "' y2='" &
+                                                  Text(184 - (varGoalFPY-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") &
+                                                  "' stroke='#E15242' stroke-width='1.5' stroke-dasharray='6 4'/>" &
+                                              "<text x='" & PXR & "' y='" &
+                                                  Text(184 - (varGoalFPY-varTrendFloor)/Max(100-varTrendFloor, 1)*172 - 5, "[$-en-US]0.0") &
+                                                  "' font-size='10' font-weight='700' fill='#E15242' text-anchor='end'>GOAL " &
+                                                  varGoalFPY & "%</text>" &
+
+                                              // --- the three per-test series, fixed slot colours (CLAUDE.md §11):
+                                              //     Electrical #1B6FA8, Plumbing #eb6834, Gas #1baf7a. Blank weeks are
+                                              //     filtered out per series so a test that was not run never plots as 0.
+                                              "<polyline points='" &
+                                              Concat(Filter(col_trend_chart, !IsBlank(elec)),
+                                                  Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") & "," &
+                                                  Text(184 - (Max(elec, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
+                                              "' fill='none' stroke='#1B6FA8' stroke-width='1.8' stroke-linejoin='round' opacity='0.95'/>" &
+                                              "<polyline points='" &
+                                              Concat(Filter(col_trend_chart, !IsBlank(plumb)),
+                                                  Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") & "," &
+                                                  Text(184 - (Max(plumb, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
+                                              "' fill='none' stroke='#eb6834' stroke-width='1.8' stroke-linejoin='round' opacity='0.95'/>" &
+                                              "<polyline points='" &
+                                              Concat(Filter(col_trend_chart, !IsBlank(gas)),
+                                                  Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") & "," &
+                                                  Text(184 - (Max(gas, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
+                                              "' fill='none' stroke='#1baf7a' stroke-width='1.8' stroke-linejoin='round' opacity='0.95'/>" &
+
+                                              // --- overall Week_FPY last, so it sits on top. Near-black and heaviest:
+                                              //     the composite line must not read as a fourth test, and it cannot use
+                                              //     Champion Blue without colliding with Electrical's slot colour.
+                                              "<polyline points='" &
+                                              Concat(Filter(col_trend_chart, !IsBlank(fpy)),
+                                                  Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") & "," &
+                                                  Text(184 - (Max(fpy, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
+                                              "' fill='none' stroke='#0b0b0b' stroke-width='2.8' stroke-linejoin='round'/>" &
+                                              Concat(Filter(col_trend_chart, !IsBlank(fpy)),
+                                                  "<circle cx='" & Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") &
+                                                  "' cy='" & Text(184 - (Max(fpy, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") &
+                                                  "' r='3.2' fill='#0b0b0b' stroke='#ffffff' stroke-width='1.8'/>") &
+
+                                              // --- legend ---
+                                              "<line x1='44' x2='64' y1='238' y2='238' stroke='#0b0b0b' stroke-width='2.8'/>" &
+                                              "<text x='68' y='242' font-size='11' fill='#525148'>Overall</text>" &
+                                              "<line x1='124' x2='144' y1='238' y2='238' stroke='#1B6FA8' stroke-width='1.8'/>" &
+                                              "<text x='148' y='242' font-size='11' fill='#525148'>Electrical</text>" &
+                                              "<line x1='210' x2='230' y1='238' y2='238' stroke='#eb6834' stroke-width='1.8'/>" &
+                                              "<text x='234' y='242' font-size='11' fill='#525148'>Plumbing</text>" &
+                                              "<line x1='298' x2='318' y1='238' y2='238' stroke='#1baf7a' stroke-width='1.8'/>" &
+                                              "<text x='322' y='242' font-size='11' fill='#525148'>Gas</text>" &
+                                              "<line x1='356' x2='376' y1='238' y2='238' stroke='#E15242' stroke-width='1.5' stroke-dasharray='6 4'/>" &
+                                              "<text x='380' y='242' font-size='11' fill='#525148'>Goal</text>" &
+                                              "</svg>"
+                                              )))
+                                          Width: =Parent.Width
+                                    - lbl_trend_title:
+                                        Control: ModernText
+                                        Properties:
+                                          Color: =TextPrimary
+                                          FontWeight: =FontWeight.Bold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =14
+                                          Text: ="First Time Pass Rate"
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Wrap: =false
+                  - Container1:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.None
+                        FillPortions: =4
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: |-
+                          =If(IsWideLayout,
+                              LayoutDirection.Horizontal,
+                              LayoutDirection.Vertical)
+                        LayoutGap: =16
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        LayoutMaxWidth: =Parent.Width
+                        LayoutMinHeight: =300
+                        LayoutMinWidth: =16
+                      Children:
+                        - cnt_pareto:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              Fill: =CardBg
+                              Height: =320
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =!IsBlank(varPID)
+                              Width: |-
+                                =If(IsWideLayout,
+                                    Parent.Width/2,
+                                    Parent.Width)
+                            Children:
+                              - cnt_pareto_header:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =24
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =Parent.Width
+                                  Children:
+                                    - lbl_pareto_title:
+                                        Control: ModernText
+                                        Properties:
+                                          Color: =TextPrimary
+                                          FontWeight: =FontWeight.Bold
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =20
+                                          Text: ="Defect Pareto"
+                                          Wrap: =false
+                                    - tabs_pareto_level:
+                                        Control: ModernTabList
+                                        Properties:
+                                          Default: |-
+                                            ={Value: "By defect"}
+                                          Items: |-
+                                            =Table({Value: "By defect"}, {Value: "By type"})
+                                          OnChange: |-
+                                            =Set(varParetoLevel, If(tabs_pareto_level.Selected.Value = "By defect", "defect", "type"));
+                                            Select(btn_build_pareto)
+                                    - tabs_pareto_view:
+                                        Control: ModernTabList
+                                        Properties:
+                                          Default: |-
+                                            ={Value: "Chart"}
+                                          Items: |-
+                                            =Table({Value: "Chart"}, {Value: "Table"})
+                              - cnt_pareto_chart_wrap:
+                                  Control: GroupContainer
+                                  Variant: ManualLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Height: =260
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =tabs_pareto_view.Selected.Value = "Chart"
+                                    Width: =Parent.Width
+                                  Children:
+                                    - cnt_pareto_plot:
+                                        Control: GroupContainer
+                                        Variant: ManualLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          Height: =Parent.Height
+                                          PaddingBottom: =10
+                                          PaddingTop: =10
+                                          Width: =Parent.Width
+                                        Children:
+                                          - rect_pareto_grid_100:
+                                              Control: Rectangle
+                                              Properties:
+                                                Fill: =GridLine
+                                                Height: =1
+                                                Width: =Parent.Width-40
+                                                X: =40
+                                          - rect_pareto_grid_75:
+                                              Control: Rectangle
+                                              Properties:
+                                                Fill: =GridLine
+                                                Height: =1
+                                                Width: =Parent.Width-40
+                                                X: =40
+                                                Y: =53
+                                          - rect_pareto_grid_50:
+                                              Control: Rectangle
+                                              Properties:
+                                                Fill: =GridLine
+                                                Height: =1
+                                                Width: =Parent.Width-40
+                                                X: =40
+                                                Y: =105
+                                          - rect_pareto_grid_25:
+                                              Control: Rectangle
+                                              Properties:
+                                                Fill: =GridLine
+                                                Height: =1
+                                                Width: =Parent.Width-40
+                                                X: =40
+                                                Y: =158
+                                          - rect_pareto_grid_0:
+                                              Control: Rectangle
+                                              Properties:
+                                                Fill: =GridLine
+                                                Height: =1
+                                                Width: =Parent.Width-40
+                                                X: =40
+                                                Y: =210
+                                          - rect_pareto_axis_line:
+                                              Control: Rectangle
+                                              Properties:
+                                                Fill: =TextMuted
+                                                Height: =210
+                                                Width: =2
+                                                X: =38
+                                          - lbl_pareto_axis_100:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =TextMuted
+                                                Height: =14
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =4
+                                                PaddingTop: =0
+                                                Size: =9
+                                                Text: =Text(varParetoAxisMax, "0.0")
+                                                Width: =34
+                                                Wrap: =false
+                                          - lbl_pareto_axis_75:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =TextMuted
+                                                Height: =14
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =4
+                                                PaddingTop: =0
+                                                Size: =9
+                                                Text: =Text(varParetoAxisMax * 0.75, "0.0")
+                                                Width: =34
+                                                Wrap: =false
+                                                Y: =46
+                                          - lbl_pareto_axis_50:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =TextMuted
+                                                Height: =14
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =4
+                                                PaddingTop: =0
+                                                Size: =9
+                                                Text: =Text(varParetoAxisMax * 0.5, "0.0")
+                                                Width: =34
+                                                Wrap: =false
+                                                Y: =98
+                                          - lbl_pareto_axis_25:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =TextMuted
+                                                Height: =14
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =4
+                                                PaddingTop: =0
+                                                Size: =9
+                                                Text: =Text(varParetoAxisMax * 0.25, "0.0")
+                                                Width: =34
+                                                Wrap: =false
+                                                Y: =151
+                                          - lbl_pareto_axis_0:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =TextMuted
+                                                Height: =14
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =4
+                                                PaddingTop: =0
+                                                Size: =9
+                                                Text: ="0.0"
+                                                Width: =34
+                                                Wrap: =false
+                                                Y: =203
+                                          - gal_dash_pareto_bars:
+                                              Control: Gallery
+                                              Variant: Horizontal
+                                              Properties:
+                                                Height: =Parent.Height
+                                                Items: =FirstN(SortByColumns(col_pareto, "Share_pct", SortOrder.Descending), 5)
+                                                ShowScrollbar: =false
+                                                TemplatePadding: =0
+                                                TemplateSize: =(Parent.Width-40)/5
+                                                Width: =Parent.Width-40
+                                                X: =40
+                                              Children:
+                                                - cnt_pareto_bar_col:
+                                                    Control: GroupContainer
+                                                    Variant: ManualLayout
+                                                    Properties:
+                                                      Height: =Parent.TemplateHeight
+                                                      Width: =Parent.TemplateWidth
+                                                    Children:
+                                                      - lbl_pareto_bar_value:
+                                                          Control: ModernText
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            Color: =TextPrimary
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =16
+                                                            PaddingBottom: =0
+                                                            PaddingLeft: =0
+                                                            PaddingRight: =0
+                                                            PaddingTop: =0
+                                                            Size: =11
+                                                            Text: =Text(ThisItem.Share_pct, "0.0") & "%"
+                                                            Width: =Parent.Width
+                                                            Wrap: =false
+                                                            Y: =210 - 210 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1)) - 18
+                                                      - rect_pareto_bar:
+                                                          Control: Rectangle
+                                                          Properties:
+                                                            Fill: =AlertRed
+                                                            Height: =210 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1))
+                                                            Width: =Parent.Width*0.6
+                                                            X: =Parent.Width*0.2
+                                                            Y: =210 - 210 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1))
+                                                      - lbl_pareto_bar_name:
+                                                          Control: ModernText
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            Color: =RGBA(0, 0, 0, 1)
+                                                            Height: =34
+                                                            PaddingBottom: =0
+                                                            PaddingLeft: =2
+                                                            PaddingRight: =2
+                                                            PaddingTop: =2
+                                                            Size: =9
+                                                            Text: =ThisItem.Pareto_name
+                                                            VerticalAlign: =VerticalAlign.Top
+                                                            Width: =Parent.Width
+                                                            Y: =210
+                                                      - btn_pareto_bar_overlay:
+                                                          Control: Button
+                                                          Properties:
+                                                            Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                                            BorderThickness: =0
+                                                            Height: =Parent.Height
+                                                            OnSelect: |-
+                                                              =Set(varDrillLevel, varParetoLevel);
+                                                              Set(varDrillName, ThisItem.Pareto_name);
+                                                              Set(varDrillDefectID, ThisItem.Defect_ID);
+                                                              Set(varDrillTypeID, ThisItem.Type_ID);
+                                                              Set(varDrillShare, ThisItem.Share_pct);
+                                                              BuildDefectDrill();
+                                                              Set(varShowDrill, true)
+                                                            Text: =""
+                                                            Width: =Parent.Width
+                              - Container2:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =14
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    Visible: =tabs_pareto_view.Selected.Value = "Table"
+                                    Width: =Parent.Width-Self.X
+                                    X: =40
+                                    Y: =40
+                                  Children:
+                                    - Label1:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =2
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledColor: =RGBA(161, 159, 157, 1)
+                                          FocusedBorderThickness: =4
+                                          Font: =Font.'Segoe UI'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =16
+                                          Size: =10
+                                          Text: ="Item"
+                                          Width: =300
+                                    - Label1_1:
+                                        Control: Label
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =2
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledColor: =RGBA(161, 159, 157, 1)
+                                          FocusedBorderThickness: =4
+                                          Font: =Font.'Segoe UI'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =16
+                                          PaddingLeft: =10
+                                          Size: =10
+                                          Text: ="Qty"
+                                          Width: =60
+                                    - Label1_2:
+                                        Control: Label
+                                        Properties:
+                                          Align: =Align.Right
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =2
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledColor: =RGBA(161, 159, 157, 1)
+                                          FocusedBorderThickness: =4
+                                          Font: =Font.'Segoe UI'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =16
+                                          Size: =10
+                                          Text: ="Share %"
+                                          Width: =100
+                                    - Label1_3:
+                                        Control: Label
+                                        Properties:
+                                          Align: =Align.Right
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =2
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledColor: =RGBA(161, 159, 157, 1)
+                                          FocusedBorderThickness: =4
+                                          Font: =Font.'Segoe UI'
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =16
+                                          Size: =10
+                                          Text: ="Cumulative %"
+                                          Width: =120
+                              - gal_pareto_table:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                                    Items: =FirstN(SortByColumns(col_pareto, "Share_pct", SortOrder.Descending), 10)
+                                    LayoutMinHeight: =0
+                                    ShowScrollbar: =false
+                                    TemplateSize: =25
+                                    Visible: =tabs_pareto_view.Selected.Value = "Table"
+                                    Width: =Parent.Width
+                                  Children:
+                                    - cnt_pt_row:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =VerticalAlign.Middle
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =12
+                                          Width: =Parent.Width
+                                        Children:
+                                          - lbl_pt_name:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =ThisItem.Pareto_name
+                                                Width: =300
+                                                Wrap: =false
+                                          - lbl_pt_qty:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =Text(ThisItem.Qty_Sum, "0")
+                                                Width: =60
+                                                Wrap: =false
+                                          - lbl_pt_share:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =Text(ThisItem.Share_pct, "0.0") & "%"
+                                                Width: =100
+                                                Wrap: =false
+                                          - lbl_pt_cumulative:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                AutoHeight: =true
+                                                Color: =TextMuted
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =Text(ThisItem.Cumulative_pct, "0.0") & "%"
+                                                Width: =80
+                                                Wrap: =false
+                        - cnt_catchart:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              Fill: =CardBg
+                              Height: =260
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =8
+                              RadiusBottomRight: =8
+                              RadiusTopLeft: =8
+                              RadiusTopRight: =8
+                              Visible: =!IsBlank(varPID)
+                              Width: |-
+                                =If(IsWideLayout,
+                                    Parent.Width/2,
+                                    Parent.Width)
+                            Children:
+                              - lbl_catchart_title:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextPrimary
+                                    FontWeight: =FontWeight.Bold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =20
+                                    Text: ="Last week's Cost of Poor Quality by Test"
+                                    Wrap: =false
+                              - cnt_bytest_plot:
+                                  Control: GroupContainer
+                                  Variant: ManualLayout
+                                  Properties:
+                                    Height: =220
+                                    Width: =Parent.Width
+                                  Children:
+                                    - rect_bytest_grid_50:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                          Y: =90
+                                    - rect_bytest_grid_25:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                          Y: =135
+                                    - rect_bytest_grid_0:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                          Y: =180
+                                    - rect_bytest_axis_line:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =TextMuted
+                                          Height: =180
+                                          Width: =2
+                                          X: =38
+                                    - lbl_bytest_axis_100:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Right
+                                          Color: =TextMuted
+                                          Height: =14
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =4
+                                          PaddingTop: =0
+                                          Size: =9
+                                          Text: =Text(varByTestAxisMax, "[$-en-US]$#,##0")
+                                          Width: =34
+                                          Wrap: =false
+                                    - lbl_bytest_axis_75:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Right
+                                          Color: =TextMuted
+                                          Height: =14
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =4
+                                          PaddingTop: =0
+                                          Size: =9
+                                          Text: =Text(varByTestAxisMax * 0.75, "[$-en-US]$#,##0")
+                                          Width: =34
+                                          Wrap: =false
+                                          Y: =38
+                                    - lbl_bytest_axis_50:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Right
+                                          Color: =TextMuted
+                                          Height: =14
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =4
+                                          PaddingTop: =0
+                                          Size: =9
+                                          Text: =Text(varByTestAxisMax * 0.5, "[$-en-US]$#,##0")
+                                          Width: =34
+                                          Wrap: =false
+                                          Y: =83
+                                    - lbl_bytest_axis_25:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Right
+                                          Color: =TextMuted
+                                          Height: =14
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =4
+                                          PaddingTop: =0
+                                          Size: =9
+                                          Text: =Text(varByTestAxisMax * 0.25, "[$-en-US]$#,##0")
+                                          Width: =34
+                                          Wrap: =false
+                                          Y: =128
+                                    - lbl_bytest_axis_0:
+                                        Control: ModernText
+                                        Properties:
+                                          Align: =Align.Right
+                                          Color: =TextMuted
+                                          Height: =14
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =4
+                                          PaddingTop: =0
+                                          Size: =9
+                                          Text: ="0"
+                                          Width: =34
+                                          Wrap: =false
+                                          Y: =173
+                                    - gal_bytest_bars:
+                                        Control: Gallery
+                                        Variant: Horizontal
+                                        Properties:
+                                          Height: =Parent.Height
+                                          Items: =col_by_test
+                                          ShowScrollbar: =false
+                                          TemplatePadding: =0
+                                          TemplateSize: =(Parent.Width-40)/3
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                        Children:
+                                          - cnt_bytest_bar_col:
+                                              Control: GroupContainer
+                                              Variant: ManualLayout
+                                              Properties:
+                                                Height: =Parent.TemplateHeight
+                                                Width: =Parent.TemplateWidth
+                                              Children:
+                                                - lbl_bytest_bar_name:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      Color: =TextMuted
+                                                      Height: =15
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =2
+                                                      PaddingRight: =2
+                                                      PaddingTop: =2
+                                                      Size: =9
+                                                      Text: =ThisItem.Test_name
+                                                      VerticalAlign: =VerticalAlign.Top
+                                                      Width: =Parent.Width
+                                                      Y: =rect_bytest_grid_0.Y+Self.Height
+                                                - lbl_bytest_bar_value:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      Color: =TextPrimary
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =15
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =11
+                                                      Text: =Text(ThisItem.Weighted, "[$-en-US]$#,##0")
+                                                      VerticalAlign: =VerticalAlign.Bottom
+                                                      Width: =Parent.Width
+                                                      Wrap: =false
+                                                      Y: =180 - 180 * (ThisItem.Weighted/Max(varByTestAxisMax, 1)) - 18
+                                                - rect_bytest_bar:
+                                                    Control: Rectangle
+                                                    Properties:
+                                                      Fill: =TestColorOf(ThisItem.Test_ID)
+                                                      Height: =180 * (ThisItem.Weighted/Max(varByTestAxisMax, 1))
+                                                      Width: =Parent.Width*0.6
+                                                      X: =Parent.Width*0.2
+                                                      Y: =180 - 180 * (ThisItem.Weighted/Max(varByTestAxisMax, 1))
+                                    - rect_bytest_grid_100:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                    - rect_bytest_grid_75:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                          Y: =45
+      - cnt_drill_overlay:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Visible: =varShowDrill
+            Width: =Parent.Width
+          Children:
+            - rect_drill_scrim:
+                Control: Rectangle
+                Properties:
+                  Fill: =RGBA(11, 11, 11, 0.55)
+                  Height: =Parent.Height
+                  Width: =Parent.Width
+            - cnt_drill_card:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  Fill: =CardBg
+                  Height: =Min(Parent.Height - 100, 480)
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: =Min(Parent.Width - 64, 900)
+                  X: =(Parent.Width - Self.Width)/2
+                  Y: =(Parent.Height - Self.Height)/2
+                Children:
+                  - lbl_drill_title:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: =varDrillName
+                        Width: =Parent.Width - 48
+                        Wrap: =false
+                        X: =24
+                        Y: =18
+                  - lbl_drill_sub:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =If(varDrillLevel = "type", "Type of test", "Defect") & " - " &
+                          Text(varDrillTotal, "0") & " defects across the " &
+                          Text(CountRows(col_drill_trend), "0") & " weeks shown - " &
+                          Text(varDrillShare, "0.0") & "% of all defects in the full " &
+                          Text(varWindowMonths, "0") & "-month window"
+                        Width: =Parent.Width - 48
+                        Wrap: =false
+                        X: =24
+                        Y: =48
+                  - img_drill_chart:
+                      Control: Image
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Height: =Parent.Height - 128
+                        Image: |-
+                          ="data:image/svg+xml;utf8," & EncodeUrl(
+                            "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 840 300'>" &
+                            "<rect x='0' y='0' width='840' height='300' fill='#ffffff'/>" &
+                            Concat([0,0.25,0.5,0.75,1] As g,
+                                "<line x1='52' x2='820' y1='" &
+                                Text(250 - g.Value*220, "[$-en-US]0.0") & "' y2='" &
+                                Text(250 - g.Value*220, "[$-en-US]0.0") &
+                                "' stroke='#e1e0d9' stroke-width='1'/>" &
+                                "<text x='45' y='" & Text(250 - g.Value*220 + 4, "[$-en-US]0.0") &
+                                "' font-size='11' fill='#898781' text-anchor='end'>" &
+                                Text(varDrillMax * g.Value, "[$-en-US]0") & "</text>") &
+                            "<line x1='52' x2='820' y1='250' y2='250' stroke='#c3c2b7' stroke-width='1'/>" &
+                            "<polyline points='" &
+                            Concat(col_drill_trend,
+                                Text(52 + (idx-1)/If(CountRows(col_drill_trend)>1, CountRows(col_drill_trend)-1, 1)*768, "[$-en-US]0.0") & "," &
+                                Text(250 - qty/Max(varDrillMax, 1)*220, "[$-en-US]0.0") & " ") &
+                            "' fill='none' stroke='#E15242' stroke-width='2.5' stroke-linejoin='round'/>" &
+                            Concat(col_drill_trend,
+                                "<circle cx='" &
+                                Text(52 + (idx-1)/If(CountRows(col_drill_trend)>1, CountRows(col_drill_trend)-1, 1)*768, "[$-en-US]0.0") &
+                                "' cy='" & Text(250 - qty/Max(varDrillMax, 1)*220, "[$-en-US]0.0") &
+                                "' r='4' fill='#E15242' stroke='#ffffff' stroke-width='2'/>" &
+                                "<text x='" &
+                                Text(52 + (idx-1)/If(CountRows(col_drill_trend)>1, CountRows(col_drill_trend)-1, 1)*768, "[$-en-US]0.0") &
+                                "' y='" & Text(250 - qty/Max(varDrillMax, 1)*220 - 11, "[$-en-US]0.0") &
+                                "' font-size='11' font-weight='700' fill='#0b0b0b' text-anchor='middle'>" &
+                                Text(qty, "0") & "</text>") &
+                            Concat(col_drill_trend,
+                                "<text x='" &
+                                Text(52 + (idx-1)/If(CountRows(col_drill_trend)>1, CountRows(col_drill_trend)-1, 1)*768, "[$-en-US]0.0") &
+                                "' y='272' font-size='10' fill='#898781' text-anchor='middle'>" &
+                                lbl & "</text>") &
+                            "<text x='16' y='150' font-size='11' fill='#898781' text-anchor='middle' transform='rotate(-90 16 150)'>Defects (Qty)</text>" &
+                            "</svg>")
+                        Width: =Parent.Width - 24
+                        X: =12
+                        Y: =78
+                  - lbl_drill_hint:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Center
+                        Color: =TextMuted
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =11
+                        Text: ="Tap anywhere to close"
+                        Width: =Parent.Width - 48
+                        Wrap: =false
+                        X: =24
+                        Y: =Parent.Height - 34
+            - btn_drill_dismiss:
+                Control: Button
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Transparent
+                  BorderThickness: =0
+                  Height: =Parent.Height
+                  OnSelect: =Set(varShowDrill, false)
+                  Text: =""
+                  Width: =Parent.Width

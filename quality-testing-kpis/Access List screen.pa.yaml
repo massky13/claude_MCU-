@@ -1,0 +1,805 @@
+Screens:
+  Access List screen:
+    Properties:
+      Fill: =RGBA(234, 234, 234, 1)
+      OnVisible: |-
+        =ClearCollect(col_sys_access, sys_test_access);
+        UpdateContext({accSelected: Blank(), accNewMode: false, accDeleteMode: false, accPickedUser: Blank()});
+        Clear(accSearchResults);
+        ClearCollect(col_plant_options, {Plant_Names: "Corporate", Plant_ID: 0});
+        Collect(col_plant_options, ForAll(SortByColumns(Distinct(Plant_List, Plant_Names), "Value", SortOrder.Ascending), {Plant_Names: Value, Plant_ID: LookUp(Plant_List, Plant_Names = Value, Plant_ID)}))
+    Children:
+      - AccessScreenContainer:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(245, 245, 245, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =Parent.Width
+          Children:
+            - AccessHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =RGBA(15, 108, 189, 1)
+                  FillPortions: =0
+                  Height: =75
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                Children:
+                  - acc_gear_icon:
+                      Control: Classic/Icon
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        Height: =40
+                        Icon: =Icon.Settings
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Width: =40
+                  - acc_title:
+                      Control: Label
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        FillPortions: =1
+                        Font: =Font.'Lato Black'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Size: =22
+                        Text: ="Access List Manager"
+                  - acc_back_icon:
+                      Control: Classic/Icon
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        Height: =40
+                        Icon: =Icon.Home
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        OnSelect: =Navigate('Welcome screen', ScreenTransition.Fade)
+                        Tooltip: ="Back to main screen"
+                        Width: =40
+            - AccessBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingBottom: =12
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =12
+                Children:
+                  - AccSidebar:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.Regular
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =5
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                      Children:
+                        - AccAddRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              FillPortions: =0
+                              Height: =48
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                            Children:
+                              - acc_add_icon:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    Height: =44
+                                    Icon: =Icon.Add
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =UpdateContext({accNewMode:true, accDeleteMode:false, accSelected:Blank()})
+                                    PaddingBottom: =10
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =10
+                                    Width: =44
+                              - acc_add_label:
+                                  Control: Label
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    FillPortions: =1
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =44
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =UpdateContext({accNewMode:true, accDeleteMode:false, accSelected:Blank()})
+                                    Text: ="Add Person"
+                        - AccSidebarSep:
+                            Control: Rectangle
+                            Properties:
+                              BorderColor: =RGBA(89, 0, 0, 1)
+                              Fill: =RGBA(89, 0, 0, 1)
+                              Height: =2
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                        - acc_gallery:
+                            Control: Gallery
+                            Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              BorderColor: =RGBA(89, 0, 0, 1)
+                              Fill: =RGBA(250, 250, 250, 1)
+                              Items: =SortByColumns(SortByColumns(col_sys_access, "Plant_name", SortOrder.Ascending), "Inspector_name", SortOrder.Ascending)
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =0
+                              OnSelect: |-
+                                =UpdateContext({accSelected: ThisItem, accNewMode: false, accDeleteMode: false});
+                                Reset(txt_acc_name);
+                                Reset(txt_acc_email)
+                              TemplateFill: =If(ThisItem.IsSelected, RGBA(230, 230, 230, 1), RGBA(0, 0, 0, 0))
+                              TemplateSize: =72
+                            Children:
+                              - acc_gal_bar:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(89, 0, 0, 1)
+                                    Height: =Parent.TemplateHeight
+                                    Visible: =ThisItem.IsSelected
+                                    Width: =4
+                              - acc_gal_name:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =Self.Size * 1.8
+                                    OnSelect: |-
+                                      =UpdateContext({accSelected: ThisItem, accNewMode: false, accDeleteMode: false});
+                                      Reset(txt_acc_name);
+                                      Reset(txt_acc_email)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =12
+                                    PaddingTop: =0
+                                    Text: =ThisItem.Inspector_name
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =Parent.TemplateWidth - 16
+                                    X: =8
+                                    Y: =6
+                              - acc_gal_email:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =RGBA(100, 100, 100, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =Self.Size * 1.8
+                                    OnSelect: |-
+                                      =UpdateContext({accSelected: ThisItem, accNewMode: false, accDeleteMode: false});
+                                      Reset(txt_acc_name);
+                                      Reset(txt_acc_email)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =12
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: =ThisItem.Inspector_email
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =Parent.TemplateWidth - 16
+                                    X: =8
+                                    Y: =28
+                              - acc_gal_plant:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =Self.Size * 1.8
+                                    OnSelect: |-
+                                      =UpdateContext({accSelected: ThisItem, accNewMode: false, accDeleteMode: false});
+                                      Reset(txt_acc_name);
+                                      Reset(txt_acc_email)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =12
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: =If(ThisItem.Plant_ID=0,"Corporate Admin", ThisItem.Plant_name)
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =Parent.TemplateWidth - 16
+                                    X: =8
+                                    Y: =48
+                              - acc_gal_sep:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(230, 230, 230, 1)
+                                    Height: =1
+                                    Width: =Parent.TemplateWidth
+                                    Y: =Parent.TemplateHeight - Self.Height
+                  - AccRightPanel:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Fill: =RGBA(245, 245, 245, 1)
+                        FillPortions: =7
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                      Children:
+                        - AccEmptyState:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              Fill: =RGBA(255, 255, 255, 1)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Visible: =IsBlank(accSelected) && !accNewMode
+                            Children:
+                              - acc_empty_label:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =RGBA(150, 150, 150, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =14
+                                    Text: ="Select a person from the list, or click Add Person to create a new entry."
+                                    Width: =400
+                        - AccEditPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(255, 255, 255, 1)
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =16
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingBottom: =20
+                              PaddingLeft: =24
+                              PaddingRight: =24
+                              PaddingTop: =20
+                              Visible: =!IsBlank(accSelected) && !accDeleteMode && !accNewMode
+                            Children:
+                              - AccEditHeader:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingLeft: =5
+                                    PaddingRight: =5
+                                  Children:
+                                    - acc_edit_title:
+                                        Control: Label
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =RGBA(15, 108, 189, 1)
+                                          FillPortions: =1
+                                          Font: =Font.'Lato Black'
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =16
+                                          Text: ="Edit Access Entry"
+                                    - acc_delete_btn:
+                                        Control: Classic/Icon
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =RGBA(89, 0, 0, 1)
+                                          Height: =32
+                                          Icon: =Icon.Trash
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          OnSelect: =UpdateContext({accDeleteMode:true})
+                                          Tooltip: ="Delete this entry"
+                                          Width: =32
+                              - AccEditSep:
+                                  Control: Rectangle
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(89, 0, 0, 1)
+                                    Height: =1
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                              - AccNameRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMaxHeight: =70
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =0
+                                    PaddingLeft: =5
+                                  Children:
+                                    - acc_name_lbl:
+                                        Control: Label
+                                        Properties:
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =20
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =12
+                                          Text: ="Name"
+                                    - txt_acc_name:
+                                        Control: Classic/TextInput
+                                        Properties:
+                                          BorderColor: =RGBA(122, 138, 143, 1)
+                                          BorderThickness: =1
+                                          Default: =accSelected.Inspector_name
+                                          Font: =Font.'Open Sans'
+                                          Height: =36
+                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                              - AccEmailRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMaxHeight: =70
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =0
+                                    PaddingLeft: =5
+                                  Children:
+                                    - acc_email_lbl:
+                                        Control: Label
+                                        Properties:
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =20
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =12
+                                          Text: ="Email"
+                                    - txt_acc_email:
+                                        Control: Classic/TextInput
+                                        Properties:
+                                          BorderColor: =RGBA(122, 138, 143, 1)
+                                          BorderThickness: =1
+                                          Default: =accSelected.Inspector_email
+                                          Font: =Font.'Open Sans'
+                                          Height: =36
+                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                              - AccPlantRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMaxHeight: =70
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =0
+                                    PaddingLeft: =5
+                                  Children:
+                                    - acc_plant_lbl:
+                                        Control: Label
+                                        Properties:
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =20
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =12
+                                          Text: ="Plant"
+                                    - ddl_plant:
+                                        Control: Classic/DropDown
+                                        Properties:
+                                          BorderColor: =RGBA(122, 138, 143, 1)
+                                          ChevronBackground: =RGBA(0, 0, 0, 0.05)
+                                          ChevronFill: =RGBA(15, 108, 189, 1)
+                                          Default: =LookUp(col_plant_options, Plant_ID = accSelected.Plant_ID, Plant_Names)
+                                          Font: =Font.'Open Sans'
+                                          Height: =36
+                                          Items: =col_plant_options
+                                          Items.Value: =Plant_Names
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                              - AccEditActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =12
+                                    LayoutJustifyContent: =LayoutJustifyContent.Center
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingTop: =8
+                                  Children:
+                                    - btn_acc_save:
+                                        Control: Classic/Button
+                                        Properties:
+                                          BorderColor: =ColorFade(Self.Fill, -15%)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(15, 108, 189, 1)
+                                          Font: =Font.'Open Sans'
+                                          HoverBorderColor: =ColorFade(Self.Fill, 20%)
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =ColorFade(RGBA(15, 108, 189, 1), -20%)
+                                          OnSelect: |-
+                                            =Patch(sys_test_access, LookUp(sys_test_access, ID = accSelected.ID),
+                                                {
+                                                    Inspector_name: txt_acc_name.Text,
+                                                    Inspector_email: txt_acc_email.Text,
+                                                    Plant_name: ddl_plant.SelectedText.Value,
+                                                    Plant_ID: LookUp(col_plant_options, Plant_Names = ddl_plant.SelectedText.Value, Plant_ID)
+                                                }
+                                            );
+                                            ClearCollect(col_sys_access, sys_test_access);
+                                            UpdateContext({accSelected: Blank()})
+                                          Text: ="Save"
+                        - AccAddPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(255, 255, 255, 1)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =16
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingBottom: =20
+                              PaddingLeft: =24
+                              PaddingRight: =24
+                              PaddingTop: =20
+                              Visible: =accNewMode
+                            Children:
+                              - AccAddHeader:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                  Children:
+                                    - acc_add_panel_title:
+                                        Control: Label
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =RGBA(15, 108, 189, 1)
+                                          FillPortions: =1
+                                          Font: =Font.'Lato Black'
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =16
+                                          Text: ="Add Person to Access List"
+                                    - btn_add_cancel:
+                                        Control: Classic/Button
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BorderColor: =ColorFade(Self.Fill, -15%)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(100, 100, 100, 1)
+                                          Font: =Font.'Open Sans'
+                                          OnSelect: |-
+                                            =UpdateContext({accNewMode: false, accPickedUser: Blank()});
+                                            Clear(accSearchResults)
+                                          Text: ="Cancel"
+                              - AccAddSep:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(89, 0, 0, 1)
+                                    Height: =1
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                              - AccSearchRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =40
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutJustifyContent: =LayoutJustifyContent.Center
+                                    LayoutMaxHeight: =60
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =0
+                                    PaddingLeft: =5
+                                    PaddingRight: =5
+                                  Children:
+                                    - txt_acc_search:
+                                        Control: Classic/TextInput
+                                        Properties:
+                                          BorderColor: =RGBA(122, 138, 143, 1)
+                                          BorderThickness: =1
+                                          FillPortions: =1
+                                          Font: =Font.'Open Sans'
+                                          Height: =36
+                                          HintText: ="Search by name..."
+                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                    - btn_acc_search:
+                                        Control: Classic/Button
+                                        Properties:
+                                          BorderColor: =ColorFade(Self.Fill, -15%)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(15, 108, 189, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =36
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =ColorFade(RGBA(15, 108, 189, 1), -20%)
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          OnSelect: =ClearCollect(accSearchResults, Office365Users.SearchUserV2({searchTerm:txt_acc_search.Text, top:15}).value)
+                                          Text: ="Search"
+                                          Width: =90
+                              - AccSearchResults:
+                                  Control: Gallery
+                                  Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    BorderThickness: =1
+                                    Fill: =RGBA(250, 250, 250, 1)
+                                    FillPortions: =0
+                                    Height: =250
+                                    Items: =accSearchResults
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =UpdateContext({accPickedUser:ThisItem})
+                                    TemplateFill: =If(ThisItem.IsSelected, RGBA(220, 235, 250, 1), RGBA(0, 0, 0, 0))
+                                    TemplateSize: =44
+                                    Visible: =CountRows(accSearchResults) > 0
+                                  Children:
+                                    - acc_sr_name:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =Parent.TemplateHeight
+                                          OnSelect: =UpdateContext({accPickedUser:ThisItem})
+                                          PaddingBottom: =0
+                                          PaddingLeft: =8
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.DisplayName
+                                          Width: '=Parent.TemplateWidth *0.45  '
+                                    - acc_sr_mail:
+                                        Control: Label
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(100, 100, 100, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =Parent.TemplateHeight
+                                          OnSelect: =UpdateContext({accPickedUser:ThisItem})
+                                          PaddingLeft: =8
+                                          Size: =11
+                                          Text: =ThisItem.Mail
+                                          Width: '=Parent.TemplateWidth *0.45  '
+                                          X: =322
+                                    - acc_sr_mail_1:
+                                        Control: Label
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          Color: =RGBA(100, 100, 100, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =Parent.TemplateHeight
+                                          OnSelect: =UpdateContext({accPickedUser:ThisItem})
+                                          PaddingLeft: =8
+                                          Size: =11
+                                          Text: =ThisItem.OfficeLocation
+                                          Width: =69
+                                          X: =644
+                              - AccPickedUser:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    Fill: =RGBA(220, 235, 250, 1)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMaxHeight: =70
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =0
+                                    PaddingBottom: =10
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =10
+                                    Visible: =!IsBlank(accPickedUser)
+                                  Children:
+                                    - acc_picked_label:
+                                        Control: Label
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =RGBA(15, 108, 189, 1)
+                                          FillPortions: =1
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =12
+                                          Text: |-
+                                            ="Selected: " & accPickedUser.DisplayName & " (" & accPickedUser.Mail & ")"
+                              - AccNewPlantRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    DropShadow: =DropShadow.None
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =70
+                                    PaddingLeft: =5
+                                    PaddingRight: =5
+                                  Children:
+                                    - acc_new_plant_lbl:
+                                        Control: Label
+                                        Properties:
+                                          Color: =RGBA(50, 49, 48, 1)
+                                          Font: =Font.'Open Sans'
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =20
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                                          Size: =12
+                                          Text: ="Plant"
+                                    - ddl_plant_new:
+                                        Control: Classic/DropDown
+                                        Properties:
+                                          BorderColor: =RGBA(122, 138, 143, 1)
+                                          ChevronBackground: =RGBA(0, 0, 0, 0.05)
+                                          ChevronFill: =RGBA(15, 108, 189, 1)
+                                          Font: =Font.'Open Sans'
+                                          Height: =36
+                                          Items: =col_plant_options
+                                          Items.Value: =Plant_Names
+                                          LayoutMaxHeight: =
+                                          LayoutMaxWidth: =
+                              - AccAddActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    DropShadow: =DropShadow.None
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =12
+                                    LayoutJustifyContent: =LayoutJustifyContent.Center
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingTop: =8
+                                  Children:
+                                    - btn_acc_add_save:
+                                        Control: Classic/Button
+                                        Properties:
+                                          BorderColor: =ColorFade(Self.Fill, -15%)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: =If(IsBlank(accPickedUser), DisplayMode.Disabled, DisplayMode.Edit)
+                                          Fill: =RGBA(89, 0, 0, 1)
+                                          FillPortions: =1
+                                          Font: =Font.'Open Sans'
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =ColorFade(RGBA(89, 0, 0, 1), -20%)
+                                          OnSelect: |-
+                                            =Patch(sys_test_access, Defaults(sys_test_access),
+                                                {
+                                                    Title: accPickedUser.Mail & "." & Text(LookUp(col_plant_options, Plant_Names = ddl_plant_new.SelectedText.Value, Plant_ID)),
+                                                    Inspector_email: accPickedUser.Mail,
+                                                    Inspector_name: accPickedUser.DisplayName,
+                                                    Plant_ID: LookUp(col_plant_options, Plant_Names = ddl_plant_new.SelectedText.Value, Plant_ID),
+                                                    Plant_name: ddl_plant_new.SelectedText.Value
+                                                }
+                                            );
+                                            ClearCollect(col_sys_access, sys_test_access);
+                                            UpdateContext({accNewMode: false, accPickedUser: Blank()});
+                                            Clear(accSearchResults)
+                                          Text: ="Add to Access List"
+                        - AccDeletePanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(255, 255, 255, 1)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =20
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Visible: =accDeleteMode
+                            Children:
+                              - acc_delete_confirm_lbl:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =50
+                                    Size: =16
+                                    Text: ="Delete " & accSelected.Inspector_name & " from the access list?"
+                                    Width: =450
+                              - AccDeleteButtons:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =16
+                                    LayoutJustifyContent: =LayoutJustifyContent.Center
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingBottom: =5
+                                    PaddingTop: =5
+                                  Children:
+                                    - btn_confirm_delete:
+                                        Control: Classic/Button
+                                        Properties:
+                                          BorderColor: =ColorFade(Self.Fill, -15%)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(189, 49, 51, 1)
+                                          Font: =Font.'Open Sans'
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =ColorFade(RGBA(189, 49, 51, 1), -20%)
+                                          OnSelect: |-
+                                            =Remove(sys_test_access, LookUp(sys_test_access, ID = accSelected.ID));
+                                            ClearCollect(col_sys_access, sys_test_access);
+                                            UpdateContext({accDeleteMode: false, accSelected: Blank()})
+                                          Text: ="Confirm Delete"
+                                    - btn_cancel_delete:
+                                        Control: Classic/Button
+                                        Properties:
+                                          BorderColor: =ColorFade(Self.Fill, -15%)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(39, 113, 194, 1)
+                                          Font: =Font.'Open Sans'
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =ColorFade(RGBA(39, 113, 194, 1), -20%)
+                                          OnSelect: =UpdateContext({accDeleteMode:false})
+                                          Text: ="Cancel"

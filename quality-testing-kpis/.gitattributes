@@ -1,0 +1,6 @@
+# sync_canvas always writes LF. Without this, git's autocrlf rewrites the files on
+# checkout and every single .pa.yaml shows as modified after the next sync - which
+# would make the diff useless for spotting real losses.
+*.pa.yaml text eol=lf
+*.csv     text eol=lf
+*.md      text eol=lf

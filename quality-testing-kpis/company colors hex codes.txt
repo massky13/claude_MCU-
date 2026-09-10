@@ -1,0 +1,13 @@
+Primary
+Champion Blue
+HEX 02426D
+
+Secondary
+Gold
+HEX FFB500
+
+Light Aqua
+HEX 9CD4EA
+
+Red
+HEX E15242

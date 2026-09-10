@@ -1,0 +1,10 @@
+EditorState:
+  ScreensOrder:
+    - scr_AccessAdmin
+    - scr_Dashboard
+    - scr_Entry
+    - scr_History
+    - scr_TaxonomyAdmin
+    - scr_WeekDetail
+    - scr_ParetoTest
+    - scr_CorporateHome

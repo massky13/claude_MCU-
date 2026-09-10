@@ -1,0 +1,1643 @@
+Screens:
+  Records screen:
+    Properties:
+      Fill: =RGBA(234, 234, 234, 1)
+      LoadingSpinnerColor: =RGBA(164, 38, 44, 1)
+      OnVisible: |
+        =UpdateContext({deleteMode:false,editMode:true,newMode:false});
+        Set(selectedRecord,Blank());
+        Reset(gal_edit_items)
+    Children:
+      - ScreenContainer1:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(250, 250, 250, 1)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =15
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            PaddingBottom: =12
+            PaddingLeft: =12
+            PaddingRight: =12
+            PaddingTop: =12
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - TableNameContainer1:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  FillPortions: =0
+                  Height: =75
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                Children:
+                  - TableNameLabel1:
+                      Control: Label
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(186, 186, 186, 1)
+                        Fill: =PowerAppsTheme.Colors.Primary
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =68
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        Size: =16
+                        Text: ="Weekly Quality Tests"
+                        Width: =Parent.Width
+                  - HomeIconButton1:
+                      Control: Classic/Icon
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(56, 56, 56, 1)
+                        DisabledColor: =RGBA(119, 119, 119, 1)
+                        Fill: =PowerAppsTheme.Colors.Primary
+                        FocusedBorderThickness: =0
+                        Icon: =Icon.Home
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =32
+                        OnSelect: =Back()
+                        PaddingLeft: =5
+                        PaddingRight: =15
+                        TabIndex: =0
+                        Width: =52
+                  - Offline sync Icon1:
+                      Control: Classic/Icon
+                      Properties:
+                        AccessibleLabel: ="Offline sync status icon"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(56, 56, 56, 1)
+                        DisabledColor: =RGBA(119, 119, 119, 1)
+                        Fill: '=PowerAppsTheme.Colors.Primary   '
+                        FocusedBorderThickness: =0
+                        Icon: |-
+                          =Switch(Connection.Sync,
+                             ConnectionSync.Connected, Icon.Globe, 
+                             ConnectionSync.ConnectedWithWarning, Icon.GlobeWarning,
+                             ConnectionSync.ConnectedPendingUpsync, Icon.GlobeChangesPending,
+                             ConnectionSync.ConnectedError, Icon.GlobeError,
+                             ConnectionSync.ConnectedRefresh, Icon.GlobeRefresh,
+                             ConnectionSync.NotConnected, Icon.GlobeNotConnected, 
+                             ConnectionSync.NotConnectedWithWarning, Icon.GlobeWarning,
+                             ConnectionSync.NotConnectedPendingUpsync, Icon.GlobeChangesPending,
+                             ConnectionSync.NotConnectedSyncError, Icon.GlobeError)
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =32
+                        OnSelect: =ShowHostInfo(HostInfo.OfflineSync)
+                        PaddingLeft: =5
+                        PaddingRight: =15
+                        TabIndex: =0
+                        Tooltip: =If(Connection.Connected,"Connected","Offline")
+                        Visible: =Host.OfflineEnabled
+                        Width: =52
+            - BodyContainer1:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - SidebarContainer1:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.Regular
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FillPortions: =If(And('Records screen'.Size = ScreenSize.Small, Or(newMode, editMode, itemSelected, !deleteMode)), 0, 3)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =10
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =10
+                        Visible: =If(And('Records screen'.Size = ScreenSize.Small, Or(newMode, editMode, itemSelected)), false, true)
+                      Children:
+                        - NewRecordButtonBarContainer1:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              FillPortions: =0
+                              Height: =44
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                              - NewRecordAddIcon1:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    Height: =44
+                                    Icon: =Icon.Add
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =UpdateContext({newMode:true, deleteMode:false,deleteCancelled:false, editMode:false})
+                                    PaddingBottom: =10
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =10
+                                    Width: =44
+                              - NewRecordLabel1:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    FillPortions: =1
+                                    Font: =Font.'Open Sans'
+                                    Height: =44
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: =UpdateContext({newMode:true})
+                                    Text: ="New"
+                              - SelectedRecordTitle1_1:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Right
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    FillPortions: =1
+                                    Font: =Font.'Open Sans'
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingRight: =25
+                                    Size: =14
+                                    Text: |-
+                                      ="Facility: " & drop_facility_main.SelectedText.Value
+                                    Width: =80
+                        - RecordsListSeparator1:
+                            Control: Rectangle
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              BorderColor: =RGBA(89, 0, 0, 1)
+                              Fill: =PowerAppsTheme.Colors.Primary
+                              Height: =1
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =200
+                        - gal_edit_items:
+                            Control: Gallery
+                            Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                            Properties:
+                              BorderColor: =RGBA(89, 0, 0, 1)
+                              Fill: =RGBA(250, 250, 250, 1)
+                              Items: =Sort(Filter(col_sys_test,Facility_ID=Value(drop_facility_main.SelectedText.Value)),Week_end,SortOrder.Descending)
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =0
+                              OnSelect: =Set(selectedRecord,gal_edit_items.Selected)
+                              TemplateFill: =If(ThisItem.IsSelected, RGBA(230, 230, 230, 1), RGBA(0, 0, 0, 0))
+                              TemplateSize: =104
+                            Children:
+                              - Title1:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                                    Height: =Self.Size * 1.8
+                                    OnSelect: =Select(Parent)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =12
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: |-
+                                      ="FTR: " & ThisItem.Week_FPY & "  -  NCs/Floor: " & RoundUp(ThisItem.RTS_AVG,1)
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =Parent.TemplateWidth - 86
+                                    X: =16
+                                    Y: =52
+                              - NextArrow1:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    AccessibleLabel: =Self.Tooltip
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Color: =RGBA(166, 166, 166, 1)
+                                    Height: =50
+                                    Icon: =Icon.ChevronRight
+                                    OnSelect: =Select(Parent)
+                                    PaddingBottom: =12
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =12
+                                    Tooltip: ="View item details"
+                                    Width: =50
+                                    X: =Parent.TemplateWidth - Self.Width - 12
+                                    Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                              - Separator1:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Height: =8
+                                    OnSelect: =Select(Parent)
+                                    Width: =Parent.TemplateWidth
+                                    Y: =Parent.TemplateHeight - Self.Height
+                              - Rectangle1:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =PowerAppsTheme.Colors.Primary
+                                    Height: =Parent.TemplateHeight - Separator1.Height
+                                    OnSelect: =Select(Parent)
+                                    Visible: =ThisItem.IsSelected
+                                    Width: =4
+                              - Title1_1:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =Self.Size * 1.8
+                                    OnSelect: =Select(Parent)
+                                    PaddingBottom: =0
+                                    PaddingLeft: =12
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: '=ThisItem.Week_start & " to " & ThisItem.Week_end '
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =Parent.TemplateWidth - 86
+                                    X: =16
+                                    Y: =14
+                  - EditContainer:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =If(And('Records screen'.Size = ScreenSize.Small, Or(newMode, editMode, itemSelected, !deleteMode)), 0, 8)
+                        Height: =SidebarContainer1.Height
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =20
+                        LayoutJustifyContent: =LayoutJustifyContent.Center
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: |-
+                          =//editMode //If(And(!deleteMode, !newMode, editMode, !IsBlank(selectedRecord)), true, false)
+                          If(And(!deleteMode, !newMode, editMode, !IsBlank(selectedRecord)), true, false)
+                        Width: =0
+                      Children:
+                        - SelectedRecordHeaderContainer1:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Height: =50
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Visible: =If(And(!deleteMode, !newMode, editMode, !IsBlank(selectedRecord)), true, false)
+                            Children:
+                              - TextCanvas9:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingLeft: =10
+                                    Size: =18
+                                    Text: "=\"Selected Week Ending: \" "
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =210
+                              - BackIconButton1:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    Height: =50
+                                    Icon: =Icon.ChevronLeft
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: |-
+                                      =UpdateContext({ itemSelected: false })
+                                    PaddingBottom: =12
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =12
+                                    TabIndex: =0
+                                    Visible: =If('Records screen'.Size = ScreenSize.Small, And(!editMode, !newMode, !deleteMode), false)
+                                    Width: =50
+                              - SelectedRecordTitle1:
+                                  Control: Label
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    FillPortions: =1
+                                    Font: =Font.'Open Sans'
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    Size: =14
+                                    Text: |-
+                                      =selectedRecord.Week_end & "    Fiscal Year:" & selectedRecord.Fiscal_year & "  Quarter: " & selectedRecord.Fiscal_quarter
+                              - Rectangle8:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =20
+                                    Width: =50
+                              - DeleteIconButton1:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    Height: =50
+                                    Icon: =Icon.Trash
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    LayoutMinHeight: =30
+                                    OnSelect: |-
+                                      =UpdateContext({ deleteMode: true, deleteCancelled: false});
+                                      Set(selectedRecord, gal_edit_items.Selected )
+                                    PaddingBottom: =12
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =12
+                                    TabIndex: =0
+                                    Width: =50
+                        - cont_system_testing:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Height: =190
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Visible: =If(And(!deleteMode, !newMode, editMode, !IsBlank(selectedRecord)), true, false)
+                              Width: =Parent.Width
+                            Children:
+                              - TextCanvas1_3:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="Electrical"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =100
+                                    X: =22
+                                    Y: =112
+                              - TextCanvas6:
+                                  Control: Text
+                                  Properties:
+                                    FontColor: =RGBA(0, 0, 0, 1)
+                                    Height: =60
+                                    PaddingBottom: =10
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =10
+                                    Size: =22
+                                    Text: ="System Testing"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =303
+                              - TextCanvas7:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: ="/"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =31
+                                    X: =72
+                                    Y: =144
+                              - TextCanvas8:
+                                  Control: Text
+                                  Properties:
+                                    PaddingBottom: =0
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =0
+                                    Text: ="(number of floors passed / number of floors failed)"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =401
+                                    Y: =45
+                              - RecordsListSeparator1_1:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =PowerAppsTheme.Colors.Primary
+                                    Height: =1
+                                    Width: =Parent.Width
+                                    Y: =82
+                              - TextCanvas1_4:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="Plumbing"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =100
+                                    X: =224
+                                    Y: =112
+                              - TextCanvas7_1:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: ="/"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =31
+                                    X: =274
+                                    Y: =144
+                              - TextCanvas1_5:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="Gas"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =100
+                                    X: =428
+                                    Y: =112
+                              - TextCanvas7_2:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: ="/"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =31
+                                    X: =478
+                                    Y: =144
+                              - Rectangle7:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =153
+                                    Y: =90
+                              - Rectangle7_1:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =355
+                                    Y: =90
+                              - Rectangle7_2:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =559
+                                    Y: =90
+                              - TextCanvas1_6:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="First Time Rate"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =143
+                                    X: =630
+                                    Y: =112
+                              - txt_firstpassyield:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: =IfError( RoundUp( (Value(txt_electricalpass.Text) +Value(txt_plumbingpass.Text)+ Value(txt_gaspass.Text))/(Value(txt_electricalpass.Text) +Value(txt_plumbingpass.Text)+ Value(txt_gaspass.Text)+Value(txt_electricalfail.Text) +Value(txt_plumbingfail.Text)+ Value(txt_gasfail.Text))* 100,1) & "%","")
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =143
+                                    X: =630
+                                    Y: =144
+                              - txt_electricalpass:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.Electrical_pass
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.32)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =22
+                                    Y: =144
+                              - txt_electricalfail:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.Electrical_fail
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.32)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =103
+                                    Y: =144
+                              - txt_plumbingpass:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.Plumbing_pass
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.32)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =224
+                                    Y: =144
+                              - txt_plumbingfail:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.Plumbing_fail
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.32)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =305
+                                    Y: =144
+                              - txt_gaspass:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.Gas_pass
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.32)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =428
+                                    Y: =144
+                              - txt_gasfail:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.Gas_fail
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.32)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =509
+                                    Y: =144
+                        - cont_readytoship:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Height: =170
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Visible: =If(And(!deleteMode, !newMode, editMode, !IsBlank(selectedRecord)), true, false)
+                              Width: =Parent.Width
+                              Y: =210
+                            Children:
+                              - TextCanvas6_1:
+                                  Control: Text
+                                  Properties:
+                                    FontColor: =RGBA(0, 0, 0, 1)
+                                    Height: =60
+                                    PaddingBottom: =10
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =10
+                                    Size: =22
+                                    Text: ="Ready To Ship"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =303
+                              - RecordsListSeparator1_2:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =PowerAppsTheme.Colors.Primary
+                                    Height: =1
+                                    Width: =Parent.Width
+                                    Y: =81
+                              - Rectangle7_3:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =559
+                                    Y: =90
+                              - TextCanvas1_8:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="NCs per Floor"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =143
+                                    X: =630
+                                    Y: =92
+                              - TextCanvas7_5:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: =IfError(RoundUp(Value(txt_numberofnonconformities.Text)/ Value(txt_numberoffloors.Text),1),"")   //If(IsBlank(gal_edit_items.Selected.RTS_floors),"", RoundUp(txt_numberofnonconformities.Value/ txt_numberoffloors.Value,0))
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =143
+                                    X: =630
+                                    Y: =124
+                              - TextCanvas1_9:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    Height: =60
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Number of non-conformities this week"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =205
+                                    X: =253
+                                    Y: =92
+                              - TextCanvas1_10:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    Height: =60
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Number of Floors this week"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =202
+                                    X: =22
+                                    Y: =92
+                              - txt_numberoffloors:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.RTS_floors
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.31)
+                                    PaddingLeft: =5
+                                    Width: =64
+                                    X: =22
+                                    Y: =152
+                              - txt_numberofnonconformities:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =selectedRecord.RTS_NCS
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.31)
+                                    PaddingLeft: =5
+                                    Width: =64
+                                    X: =253
+                                    Y: =152
+                              - TextCanvas8_2:
+                                  Control: Text
+                                  Properties:
+                                    PaddingBottom: =0
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =0
+                                    Text: ="(floors per week)"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =401
+                                    Y: =42
+                        - Container4:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0.5
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Visible: =If(And(!deleteMode, !newMode, editMode, !IsBlank(selectedRecord)), true, false)
+                            Children:
+                              - ButtonCanvas4:
+                                  Control: Button
+                                  Properties:
+                                    FontWeight: =FontWeight.Normal
+                                    OnSelect: |-
+                                      =
+                                      Patch(col_sys_test,LookUp(col_sys_test,ID=selectedRecord.ID),
+                                          {
+                                              MMDD_field:Text(selectedRecord.Week_end,"mm/dd") ,
+                                              Electrical_pass:Value(txt_electricalpass.Text),
+                                              Electrical_fail:Value(txt_electricalfail.Text),
+                                              Plumbing_pass:Value(txt_plumbingpass.Text),
+                                              Plumbing_fail:Value(txt_plumbingfail.Text),
+                                              Gas_pass:Value(txt_gaspass.Text),
+                                              Gas_fail:Value(txt_gasfail.Text),
+                                              Week_FPY:RoundUp( (Value(txt_electricalpass.Text) +Value(txt_plumbingpass.Text)+ Value(txt_gaspass.Text))/(Value(txt_electricalpass.Text) +Value(txt_plumbingpass.Text)+ Value(txt_gaspass.Text)+Value(txt_electricalfail.Text) +Value(txt_plumbingfail.Text)+ Value(txt_gasfail.Text))* 100,1),
+                                              RTS_floors:Value(txt_numberoffloors.Text),
+                                              RTS_NCS:Value(txt_numberofnonconformities.Text),
+                                              RTS_AVG:Value(txt_numberofnonconformities.Text/ txt_numberoffloors.Text)
+                                          }
+                                      );
+
+                                      Patch(system_testing_data,LookUp(system_testing_data,ID=selectedRecord.ID),
+                                          {
+                                              //Week_start: LookUp(calendar_list,W_end=Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),W_start),
+                                              MMDD_field:Text(selectedRecord.Week_end,"mm/dd") ,
+                                              Electrical_pass:Value(txt_electricalpass.Text),
+                                              Electrical_fail:Value(txt_electricalfail.Text),
+                                              Plumbing_pass:Value(txt_plumbingpass.Text),
+                                              Plumbing_fail:Value(txt_plumbingfail.Text),
+                                              Gas_pass:Value(txt_gaspass.Text),
+                                              Gas_fail:Value(txt_gasfail.Text),
+                                              Week_FPY:RoundUp( (Value(txt_electricalpass.Text) +Value(txt_plumbingpass.Text)+ Value(txt_gaspass.Text))/(Value(txt_electricalpass.Text) +Value(txt_plumbingpass.Text)+ Value(txt_gaspass.Text)+Value(txt_electricalfail.Text) +Value(txt_plumbingfail.Text)+ Value(txt_gasfail.Text))* 100,1),
+                                              RTS_floors:Value(txt_numberoffloors.Text),
+                                              RTS_NCS:Value(txt_numberofnonconformities.Text),
+                                              RTS_AVG:Value(txt_numberofnonconformities.Text/ txt_numberoffloors.Text)
+                                          }
+                                      );
+
+                                      Set(
+                                          varTTW,
+                                          Average(
+                                              FirstN(
+                                                  Sort(col_sys_test,Week_end,SortOrder.Descending),
+                                                  12
+                                              ),
+                                              Week_FPY
+                                          )
+                                      );
+
+                                      Patch(col_sys_test ,LookUp(col_sys_test,ID=selectedRecord.ID),
+                                          {Week_TTW:varTTW}
+                                      );
+
+                                      Patch(system_testing_data ,LookUp(system_testing_data,ID=selectedRecord.ID),
+                                          {Week_TTW:varTTW}
+                                      );
+
+
+
+
+                                      Reset(txt_electricalfail);
+                                      Reset(txt_electricalpass);
+                                      Reset(txt_electricalfail);
+                                      Reset(txt_plumbingpass);
+                                      Reset(txt_plumbingpass);
+                                      Reset(txt_plumbingfail);
+                                      Reset(txt_gaspass);
+                                      Reset(txt_gasfail);
+                                      Reset(txt_numberoffloors);
+                                      Reset(txt_numberofnonconformities);
+
+
+
+                                      Reset(gal_edit_items );
+                                      Set(selectedRecord,Blank());
+                                    Text: ="Save"
+                                    Visible: =!IsBlank(selectedRecord)
+                                    X: '=Parent.Width/2-Self.Width/2 '
+                                    Y: =40
+                  - DeleteContainer:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =If(And('Records screen'.Size = ScreenSize.Small, Or(newMode, editMode, itemSelected)), 0, 8)
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Visible: =If(deleteMode, true, false)
+                        Width: =0
+                      Children:
+                        - ConfirmDeletionLabel1:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Stretch
+                              BorderColor: =RGBA(89, 0, 0, 1)
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              Text: ="Are you sure you want to delete this record?"
+                        - ConfirmDeleteButtonBarContainer1:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =15
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutWrap: =true
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                              - CancelDeleteButton1:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderColor: =ColorFade(Self.Fill, -15%)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    Fill: =RGBA(39, 113, 194, 1)
+                                    Font: =Font.'Open Sans'
+                                    HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =ColorFade(RGBA(164, 38, 44, 1), -20%)
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: |-
+                                      =UpdateContext({ deleteMode: false, deleteCancelled: true })
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Text: ="Cancel"
+                              - ConfirmDeleteButton1:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderColor: =ColorFade(Self.Fill, -15%)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    Fill: =RGBA(189, 49, 51, 1)
+                                    Font: =Font.'Open Sans'
+                                    HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =ColorFade(RGBA(164, 38, 44, 1), -20%)
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: |-
+                                      =Remove(col_sys_test, LookUp(col_sys_test,ID=selectedRecord.ID));
+                                      Remove(system_testing_data, LookUp(system_testing_data,ID=selectedRecord.ID));
+                                      UpdateContext( { editMode: true, newMode: false, deleteMode: false });
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Text: ="Delete"
+                  - NewContainer:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =If(And('Records screen'.Size = ScreenSize.Small, Or(newMode, editMode, itemSelected)), 0, 8)
+                        Height: =SidebarContainer1.Height
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =20
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =newMode //If(Or(!deleteMode, newMode, !editMode, !itemSelected), true, false)
+                        Width: =0
+                      Children:
+                        - SelectedRecordHeaderContainer1_1:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(255, 255, 255, 1)
+                              FillPortions: =0
+                              Height: =50
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                            Children:
+                              - TextCanvas9_1:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.End
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingLeft: =10
+                                    PaddingRight: =5
+                                    Size: =18
+                                    Text: '="Fiscal Year:" '
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =110
+                              - BackIconButton1_1:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Color: =RGBA(89, 0, 0, 1)
+                                    Height: =50
+                                    Icon: =Icon.ChevronLeft
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    OnSelect: |-
+                                      =UpdateContext({ itemSelected: false })
+                                    PaddingBottom: =12
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =12
+                                    TabIndex: =0
+                                    Visible: =If('Records screen'.Size = ScreenSize.Small, And(!editMode, !newMode, !deleteMode), false)
+                                    Width: =50
+                              - Dropdown2:
+                                  Control: Classic/DropDown
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BorderColor: =Color.White
+                                    ChevronBackground: =RGBA(0, 0, 0, 0.05)
+                                    ChevronFill: =PowerAppsTheme.Colors.Primary
+                                    ChevronHoverBackground: =RGBA(0, 0, 0, 0.05)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Fill: =RGBA(240, 240, 240, 0.8)//RGBA(0, 0, 0, 0.05)
+                                    Font: =Font.'Open Sans'
+                                    HoverFill: =RGBA(0, 0, 0, 0.2)
+                                    Items: =Distinct(Filter(calendar_list,Fiscal_year>=Year(Today())).Fiscal_year,Fiscal_year)
+                                    Items.Value: =Value
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =PowerAppsTheme.Colors.Darker40
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =RGBA(40, 134, 222, 1)
+                                    Size: '=12  '
+                                    Width: =100
+                              - TextCanvas9_2:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.End
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    AutoHeight: =true
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingLeft: =10
+                                    PaddingRight: =5
+                                    Size: =18
+                                    Text: ="Quarter:"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =100
+                              - Dropdown2_1:
+                                  Control: Classic/DropDown
+                                  Properties:
+                                    BorderColor: =Color.White
+                                    ChevronBackground: =RGBA(0, 0, 0, 0.05)
+                                    ChevronFill: =PowerAppsTheme.Colors.Primary
+                                    ChevronHoverBackground: =RGBA(0, 0, 0, 0.05)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Fill: =RGBA(240, 240, 240, 0.8)//RGBA(0, 0, 0, 0.05)
+                                    Font: =Font.'Open Sans'
+                                    HoverFill: =RGBA(0, 0, 0, 0.2)
+                                    Items: =Distinct(Filter(calendar_list,Fiscal_year=Value(Dropdown2.SelectedText.Value)).Fiscal_quarter,Fiscal_quarter)
+                                    Items.Value: =Value
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =PowerAppsTheme.Colors.Darker40
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =RGBA(40, 134, 222, 1)
+                                    Size: '=12  '
+                                    Width: =90
+                              - TextCanvas9_3:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.End
+                                    AutoHeight: =true
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingLeft: =10
+                                    PaddingRight: =5
+                                    Size: =18
+                                    Text: '="Week end date:" '
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =170
+                              - drop_week_end_date:
+                                  Control: Classic/DropDown
+                                  Properties:
+                                    BorderColor: =Color.White
+                                    ChevronBackground: =RGBA(0, 0, 0, 0.05)
+                                    ChevronFill: =PowerAppsTheme.Colors.Primary
+                                    ChevronHoverBackground: =RGBA(0, 0, 0, 0.05)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Fill: =RGBA(240, 240, 240, 0.8)//RGBA(0, 0, 0, 0.05)
+                                    Font: =Font.'Open Sans'
+                                    HoverFill: =RGBA(0, 0, 0, 0.2)
+                                    Items: =Filter(calendar_list,Fiscal_year=Value(Dropdown2.SelectedText.Value),Fiscal_quarter=Value(Dropdown2_1.SelectedText.Value)).W_end
+                                    Items.Value: =field_1
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    PressedFill: =PowerAppsTheme.Colors.Darker40
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =RGBA(40, 134, 222, 1)
+                                    Size: '=12  '
+                                    Width: =150
+                              - TextCanvas9_4:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    AutoHeight: =true
+                                    LayoutMaxHeight: =
+                                    LayoutMaxWidth: =
+                                    PaddingLeft: =10
+                                    Size: =18
+                                    Text: =
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =210
+                        - cont_system_testing_1:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Height: =190
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Width: =Parent.Width
+                            Children:
+                              - TextCanvas1_7:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="Electrical"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =100
+                                    X: =22
+                                    Y: =112
+                              - TextCanvas6_2:
+                                  Control: Text
+                                  Properties:
+                                    FontColor: =RGBA(0, 0, 0, 1)
+                                    Height: =60
+                                    PaddingBottom: =10
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =10
+                                    Size: =22
+                                    Text: ="System Testing"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =303
+                              - TextCanvas7_3:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: ="/"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =31
+                                    X: =72
+                                    Y: =144
+                              - TextCanvas8_1:
+                                  Control: Text
+                                  Properties:
+                                    PaddingBottom: =0
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =0
+                                    Text: ="(pass/fail)"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =186
+                                    Y: =45
+                              - RecordsListSeparator1_3:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =PowerAppsTheme.Colors.Primary
+                                    Height: =1
+                                    Width: =Parent.Width
+                                    Y: =82
+                              - TextCanvas1_11:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="Plumbing"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =100
+                                    X: =224
+                                    Y: =112
+                              - TextCanvas7_4:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: ="/"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =31
+                                    X: =274
+                                    Y: =144
+                              - TextCanvas1_12:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="Gas"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =100
+                                    X: =428
+                                    Y: =112
+                              - TextCanvas7_6:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: ="/"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =31
+                                    X: =478
+                                    Y: =144
+                              - Rectangle7_4:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =153
+                                    Y: =90
+                              - Rectangle7_5:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =355
+                                    Y: =90
+                              - Rectangle7_6:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =559
+                                    Y: =90
+                              - TextCanvas1_13:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="First Time Rate"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =143
+                                    X: =630
+                                    Y: =112
+                              - txt_firstpassyield_1:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: =IfError(RoundUp( (Value(txt_electricalpass_1.Text) +Value(txt_plumbingpass_1.Text)+ Value(txt_gaspass_1.Text))/(Value(txt_electricalpass_1.Text) +Value(txt_plumbingpass_1.Text)+ Value(txt_gaspass_1.Text)+Value(txt_electricalfail_1.Text) +Value(txt_plumbingfail_1.Text)+ Value(txt_gasfail_1.Text))* 100,1) & "%","")
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =143
+                                    X: =630
+                                    Y: =144
+                              - txt_electricalpass_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(40, 134, 222, 0.29)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =22
+                                    Y: =144
+                              - txt_electricalfail_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(40, 134, 222, 0.29)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =103
+                                    Y: =144
+                              - txt_plumbingpass_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(40, 134, 222, 0.29)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =224
+                                    Y: =144
+                              - txt_plumbingfail_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(40, 134, 222, 0.29)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =305
+                                    Y: =144
+                              - txt_gaspass_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(40, 134, 222, 0.29)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =428
+                                    Y: =144
+                              - txt_gasfail_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(40, 134, 222, 0.29)
+                                    PaddingLeft: =5
+                                    Width: =50
+                                    X: =509
+                                    Y: =144
+                        - cont_readytoship_1:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Height: =170
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Width: =Parent.Width
+                              Y: =210
+                            Children:
+                              - TextCanvas6_3:
+                                  Control: Text
+                                  Properties:
+                                    FontColor: =RGBA(0, 0, 0, 1)
+                                    Height: =60
+                                    PaddingBottom: =10
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    PaddingTop: =10
+                                    Size: =22
+                                    Text: ="Ready To Ship"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =303
+                              - RecordsListSeparator1_4:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =PowerAppsTheme.Colors.Primary
+                                    Height: =1
+                                    Width: =Parent.Width
+                                    Y: =60
+                              - Rectangle7_7:
+                                  Control: Rectangle
+                                  Properties:
+                                    BorderColor: =RGBA(89, 0, 0, 1)
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Width: =71
+                                    X: =559
+                                    Y: =90
+                              - TextCanvas1_16:
+                                  Control: Text
+                                  Properties:
+                                    Size: =18
+                                    Text: ="NCs per Floor"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =143
+                                    X: =630
+                                    Y: =92
+                              - TextCanvas7_7:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    FontColor: =RGBA(53, 61, 63, 1)
+                                    Size: =20
+                                    Text: =IfError(RoundUp(Value(txt_numberofnonconformities_1.Text)/ Value(txt_numberoffloors_1.Text),0),"")   //If(IsBlank(gal_edit_items.Selected.RTS_floors),"", RoundUp(txt_numberofnonconformities.Value/ txt_numberoffloors.Value,0))
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =143
+                                    X: =630
+                                    Y: =124
+                              - TextCanvas1_15:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Number of non-conformances"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =285
+                                    X: =253
+                                    Y: =92
+                              - TextCanvas1_14:
+                                  Control: Text
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Start
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Number of Floors"
+                                    VerticalAlign: =VerticalAlign.Middle
+                                    Width: =202
+                                    X: =22
+                                    Y: =92
+                              - txt_numberoffloors_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.28)
+                                    PaddingLeft: =5
+                                    Width: =64
+                                    X: =22
+                                    Y: =124
+                              - txt_numberofnonconformities_1:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(122, 138, 143, 1)
+                                    BorderThickness: =1
+                                    Default: =""
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    HoverFill: =RGBA(39, 113, 194, 0.28)
+                                    PaddingLeft: =5
+                                    Width: =64
+                                    X: =253
+                                    Y: =124
+                        - Container4_1:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0.5
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                            Children:
+                              - ButtonCanvas4_1:
+                                  Control: Button
+                                  Properties:
+                                    OnSelect: |-
+                                      =Set(selectedDate, DateValue(drop_week_end_date.SelectedText.Value));
+
+                                      If(
+                                          selectedDate > Today(),
+                                          Notify("Week end date cannot be in the future.", NotificationType.Error),
+
+                                          !IsBlank(
+                                              LookUp(system_testing_data, 
+                                                  Week_end = selectedDate && Plant_ID = PID && Facility_ID = Value(drop_facility_main.SelectedText.Value)
+                                              )
+                                          ),
+                                          Notify("A record for the selected week already exists.", NotificationType.Error),
+
+                                          Patch(col_sys_test,Defaults(col_sys_test),
+                                      			{
+                                      				Title: PID & "." & drop_facility_main.SelectedText.Value & "." & Text(Date(Year(drop_week_end_date.SelectedText.Value), Month(drop_week_end_date.SelectedText.Value), Day(drop_week_end_date.SelectedText.Value)), "yyyymmdd"),
+                                      				Plant_ID: PID,
+                                      				Facility_ID: Value(drop_facility_main.SelectedText.Value),
+                                      				Week_start: LookUp(calendar_list,W_end=Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),W_start),
+                                      				Week_end: Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),
+                                      				MMDD_field:Text(Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),"mm/dd") ,
+                                      				Period:Year(drop_week_end_date.SelectedText.Value) & "-" & Text(Month(drop_week_end_date.SelectedText.Value),"mm"),
+                                      				Period_year:Year(drop_week_end_date.SelectedText.Value),
+                                      				Fiscal_year:Value(Dropdown2.SelectedText.Value),
+                                      				Fiscal_quarter:Value(Dropdown2_1.SelectedText.Value),
+                                      				Period_month:Month(drop_week_end_date.SelectedText.Value),
+                                      				Week_number:LookUp(calendar_list,W_end=Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),Week),
+                                      				Electrical_pass:Value(txt_electricalpass_1.Text),
+                                      				Electrical_fail:Value(txt_electricalfail_1.Text),
+                                      				Plumbing_pass:Value(txt_plumbingpass_1.Text),
+                                      				Plumbing_fail:Value(txt_plumbingfail_1.Text),
+                                      				Gas_pass:Value(txt_gaspass_1.Text),
+                                      				Gas_fail:Value(txt_gasfail_1.Text),
+                                      				Week_FPY:IfError( RoundUp( (Value(txt_electricalpass_1.Text) +Value(txt_plumbingpass_1.Text)+ Value(txt_gaspass_1.Text))/(Value(txt_electricalpass_1.Text) +Value(txt_plumbingpass_1.Text)+ Value(txt_gaspass_1.Text)+Value(txt_electricalfail_1.Text) +Value(txt_plumbingfail_1.Text)+ Value(txt_gasfail_1.Text))* 100,1),""),
+                                      				Goal_FPY:0.9,
+                                      				RTS_floors:Value(txt_numberoffloors_1.Text),
+                                      				RTS_NCS:Value(txt_numberofnonconformities_1.Text),
+                                      				RTS_AVG:IfError(Value(txt_numberofnonconformities_1.Text/ txt_numberoffloors_1.Text),"")
+                                      			}
+                                      		);
+
+                                      		Patch(system_testing_data ,Defaults(system_testing_data),
+                                      			{
+                                      				Title: PID & "." & drop_facility_main.SelectedText.Value & "." & Text(Date(Year(drop_week_end_date.SelectedText.Value), Month(drop_week_end_date.SelectedText.Value), Day(drop_week_end_date.SelectedText.Value)), "yyyymmdd"),
+                                      				Plant_ID: PID,
+                                      				Facility_ID: Value(drop_facility_main.SelectedText.Value),
+                                      				Week_start: LookUp(calendar_list,W_end=Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),W_start),
+                                      				Week_end: Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),
+                                      				MMDD_field:Text(Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),"mm/dd") ,
+                                      				Period:Year(drop_week_end_date.SelectedText.Value) & "-" & Month(drop_week_end_date.SelectedText.Value),
+                                      				Period_year:Year(drop_week_end_date.SelectedText.Value),
+                                      				Fiscal_year:Value(Dropdown2.SelectedText.Value),
+                                      				Fiscal_quarter:Value(Dropdown2_1.SelectedText.Value),
+                                      				Period_month:Month(drop_week_end_date.SelectedText.Value),
+                                      				Week_number:LookUp(calendar_list,W_end=Date(Year(drop_week_end_date.SelectedText.Value),Month(drop_week_end_date.SelectedText.Value),Day(drop_week_end_date.SelectedText.Value)),Week),
+                                      				Electrical_pass:Value(txt_electricalpass_1.Text),
+                                      				Electrical_fail:Value(txt_electricalfail_1.Text),
+                                      				Plumbing_pass:Value(txt_plumbingpass_1.Text),
+                                      				Plumbing_fail:Value(txt_plumbingfail_1.Text),
+                                      				Gas_pass:Value(txt_gaspass_1.Text),
+                                      				Gas_fail:Value(txt_gasfail_1.Text),
+                                      				Week_FPY:IfError( RoundUp( (Value(txt_electricalpass_1.Text) +Value(txt_plumbingpass_1.Text)+ Value(txt_gaspass_1.Text))/(Value(txt_electricalpass_1.Text) +Value(txt_plumbingpass_1.Text)+ Value(txt_gaspass_1.Text)+Value(txt_electricalfail_1.Text) +Value(txt_plumbingfail_1.Text)+ Value(txt_gasfail_1.Text))* 100,1),""),
+                                      				Goal_FPY:0.9,
+                                      				RTS_floors:Value(txt_numberoffloors_1.Text),
+                                      				RTS_NCS:Value(txt_numberofnonconformities_1.Text),
+                                      				RTS_AVG:IfError(Value(txt_numberofnonconformities_1.Text/ txt_numberoffloors_1.Text),"")
+                                      			}
+                                      		);
+
+                                      		Reset(txt_electricalfail_1);
+                                      		Reset(txt_electricalpass_1);
+                                      		Reset(txt_electricalfail_1);
+                                      		Reset(txt_plumbingpass_1);
+                                      		Reset(txt_plumbingpass_1);
+                                      		Reset(txt_plumbingfail_1);
+                                      		Reset(txt_gaspass_1);
+                                      		Reset(txt_gasfail_1);
+                                      		Reset(txt_numberoffloors_1);
+                                      		Reset(txt_numberofnonconformities_1);
+
+
+                                      		Set(
+                                      			varTTW,
+                                      			Average(
+                                      				FirstN(
+                                      					Sort(col_sys_test,Week_end,SortOrder.Descending),
+                                      					12
+                                      				),
+                                      				Week_FPY
+                                      			)
+                                      		);
+
+                                      		Patch(col_sys_test ,LookUp(col_sys_test,Title=PID & "." & drop_facility_main.SelectedText.Value & "." & Text(Date(Year(drop_week_end_date.SelectedText.Value), Month(drop_week_end_date.SelectedText.Value), Day(drop_week_end_date.SelectedText.Value)), "yyyymmdd")),
+                                      			{Week_TTW:varTTW}
+                                      		);
+
+                                      		Patch(system_testing_data,LookUp(system_testing_data,Title=PID & "." & drop_facility_main.SelectedText.Value & "." & Text(Date(Year(drop_week_end_date.SelectedText.Value), Month(drop_week_end_date.SelectedText.Value), Day(drop_week_end_date.SelectedText.Value)), "yyyymmdd")),
+                                      			{Week_TTW:varTTW}
+                                      		);
+
+
+                                      		Back()
+                                      )
+                                    Text: ="Save"
+                                    X: =476
+                                    Y: =40
+                              - ButtonCanvas3:
+                                  Control: Button
+                                  Properties:
+                                    OnSelect: =UpdateContext({newMode:false,editMode:true,deleteMode:false})
+                                    Text: ="Cancel"
+                                    X: =300
+                                    Y: =40

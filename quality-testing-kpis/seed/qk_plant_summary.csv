@@ -1,0 +1,4 @@
+Title,Plant_ID,Plant_name,Plant_Region,Total_tests,Total_pass,Floors_tested,Floors_clean,Homes_tested,Total_defects,Total_cost,TTW_FPY,FTT_pct,Window_start_key,Window_end_key,Weeks_counted,Updated_at,Updated_by
+9001,9001,ZZ SAMPLE - delete after import,ZZ SAMPLE,0,0,0,0,0,0,0.00,0.0,0.0,20260101,20260101,0,2026-01-01 00:00,seed@example.com
+9002,9002,ZZ SAMPLE - delete after import,ZZ SAMPLE,0,0,0,0,0,0,0.00,0.0,0.0,20260101,20260101,0,2026-01-01 00:00,seed@example.com
+9003,9003,ZZ SAMPLE - delete after import,ZZ SAMPLE,0,0,0,0,0,0,0.00,0.0,0.0,20260101,20260101,0,2026-01-01 00:00,seed@example.com

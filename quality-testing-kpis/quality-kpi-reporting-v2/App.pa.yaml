@@ -1,0 +1,556 @@
+App:
+  Properties:
+    Formulas: |-
+      =// ===== Champion Home Builders brand chrome (CLAUDE.md §10) =====
+      ChampionBlue = RGBA(2, 66, 109, 1);
+      GoldAccent = RGBA(255, 181, 0, 1);
+      LightAqua = RGBA(156, 212, 234, 1);
+      AlertRed = RGBA(225, 82, 66, 1);
+
+      // Test series - fixed slots, assigned by entity, never cycled
+      ElecColor = RGBA(27, 111, 168, 1);
+      PlumbColor = RGBA(235, 104, 52, 1);
+      GasColor = RGBA(27, 175, 122, 1);
+
+      // Status colors
+      StatusGoodColor = RGBA(12, 163, 12, 1);
+      StatusWarningColor = RGBA(255, 181, 0, 1);
+      StatusSeriousColor = RGBA(236, 131, 90, 1);
+      StatusCriticalColor = RGBA(225, 82, 66, 1);
+      StatusNoDataColor = RGBA(225, 224, 217, 1);
+
+      // Neutral chrome - industrial/utilitarian data-dense palette
+      PageBg = RGBA(243, 244, 242, 1);
+      CardBg = RGBA(255, 255, 255, 1);
+      TextPrimary = RGBA(11, 11, 11, 1);
+      TextSecondary = RGBA(82, 81, 78, 1);
+      TextMuted = RGBA(137, 135, 129, 1);
+      GridLine = RGBA(225, 224, 217, 1);
+      BaselineColor = RGBA(195, 194, 183, 1);
+      CardBorder = RGBA(11, 11, 11, 0.1);
+
+      // ===== Status helpers (CLAUDE.md §7, §10) =====
+      // goal must be passed explicitly (varGoalFPY for FPY/Test_FPY/TTW, varGoalFTT for FTT_pct) -
+      // never hardcoded, so FTT is graded against its own configured goal, not FPY's.
+      StatusOf(value: Number, goal: Number, consecutiveWeeksBelow: Number): Text =
+          If(IsBlank(value), "nodata",
+             value >= goal, "good",
+             value >= goal - 5, "warning",
+             consecutiveWeeksBelow >= 3, "critical",
+             "serious");
+
+      StatusColorOf(status: Text): Color =
+          If(status = "good", StatusGoodColor,
+             status = "warning", StatusWarningColor,
+             status = "serious", StatusSeriousColor,
+             status = "critical", StatusCriticalColor,
+             StatusNoDataColor);
+
+      StatusGlyphOf(status: Text): Text =
+          If(status = "good", "▲",
+             status = "warning", "▲",
+             status = "serious", "▼",
+             status = "critical", "▼",
+             "–");
+
+      StatusLabelOf(status: Text): Text =
+          If(status = "good", "At target",
+             status = "warning", "Near target",
+             status = "serious", "Below target",
+             status = "critical", "Below 3+ wks",
+             "No data");
+
+      TestColorOf(testId: Number): Color =
+          If(testId = 1, ElecColor,
+             testId = 2, PlumbColor,
+             testId = 3, GasColor,
+             ChampionBlue);
+
+      // ===== Responsive breakpoint (CLAUDE.md §10) - App.Width against the documented
+      // App.SizeBreakpoints [600, 900, 1200]. GroupContainer has no Parent.Size output in
+      // this template, so every screen branches on this named formula instead.
+      IsWideLayout = App.Width >= 1200;
+
+      // ===== StartScreen routing (CLAUDE.md §5) - StartScreen disallows global variables
+      // entirely, so these two named formulas independently re-derive the same
+      // Plant_ID/Role resolution App.OnStart performs into varPID/varRole, purely from
+      // data, so StartScreen can branch on them without touching a Set() variable.
+      //
+      // KNOWN, ACCEPTED delegation warnings (on StartScreen / these formulas only): the
+      // compiler flags any non-delegable named formula referenced from StartScreen,
+      // regardless of actual data size - there's no real "delegation" concept for one-time
+      // screen selection. sys_test_access is a small, bounded personnel roster (one row per
+      // registered user), never a scaling fact table like qk_home - CLAUDE.md §3
+      // non-negotiable #5 is written with those large tables in mind. Deliberate exception;
+      // do not try to "fix" these warnings away without re-checking they're still just this.
+      //
+      // MUST query sys_test_access directly, NOT col_access. col_access is created by
+      // ClearCollect in App.OnStart, but named formulas backing StartScreen evaluate
+      // independently of OnStart - at that point col_access is still empty, StartAccessRow
+      // comes back blank, and every Corporate user gets routed to scr_Dashboard instead of
+      // scr_CorporateHome. Pointing this at col_access to silence the delegation warnings
+      // above is exactly the regression that caused that bug. Leave it on the data source.
+      StartAccessRow =
+          LookUp(Filter(sys_test_access, Active = true),
+              Lower(Trim(Inspector_email)) = Lower(Trim(User().Email)));
+
+      IsStartCorporate =
+          If(!IsBlank(StartAccessRow),
+              StartAccessRow.Plant_ID = 0,
+              Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation, 3)) = 0
+          );
+
+      IsStartAdmin = Coalesce(StartAccessRow.Role, "Inspector") = "Administrator";
+
+      // ===== scr_Entry week picker (gal_week_picker) - the 10 consecutive weeks running
+      // from 1 week ahead of today back to 9 weeks before that. Recomputes live off
+      // col_calendar, so it never drifts from Today() across a long-running session.
+      EntryWeekAnchorEnd = Min(Filter(col_calendar, W_end >= DateAdd(Today(), 7, TimeUnit.Days)), W_end);
+
+      BuildParetoDerived(): Void = {
+          ClearCollect(col_pareto_share,
+              AddColumns(col_pareto_sorted As SortRow,
+                  Share_pct,
+                  If(varParetoTotal > 0, Round(SortRow.Qty_Sum / varParetoTotal * 100, 1), 0)
+              )
+          );
+
+          ClearCollect(col_pareto,
+              AddColumns(col_pareto_share As PRow,
+                  Cumulative_pct,
+                  If(varParetoTotal > 0,
+                      Round(
+                          Sum(Filter(col_pareto_share, Qty_Sum >= PRow.Qty_Sum), Qty_Sum)
+                              / varParetoTotal * 100,
+                      1),
+                      0)
+              )
+          )
+      };
+
+      // ===== Per-test trend series (img_trend_db, scr_Dashboard) - one week's Test_FPY for
+      // one test, read from col_test_sum (qk_test_summary), which RunFullPlantLoad already
+      // loads for the Q matrix. col_test_sum is scoped to plant + window only, NOT to
+      // facility, so the facility branch here is required - and it is a branch, never an
+      // optional guard inside one predicate, matching CLAUDE.md §3 non-negotiable #3 (this
+      // is a local collection, but keeping one shape everywhere avoids a copy-paste of the
+      // wrong pattern onto a real data source later).
+      //
+      // Weighted (Sum of Pass / Sum of Homes_tested), never an average of each facility's
+      // own percentage - same rule Week_FPY itself follows (CLAUDE.md §7).
+      // Returns Blank() when the test was not run that week, so the series breaks the point
+      // out rather than plotting a misleading 0.
+      TrendTestFPY(weekKey: Number, testId: Number): Number =
+          With({rows:
+                  If(IsBlank(varFacility),
+                      Filter(col_test_sum, Week_key = weekKey && Test_ID = testId),
+                      Filter(col_test_sum, Week_key = weekKey && Test_ID = testId &&
+                          Facility_ID = varFacility))},
+              If(Sum(rows, Homes_tested) > 0,
+                  Round(Sum(rows, Pass) / Sum(rows, Homes_tested) * 100, 1),
+                  Blank()));
+
+      // ===== Pareto bar drill-down (cnt_drill_overlay, scr_Dashboard) - a 12-week trend
+      // for the single defect (or type) whose bar was tapped in gal_dash_pareto_bars.
+      // Reads col_defect_window, which RunFullPlantLoad already loaded to build the Pareto
+      // itself, so the drill-down costs no extra SharePoint query and every aggregate here
+      // runs over a local collection (CLAUDE.md §3 non-negotiable #7).
+      //
+      // Week axis comes from varWeekViewWindowed (qk_week_summary, already facility-scoped)
+      // rather than from the defect rows themselves - so a week where this defect never
+      // occurred still plots as a 0, instead of silently vanishing from the line.
+      BuildDefectDrill(): Void = {
+          ClearCollect(col_drill_week_keys,
+              Sort(
+                  FirstN(
+                      Sort(Distinct(varWeekViewWindowed, Week_key), Value, SortOrder.Descending),
+                      12),
+                  Value, SortOrder.Ascending));
+
+          ClearCollect(col_drill_trend,
+              ForAll(Sequence(CountRows(col_drill_week_keys)) As S,
+                  {
+                      idx: S.Value,
+                      // Sum of Qty - the total number of defect occurrences - NOT a count of
+                      // the rows (= the homes) carrying the defect. qk_home_defect is one row
+                      // per home x defect with Qty aggregating repeats (CLAUDE.md §4), so
+                      // three reverse-polarity receptacles on one home is one row of Qty 3
+                      // and must plot as 3, not 1.
+                      // Coalesce(Qty, 1): Sum() skips blank cells, so a row saved with an
+                      // empty Qty would contribute 0 and the defect would vanish from the
+                      // trend entirely. A recorded defect is at minimum one occurrence.
+                      qty:
+                          If(varDrillLevel = "type",
+                              Coalesce(Sum(Filter(col_defect_window,
+                                  Week_key = Index(col_drill_week_keys, S.Value).Value &&
+                                  Type_ID = varDrillTypeID), Coalesce(Qty, 1)), 0),
+                              Coalesce(Sum(Filter(col_defect_window,
+                                  Week_key = Index(col_drill_week_keys, S.Value).Value &&
+                                  Defect_ID = varDrillDefectID), Coalesce(Qty, 1)), 0)),
+                      lbl:
+                          Text(
+                              LookUp(col_week,
+                                  Week_key = Index(col_drill_week_keys, S.Value).Value,
+                                  Week_end),
+                              "[$-en-US]mm/dd")
+                  }
+              )
+          );
+
+          // Same +15%-headroom convention as varParetoAxisMax - never a fixed range, and
+          // never 0, so the polyline divisor below is always safe.
+          Set(varDrillMax, Max(Max(col_drill_trend, qty) * 1.15, 1));
+          Set(varDrillTotal, Sum(col_drill_trend, qty))
+      };
+
+      // ===== Single load routine (CLAUDE.md §6.2), as a UDF so it can be called from
+      // App.OnStart directly - Select() is not permitted inside the App object's own
+      // properties, so this consolidates btn_load_plant + btn_refresh_dashboard +
+      // btn_build_pareto's chained logic (scr_Dashboard) into one callable unit. Those
+      // three hidden buttons keep their own bodies unchanged for their other call sites
+      // (drp_plant.OnChange, the refresh icon, tabs_pareto_level.OnChange).
+      RunFullPlantLoad(): Void = {
+          Set(varCutoffDate, DateAdd(Today(), -varWindowMonths, TimeUnit.Months));
+          Set(varCutoffKey, Value(Text(varCutoffDate, "yyyymmdd")));
+
+          ClearCollect(col_week,
+              Filter(qk_week_summary, Plant_ID = varPID && Week_key >= varCutoffKey));
+
+          ClearCollect(col_test_sum,
+              Filter(qk_test_summary, Plant_ID = varPID && Week_key >= varCutoffKey));
+
+          Clear(col_homes);
+          Clear(col_home_defects);
+          Set(varLoadedAt, Now());
+
+          If(IsBlank(varFacility),
+              Set(varWeekView, col_week),
+              Set(varWeekView, Filter(col_week, Facility_ID = varFacility))
+          );
+
+          // No timeline filter on the dashboard - the window is always the full
+          // Window_months range from qk_config (6 months), already applied by the
+          // varCutoffKey predicate on col_week above.
+          Set(varWeekViewWindowed, varWeekView);
+
+          Set(varChartWeeks,
+              Sort(varWeekViewWindowed, Week_key, SortOrder.Ascending));
+
+          // Row-indexed series for the SVG trend chart (img_trend_db, scr_Dashboard).
+          // The SVG computes each point's x from a 1..n position; varChartWeeks has no
+          // index column, so materialise one here. Local collection - no delegation.
+          // Column names (idx/fpy/ftt/elec/plumb/gas/lbl) match what the chart formula reads.
+          ClearCollect(col_trend_chart,
+              ForAll(Sequence(CountRows(varChartWeeks)) As S,
+                  {
+                      idx: S.Value,
+                      fpy: Index(varChartWeeks, S.Value).Week_FPY,
+                      ftt: Index(varChartWeeks, S.Value).FTT_pct,
+                      elec: TrendTestFPY(Index(varChartWeeks, S.Value).Week_key, 1),
+                      plumb: TrendTestFPY(Index(varChartWeeks, S.Value).Week_key, 2),
+                      gas: TrendTestFPY(Index(varChartWeeks, S.Value).Week_key, 3),
+                      lbl: Text(Index(varChartWeeks, S.Value).Week_end, "[$-en-US]mm/dd")
+                  }
+              )
+          );
+
+          // Dynamic y-axis floor for img_trend_db. The chart previously hardcoded a floor
+          // of 30 and clamped anything below it, which was survivable while only the two
+          // composite lines (FPY/FTT) were plotted. With the three per-test lines added it
+          // is not: a single test can crater well below 30 in a bad week, and that dip is
+          // the entire reason those lines are on the chart - clamping would flatten a 12%
+          // Gas week onto the axis and make it indistinguishable from a 30% one.
+          //
+          // Round down to the next 10 below the lowest plotted value, one step lower again
+          // for headroom, never below 0. Min(table, column) skips blank rows; Coalesce
+          // covers a column that is blank for every week (a test never run this window).
+          //
+          // ftt is deliberately NOT in this Min. The chart no longer plots it, and FTT runs
+          // far below FPY by construction (~66% against ~87% at the same quality level -
+          // CLAUDE.md §7), so including it would drag the floor ~20 points below anything
+          // actually drawn and squash all four live series into the top of the plot.
+          Set(varTrendFloor,
+              Max(0,
+                  RoundDown(
+                      Min(
+                          Coalesce(Min(col_trend_chart, fpy), 100),
+                          Coalesce(Min(col_trend_chart, elec), 100),
+                          Coalesce(Min(col_trend_chart, plumb), 100),
+                          Coalesce(Min(col_trend_chart, gas), 100),
+                          varGoalFPY
+                      ) / 10, 0) * 10 - 10));
+
+          // The plant's own qk_plant_summary row - source for the dashboard TTW tile.
+          // Week_TTW on qk_week_summary is never written by this app, so the tile read
+          // blank/nodata for its entire life until this.
+          Set(varPlantSummary, LookUp(qk_plant_summary, Plant_ID = varPID));
+
+          Set(varLatestWeek,
+              First(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending)));
+
+          Set(varPriorWeek,
+              Last(FirstN(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending), 2)));
+
+          Set(varConsecBelowFPY,
+              CountRows(Filter(
+                  FirstN(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending), 3),
+                  Week_FPY < varGoalFPY)));
+
+          Set(varConsecBelowFTT,
+              CountRows(Filter(
+                  FirstN(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending), 3),
+                  FTT_pct < varGoalFTT)));
+
+          If(IsBlank(varFacility),
+              ClearCollect(col_defect_window,
+                  Filter(qk_home_defect, Plant_ID = varPID && Week_key >= varCutoffKey)),
+              ClearCollect(col_defect_window,
+                  Filter(qk_home_defect, Plant_ID = varPID && Week_key >= varCutoffKey &&
+                      Facility_ID = varFacility))
+          );
+
+          // GroupBy's nested-table column (Rows) does not resolve reliably in this
+          // validator - use the same Sum(Filter(...), ...) pattern already proven below
+          // for col_by_test's Weighted column instead, iterating the loaded taxonomy
+          // collections (col_type / col_defect) rather than grouping col_defect_window.
+          If(varParetoLevel = "type",
+              ClearCollect(col_pareto_raw,
+                  Filter(
+                      ForAll(col_type As Tx,
+                          {
+                              Type_ID: Value(Tx.Title),
+                              Defect_ID: Blank(),
+                              Pareto_name: Tx.Type_name,
+                              // Total defect occurrences (Sum of Qty), never a count of the
+                              // rows/homes carrying the defect - see the note on col_drill_trend.
+                              Qty_Sum: Sum(Filter(col_defect_window, Type_ID = Value(Tx.Title)), Coalesce(Qty, 1))
+                          }
+                      ),
+                      Qty_Sum > 0
+                  )
+              ),
+              ClearCollect(col_pareto_raw,
+                  Filter(
+                      ForAll(col_defect As Dx,
+                          {
+                              Type_ID: Blank(),
+                              Defect_ID: Value(Dx.Title),
+                              Pareto_name: Dx.Defect_name,
+                              Qty_Sum: Sum(Filter(col_defect_window, Defect_ID = Value(Dx.Title)), Coalesce(Qty, 1))
+                          }
+                      ),
+                      Qty_Sum > 0
+                  )
+              )
+          );
+
+          Set(varParetoTotal, Sum(col_pareto_raw, Qty_Sum));
+
+          ClearCollect(col_pareto_sorted, SortByColumns(col_pareto_raw, "Qty_Sum", SortOrder.Descending));
+
+          BuildParetoDerived();
+
+          // Axis scale for the custom bar-gallery Pareto (cnt_pareto, scr_Dashboard) -
+          // max of the displayed Share_pct values + 10% headroom, never a fixed 0-100 range.
+          Set(varParetoAxisMax, Max(Max(col_pareto, Share_pct) * 1.1, 1));
+
+          ClearCollect(col_by_test,
+              ForAll(col_test As T,
+                  {
+                      Test_name: T.Test_name,
+                      Test_ID: Value(T.Title),
+                      // Cost of poor quality, in dollars - this replaced the severity-weighted
+                      // index. Defect_cost is denormalised onto qk_home_defect at save time
+                      // (scr_Entry), exactly as Severity is, so a week's dollars are frozen at
+                      // the cost in effect when the defect was recorded and never reprice when
+                      // an admin edits the taxonomy.
+                      // The LookUp fallback covers rows written BEFORE the stamp existed: they
+                      // have a blank Defect_cost and would otherwise total $0. It reads
+                      // col_defect_all, not col_defect, so a deactivated defect still prices.
+                      // Once history is re-saved the stamp wins and the fallback stops firing.
+                      Weighted: Sum(Filter(col_defect_window, Test_ID = Value(T.Title)),
+                          Coalesce(Qty, 1) *
+                              Coalesce(Defect_cost,
+                                  LookUp(col_defect_all, Value(Title) = Defect_ID, Defect_cost),
+                                  0))
+                  }
+              )
+          );
+
+          // Axis scale for the custom bar-gallery Defects-by-Test chart (cnt_catchart) -
+          // same +10%-headroom convention as varParetoAxisMax above.
+          Set(varByTestAxisMax, Max(Max(col_by_test, Weighted) * 1.1, 1))
+      };
+
+      // ===== scr_CorporateHome load routine - Corporate users (varPID = 0) land on a
+      // region x plant comparison instead of a single plant's dashboard. Deliberately
+      // scoped to qk_week_summary only (never qk_home/qk_home_defect) - a 12-week window
+      // across every plant stays small regardless of plant count, unlike the home/defect
+      // drill-down data CLAUDE.md §13 excludes as a later, Dataverse-scale phase.
+      // Avoids GroupBy's nested-table column (see the note in RunFullPlantLoad above) -
+      // same ForAll+Filter pattern instead.
+      LoadCorporateHome(): Void = {
+          // Reads qk_plant_summary - ONE row per plant (~40) - instead of the old unbounded
+          // Filter(qk_week_summary, Week_key >= cutoff) across every plant. That query returned
+          // one row per plant x facility x week (~720 for 40 plants), which silently truncated
+          // at the app's data row limit: no delegation warning fires because the query IS
+          // delegable, so every plant's KPI was quietly computed over a partial set.
+          // qk_plant_summary is maintained by btn_rebuild_rollups (scr_Entry) on every save.
+          ClearCollect(col_corp_plant_sum, qk_plant_summary);
+
+          // Plant_List stays the authoritative roster - one row per plant x facility, so
+          // consolidate to plants. Taking the roster from here rather than from the summary
+          // list means a plant that has NEVER reported still appears, as 'no data', instead of
+          // silently vanishing - a silent plant is exactly the one corporate needs to see.
+          ClearCollect(col_corp_plant_roster, Distinct(col_plants, Plant_ID));
+
+          ClearCollect(col_corp_plants,
+              ForAll(col_corp_plant_roster As PR,
+                  {
+                      Plant_ID: PR.Value,
+                      Plant_Name: LookUp(col_plants, Plant_ID = PR.Value, Plant_Names),
+                      Plant_Region: LookUp(col_plants, Plant_ID = PR.Value, Plant_Region)
+                  }
+              )
+          );
+
+          // Left-join the roster to the summary. Plant_Pass/Plant_Tests carry through as the
+          // weighted components so the region roll-up below stays Sum(pass)/Sum(tests) and
+          // never becomes a mean of plant percentages (CLAUDE.md §7).
+          ClearCollect(col_corp_plant_metrics,
+              ForAll(col_corp_plants As CP,
+                  {
+                      Plant_ID: CP.Plant_ID,
+                      Plant_Name: CP.Plant_Name,
+                      Plant_Region: CP.Plant_Region,
+                      Plant_Pass:  Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Total_pass), 0),
+                      Plant_Tests: Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Total_tests), 0),
+                      // FTT components. The region figure MUST be built from these, not from an
+                      // average of each plant's Plant_FTT - otherwise a 4-floor plant swings the
+                      // region as hard as a 400-floor one (CLAUDE.md §7).
+                      Plant_Floors_clean:  Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Floors_clean), 0),
+                      Plant_Floors_tested: Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Floors_tested), 0),
+                      // Read the stored percentage rather than recomputing - one definition,
+                      // written once, so the corporate card and the plant's own dashboard tile
+                      // cannot drift apart.
+                      Plant_TTW: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, TTW_FPY),
+                      Plant_FTT: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_pct),
+                      Plant_Weeks: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Weeks_counted),
+                      Plant_Updated: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Updated_at),
+                      // Days since this plant last recomputed. Blank = never reported.
+                      Plant_Stale_days:
+                          If(IsBlank(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Updated_at)),
+                              Blank(),
+                              DateDiff(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Updated_at),
+                                  Now(), TimeUnit.Days))
+                  }
+              )
+          );
+
+          ClearCollect(col_corp_region_roster, Distinct(col_corp_plant_metrics, Plant_Region));
+
+          ClearCollect(col_corp_regions_raw,
+              ForAll(col_corp_region_roster As RR,
+                  {
+                      Region_Name: RR.Value,
+                      Region_Pass: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Pass),
+                      Region_Tests: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Tests),
+                      Region_Floors_clean: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Floors_clean),
+                      Region_Floors_tested: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Floors_tested)
+                  }
+              )
+          );
+          ClearCollect(col_corp_regions,
+              AddColumns(col_corp_regions_raw As RG,
+                  // Weighted region FTT - floors passing all three / floors fully tested,
+                  // summed across the region's plants. Region_TTW is kept alongside it so the
+                  // FPY view is one binding away if corporate wants it back.
+                  Region_FTT,
+                      If(RG.Region_Floors_tested > 0,
+                          Round(RG.Region_Floors_clean / RG.Region_Floors_tested * 100, 1), Blank()),
+                  Region_TTW,
+                      If(RG.Region_Tests > 0, Round(RG.Region_Pass / RG.Region_Tests * 100, 1), Blank())
+              )
+          );
+
+          Set(varCorpLoadedAt, Now())
+      };
+
+      // Corporate users pick a plant from scr_CorporateHome, same as an admin picking one
+      // from drp_plant - reuses RunFullPlantLoad() rather than duplicating its logic.
+      SelectCorporatePlant(plantId: Number): Void = {
+          Set(varPID, plantId);
+          Set(varFacility, 1);
+          RunFullPlantLoad();
+          Navigate(scr_Dashboard, ScreenTransition.None)
+      };
+    OnStart: |-
+      =// ===== Identity and role resolution (CLAUDE.md §5, adjusted for actual schema) =====
+      Set(varUserEmail, Lower(Trim(User().Email)));
+
+      // NOTE (schema risk - see plan doc "Known Risks"): sys_test_access currently has
+      // NO Role or Active columns in the connected list. This formula is written exactly
+      // per CLAUDE.md §5 spec; if Role/Active do not resolve, compile_canvas will report
+      // it. Do not silently invent a workaround - escalate for the two columns to be added.
+      ClearCollect(col_access, Filter(sys_test_access, Active = true));
+      Set(varAccessRow, LookUp(col_access, Lower(Trim(Inspector_email)) = varUserEmail));
+
+      Set(varRole, Coalesce(varAccessRow.Role, "Inspector"));
+      Set(varIsAdmin, varRole = "Administrator");
+      Set(varIsQM, varRole = "Quality Manager");
+      Set(varCanEdit, varRole <> "Reader");
+
+      Set(varPID,
+          If(!IsBlank(varAccessRow),
+             varAccessRow.Plant_ID,
+             Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation, 3))
+          )
+      );
+
+      // ===== Taxonomy - load once, never reload on plant change (CLAUDE.md §5) =====
+      // Test_ID / Type_ID / Defect_ID are NOT real columns on these lists - Title holds
+      // the numeric key as text. Cast with Value(Title) wherever the ID is needed.
+      ClearCollect(col_test, Filter(qk_test, Active = true));
+      ClearCollect(col_type, Filter(qk_test_type, Active = true));
+      ClearCollect(col_defect, Filter(qk_defect_type, Active = true));
+      // Full taxonomy INCLUDING inactive rows. col_defect is active-only, but a defect
+      // that gets deactivated still has history in qk_home_defect - costing that history
+      // off col_defect would silently price it at zero. 66 rows, loaded once.
+      ClearCollect(col_defect_all, qk_defect_type);
+      ClearCollect(col_calendar, calendar_list);
+      ClearCollect(col_config, qk_config);
+      ClearCollect(col_plants, Plant_List);
+
+      // qk_config: Title = Setting_name (plain text, no cast). Setting_value is Text.
+      Set(varGoalFPY, Value(LookUp(col_config, Title = "Goal_FPY", Setting_value)));
+      Set(varGoalFTT, Value(LookUp(col_config, Title = "Goal_FTT", Setting_value)));
+      Set(varWindowMonths, Value(LookUp(col_config, Title = "Window_months", Setting_value)));
+      // Home_number_pattern (qk_config) is intentionally unused - plants use their own
+      // production-number coding, so scr_Entry no longer validates a fixed format.
+
+      // Distinct plant list for the admin plant picker (Plant_List has one row per
+      // plant x facility, so distinct on Plant_ID before building drp_plant.Items)
+      ClearCollect(col_plant_picker,
+          AddColumns(
+              GroupBy(col_plants, Plant_ID, PlantRows),
+              Plant_ID_Value, Plant_ID
+          )
+      );
+
+      // Facility 1 is the default for every plant (most plants have exactly one) - reset
+      // whenever the plant is (re)selected, here and in drp_plant.OnChange (scr_Dashboard).
+      Set(varFacility, 1);
+
+
+      // Administrators pick a plant before anything loads; Corporate users (Plant_ID = 0)
+      // never had a plant to load in the first place - see StartScreen for how they're
+      // routed (Navigate isn't permitted in OnStart; "Use the StartScreen property instead"
+      // is the compiler's own guidance).
+      If(varIsAdmin,
+          Set(varPID, Blank()),
+          varPID = 0,
+          false,
+          RunFullPlantLoad()
+      )
+    StartScreen: =If(IsStartCorporate, scr_CorporateHome, scr_Dashboard)
+    Theme: =PowerAppsTheme

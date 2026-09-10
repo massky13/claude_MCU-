@@ -1,0 +1,164 @@
+		
+Test	Item	Defect
+Electrical	Panel Box	Lugs not torqued
+Electrical	Panel Box	Wrong breaker 
+Electrical	Panel Box	Defective breaker
+Electrical	Panel Box	Wire insulation into lug
+Electrical	Panel Box	Wire insulation cut
+Electrical	Panel Box	Missing wire in panel box
+Electrical	Panel Box	Panel box not wired correctly
+Electrical	Panel Box	Extra breaker 
+Electrical	Panel Box	Overloaded circuit
+Electrical	Panel Box	Missing Breaker
+Electrical	Panel Box	Missing Circuit
+		
+Electrical	Recept	Not wired properly 
+Electrical	Recept	Defective 
+Electrical	Recept	Overspaced
+Electrical	Recept	Missing
+Electrical	Recept	Wrong place
+Electrical	Recept	Sheathing Cut Short into Recept
+Electrical	Recept	Missing wire
+Electrical	Recept	GFCI Missing  
+Electrical	Recept	GFCI In Wrong Place
+Electrical	Recept	GFCI - Wrong 
+Electrical	Recept	Range recept missing
+Electrical	Recept	Missing Heat Tape Recept
+Electrical	Recept	Wrong type of Recept
+		
+		
+Electrical	Switch	Not wired properly
+Electrical	Switch	Defective 
+Electrical	Switch	Sheathing Cut Short into Switch
+Electrical	Switch	Missing
+Electrical	Switch	Switch/Recept to Close to Range Opening
+Electrical	Switch	Switch upside down
+		
+		
+		
+Electrical	Short	Ceiling 
+Electrical	Short	Walls
+Electrical	Short	Floor
+Electrical	Short	Light
+Electrical	Short	Furnace
+Electrical	Short	Breaker
+Electrical	Short	Range wire below floor
+Electrical	Short	Furnace wire
+Electrical	Short	Panel Box
+		
+		
+Electrical	Lights	Loose wire
+Electrical	Lights	Missing
+Electrical	Lights	Wrong location
+Electrical	Lights	Wire missing
+		
+Electrical	Misc	Thermostat not wired
+Electrical	Misc	Vent hood not Working
+Electrical	Misc	Not Wired Per Print/Per Order
+Electrical	Misc	No Ground Wire On Jacuzzi
+Electrical	Misc	Missing Grounding Lug
+Electrical	Misc	GFI not crimped
+Electrical	Misc	Cross-over wire wrong
+Electrical	Misc	Missing CrossOver Wire
+Electrical	Misc	Dryer not wired properly
+Electrical	Misc	Missing Thermostat
+Electrical	Misc	Defective Smoke Detector
+Electrical	Misc	Ceiling fan not working
+Electrical	Misc	Smoke Detector cross-over missing
+Electrical	Misc	Smoke Alarm @ Wrong Location
+Electrical	Misc	Smoke Alarm wired incorrectly
+Electrical	Misc	Ground wire not crimped
+Electrical	Misc	Water Heater not wired
+Electrical	Misc	Furnace wire to short
+Electrical	Misc	Furnace Not wired to print
+Electrical	Misc	Installed wrong furnace
+Electrical	Misc	Furnace Not wired  
+		
+		
+		
+		
+		
+Plumbing	Drain lines	Leak below floor
+Plumbing	Drain lines	Leak above floor
+Plumbing	Drain lines	Incomplete above floor
+Plumbing	Drain lines	Open in floor
+Plumbing	Drain lines	Not through bottom board
+Plumbing	Drain lines	Not Plumbed Per Order
+Plumbing	Drain lines	P-Trap in floor leak 
+Plumbing	Drain lines	P-Trap under sink Leak 
+Plumbing	Drain lines	P-Trap at washer box leaking
+Plumbing	Drain lines	P-Trap sitting on frame
+Plumbing	Drain lines	Tail Piece Leaking at Sinks
+Plumbing	Drain lines	Tail Piece leaking Below floor
+Plumbing	Drain lines	Wax Ring leak 
+Plumbing	Drain lines	Hole in drain line under floor
+Plumbing	Drain lines	Missing clean out plug
+Plumbing	Drain lines	Reverse Slope Above floor
+Plumbing	Drain lines	Reverse Slope Below Floor
+Plumbing	Drain lines	Loose Auto Vents
+		
+Plumbing	Supply Lines	Loose supply line fitting above floor
+Plumbing	Supply Lines	Loose supply line fitting below floor
+Plumbing	Supply Lines	Trash In Supply Line
+Plumbing	Supply Lines	Kinked Supply Line in floor
+Plumbing	Supply Lines	Kinked Water Line Above Floor
+Plumbing	Supply Lines	Missing Water Line In Floor
+Plumbing	Supply Lines	Reversed Water Lines
+Plumbing	Supply Lines	Supply not Plumbed Per Order/Print
+Plumbing	Supply Lines	Open Supply Line In Floor
+Plumbing	Supply Lines	Water line not connected to faucet
+Plumbing	Supply Lines	Water line leak above floor
+Plumbing	Supply Lines	Water Line Leak in Below Floor
+Plumbing	Supply Lines	Water Line fitting not crimped
+Plumbing	Supply Lines	Water Inlet Missing Fitting/Wrong Size
+Plumbing	Supply Lines	Flex line at water heater leaking
+Plumbing	Supply Lines	Cross Over Line to Short
+Plumbing	Supply Lines	Plumbing incorrect under Kitchen sink
+Plumbing	Supply Lines	Defective Filler Tube
+		
+Plumbing	Garbage disposal	Missing
+Plumbing	Lavy	Leak at tail piece drain hole
+Plumbing	Tub	Handles Backward
+Plumbing	Tub	Hole in bottom
+Plumbing	Tub	Strainer leaking
+Plumbing	Shower	Hole in diverter
+Plumbing	Shower	Pop up won't close
+Plumbing	Toilet	Leaking tank
+Plumbing	Toilet	Cracked
+Plumbing	Toilet	Leaking filler tube 
+Plumbing	Toilet	Broken tank
+Plumbing	Toilet	Loose at floor
+Plumbing	Toilet	Flapper Won't Seal
+Plumbing	Fixtures	Filler tube stopped up
+Plumbing	Faucet	Leaking valve
+Plumbing	Bathroom sink	Broken plunger
+Plumbing	Kitchen sink	Strainer leaking
+Plumbing	Garbage disposal	Not connected
+Plumbing	Garbage disposal	Not plumbed under sink
+Plumbing	Interior Faucet	Missing
+Plumbing	Exterior Faucet	Missing
+Plumbing	Faucet	Defective
+Plumbing	Faucet	Installed backwards
+Plumbing	Lavy	Cracked
+Plumbing	Crossover	Fitting not plumb correctly
+Plumbing	VTR	Not glued
+Plumbing	VTR	Missing
+Plumbing	VTR	Not through roof
+Plumbing	Ice Maker	Missing line
+Plumbing	Appliance	Leak
+Plumbing	Teflon Tape	Missing
+Plumbing	Water Inlet	Missing
+Plumbing	Bottom Board	Damaged
+Plumbing	Fixtures	Wrong gauge drain lines
+Plumbing	Fixtures	Water heater not installed
+		
+		
+Gas	Main line	Leak
+Gas	Fitting	Leak
+Gas	Valve	Leak
+Gas	Furnace	Riser leak
+Gas	Range	Riser leak
+Gas	Water heater	Riser leak
+Gas	Dryer	Riser leak
+Gas	Crossover	Leak
+Gas	Gas	Other

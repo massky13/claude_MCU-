@@ -1,0 +1,67 @@
+﻿Defect_ID,Type_ID,Test_ID,Test_name,Type_name,QP_ref,Defect_name,Severity,Sort_order,Active
+1101,11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,Short - exterior sheathing staple/nail,2,1,Yes
+1102,11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,Short - interior of home staple/nail,2,2,Yes
+1103,11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,Short - chassis member smashing wire,2,3,Yes
+1104,11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,Short - lag into wire,2,4,Yes
+1105,11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,"Short - receptacle issue, poor workmanship",2,5,Yes
+1106,11,1,Electrical,Hi Pot (Dielectric),QP.06A.0,"Short - lighting outlet, poor workmanship",2,6,Yes
+1201,12,1,Electrical,Continuity,QP.07.0,Bonding straps not removed,2,1,Yes
+1202,12,1,Electrical,Continuity,QP.07.0,Open ground at appliance(s),2,2,Yes
+1203,12,1,Electrical,Continuity,QP.07.0,Gas line not grounded. Use tester and visual.,2,3,Yes
+1204,12,1,Electrical,Continuity,QP.07.0,Metal roof not grounded,2,4,Yes
+1205,12,1,Electrical,Continuity,QP.07.0,Metal duct not grounded,2,5,Yes
+1206,12,1,Electrical,Continuity,QP.07.0,Lights or fans not grounded,2,6,Yes
+1207,12,1,Electrical,Continuity,QP.07.0,Chassis not grounded,2,7,Yes
+1301,13,1,Electrical,Operational,QP.08.0,GFCI not wired correctly or not tripping,2,1,Yes
+1302,13,1,Electrical,Operational,QP.08.0,Receptacle no power,2,2,Yes
+1303,13,1,Electrical,Operational,QP.08.0,Lights/fan switch not working no power,2,3,Yes
+1304,13,1,Electrical,Operational,QP.08.0,Smoke alarms not working individually and together,2,4,Yes
+1305,13,1,Electrical,Operational,QP.08.0,No power to exterior light boxes,2,5,Yes
+1306,13,1,Electrical,Operational,QP.08.0,No power to crossover connector,2,6,Yes
+1307,13,1,Electrical,Operational,QP.08.0,No power to appliance recepts 240V outlets,2,7,Yes
+1308,13,1,Electrical,Operational,QP.08.0,Incorrect # of circuits i.e. 2 at kitchen counter,2,8,Yes
+1401,14,1,Electrical,Polarity,QP.09.0,Reverse polarity - at receptacle,2,1,Yes
+1402,14,1,Electrical,Polarity,QP.09.0,Reverse polarity - at lights,2,2,Yes
+1403,14,1,Electrical,Polarity,QP.09.0,Reverse polarity - 240V outlets,2,3,Yes
+1404,14,1,Electrical,Polarity,QP.09.0,Reverse polarity - outside outlets & heat tape,2,4,Yes
+1405,14,1,Electrical,Polarity,QP.09.0,Reverse polarity - other,2,5,Yes
+2101,21,2,Plumbing,Drain Lines,QP.03.0,Drain line leaking below floor,2,1,Yes
+2102,21,2,Plumbing,Drain Lines,QP.03.0,Drain line leak above floor,2,2,Yes
+2103,21,2,Plumbing,Drain Lines,QP.03.0,Drain line incomplete above floor,2,3,Yes
+2104,21,2,Plumbing,Drain Lines,QP.03.0,Open drain line in floor,2,4,Yes
+2105,21,2,Plumbing,Drain Lines,QP.03.0,Drain line not through bottom board,2,5,Yes
+2106,21,2,Plumbing,Drain Lines,QP.03.0,P-trap above floor leak,2,6,Yes
+2107,21,2,Plumbing,Drain Lines,QP.03.0,P-Trap in floor leak,2,7,Yes
+2108,21,2,Plumbing,Drain Lines,QP.03.0,Wax ring leak or toilet leak,2,8,Yes
+2109,21,2,Plumbing,Drain Lines,QP.03.0,Hole in drain line under floor,2,9,Yes
+2110,21,2,Plumbing,Drain Lines,QP.03.0,Lag in drain,2,10,Yes
+2201,22,2,Plumbing,Water Lines,QP.01.0,Loose water line fitting above floor,2,1,Yes
+2202,22,2,Plumbing,Water Lines,QP.01.0,Loose water line fitting below floor,2,2,Yes
+2203,22,2,Plumbing,Water Lines,QP.01.0,Debris in water line/screens,2,3,Yes
+2204,22,2,Plumbing,Water Lines,QP.01.0,Kinked water line above floor,2,4,Yes
+2205,22,2,Plumbing,Water Lines,QP.01.0,Kinked water line below floor,2,5,Yes
+2206,22,2,Plumbing,Water Lines,QP.01.0,Reversed water lines,2,6,Yes
+2207,22,2,Plumbing,Water Lines,QP.01.0,Water line not connected to faucet,2,7,Yes
+2208,22,2,Plumbing,Water Lines,QP.01.0,Water line leak above floor,2,8,Yes
+2209,22,2,Plumbing,Water Lines,QP.01.0,Water line leak below floor,2,9,Yes
+2210,22,2,Plumbing,Water Lines,QP.01.0,Lag in water line,2,10,Yes
+2211,22,2,Plumbing,Water Lines,QP.01.0,Smashed water line (frame to floor),2,11,Yes
+2212,22,2,Plumbing,Water Lines,QP.01.0,Missing water inlet,2,12,Yes
+2301,23,2,Plumbing,Fixtures,QP.02.0,Leaks above floor during flow test,2,1,Yes
+2302,23,2,Plumbing,Fixtures,QP.02.0,Leaks below floor P-trap during flow test,2,2,Yes
+2303,23,2,Plumbing,Fixtures,QP.02.0,Retarded flow washer box,2,3,Yes
+2304,23,2,Plumbing,Fixtures,QP.02.0,Retarded flow tub/shower,2,4,Yes
+2305,23,2,Plumbing,Fixtures,QP.02.0,Retarded flow sinks,2,5,Yes
+3101,31,3,Gas,High Pressure,QP04.0,Main line leak,2,1,Yes
+3102,31,3,Gas,High Pressure,QP04.0,Fitting leak,2,2,Yes
+3103,31,3,Gas,High Pressure,QP04.0,Valve leak,2,3,Yes
+3104,31,3,Gas,High Pressure,QP04.0,Riser leak - Furnace,2,4,Yes
+3105,31,3,Gas,High Pressure,QP04.0,Riser leak - Range,2,5,Yes
+3106,31,3,Gas,High Pressure,QP04.0,Riser leak - Water heater,2,6,Yes
+3107,31,3,Gas,High Pressure,QP04.0,Riser leak - Dryer,2,7,Yes
+3108,31,3,Gas,High Pressure,QP04.0,Crossover leak,2,8,Yes
+3109,31,3,Gas,High Pressure,QP04.0,Broken gas line,2,9,Yes
+3201,32,3,Gas,Low Pressure,QP05.0,Leak at valve,2,1,Yes
+3202,32,3,Gas,Low Pressure,QP05.0,Leak at pipe/valve inside Furnace,2,2,Yes
+3203,32,3,Gas,Low Pressure,QP05.0,Leak at pipe/valve behind Range,2,3,Yes
+3204,32,3,Gas,Low Pressure,QP05.0,Leak at crossover valve,2,4,Yes

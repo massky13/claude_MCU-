@@ -1,0 +1,7 @@
+﻿Setting_name,Setting_value
+Goal_FPY,90
+Goal_FTT,75
+Window_months,6
+Home_number_pattern,"^\d{6,8}$"
+TTW_weeks,12
+Edit_lock_hours,24
