@@ -231,7 +231,7 @@ Screens:
                                                       PaddingTop: =0
                                                       Size: =12
                                                       Text: =ThisItem.Plant_Name //Text(ThisItem.Plant_ID) & " - " & ThisItem.Plant_Name
-                                                      Width: =100
+                                                      Width: =110
                                                       Wrap: =false
                                                 - badge_plant_row_metric:
                                                     Control: Badge
@@ -261,7 +261,7 @@ Screens:
                                                       PaddingLeft: =0
                                                       PaddingRight: =6
                                                       PaddingTop: =0
-                                                      Size: =10
+                                                      Size: =8
                                                       Text: |-
                                                         =If(IsBlank(ThisItem.Plant_Updated), "n/a",
                                                             ThisItem.Plant_Stale_days > 7,

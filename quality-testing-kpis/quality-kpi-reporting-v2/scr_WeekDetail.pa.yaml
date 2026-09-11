@@ -205,7 +205,7 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   Fill: =PageBg
-                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =16
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
@@ -232,25 +232,49 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         FillPortions: =0
-                        Height: =232
-                        LayoutDirection: =LayoutDirection.Horizontal
+                        Height: =476
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =12
-                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
-                        LayoutWrap: =true
                         Visible: =!(IsBlank(varWeekKey) || IsBlank(varFacility))
+                        Width: =236
                       Children:
-                        - gal_test_cards:
-                            Control: Gallery
-                            Variant: Horizontal
+                        - crd_ftt:
+                            Control: ModernCard
                             Properties:
                               AlignInContainer: =AlignInContainer.Center
-                              Height: =Parent.Height
+                              BorderRadius: =8
+                              Description: |-
+                                =With(
+                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
+                                    StatusGlyphOf(fStatus) & " " & If(IsBlank(varWeekRow.FTT_pct), "no data", Text(varWeekRow.FTT_pct, "0.0") & "%")
+                                )
+                              DescriptionColor: |-
+                                =With(
+                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
+                                    StatusColorOf(fStatus)
+                                )
+                              DescriptionSize: =28
+                              Fill: =CardBg
+                              Height: =110
+                              Subtitle: ="All 3 tests pass"
+                              SubtitleColor: =TextSecondary
+                              SubtitleSize: =11
+                              Title: ="First Time Through"
+                              TitleColor: =TextPrimary
+                              Width: =220
+                        - gal_test_cards:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              Height: =CountRows(Self.AllItems) * Self.TemplateHeight
                               Items: =Sort(col_test, Sort_order)
                               LayoutMinWidth: =0
-                              TemplateSize: =Parent.Width/4
-                              Width: =700
+                              ShowScrollbar: =false
+                              TemplateSize: =122
+                              Width: =Parent.Width
                             Children:
                               - crd_test:
                                   Control: ModernCard
@@ -280,44 +304,6 @@ Screens:
                                     Title: =ThisItem.Test_name
                                     TitleColor: =TextPrimary
                                     Width: =220
-                        - crd_ftt:
-                            Control: ModernCard
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              BorderRadius: =8
-                              Description: |-
-                                =With(
-                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
-                                    StatusGlyphOf(fStatus) & " " & If(IsBlank(varWeekRow.FTT_pct), "no data", Text(varWeekRow.FTT_pct, "0.0") & "%")
-                                )
-                              DescriptionColor: |-
-                                =With(
-                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
-                                    StatusColorOf(fStatus)
-                                )
-                              DescriptionSize: =28
-                              Fill: =CardBg
-                              Height: =110
-                              Subtitle: ="All 3 tests pass"
-                              SubtitleColor: =TextSecondary
-                              SubtitleSize: =11
-                              Title: ="First Time Through"
-                              TitleColor: =TextPrimary
-                              Width: =220
-                  - lbl_homes_section:
-                      Control: ModernText
-                      Properties:
-                        AlignInContainer: =AlignInContainer.Stretch
-                        Color: =TextPrimary
-                        FontWeight: =FontWeight.Bold
-                        PaddingBottom: =0
-                        PaddingLeft: =0
-                        PaddingRight: =0
-                        PaddingTop: =0
-                        Size: =16
-                        Text: ="Homes Tested This Week"
-                        Visible: =!(IsBlank(varWeekKey) || IsBlank(varFacility))
-                        Wrap: =false
                   - gal_week_homes_detail:
                       Control: Gallery
                       Variant: Vertical
@@ -409,20 +395,6 @@ Screens:
                                             =If(IsBlank(ThisItem.Gas_result), 'BadgeCanvas.ThemeColor'.Subtle,
                                                 If(ThisItem.Gas_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
                                           Width: =80
-                                    - lbl_floors:
-                                        Control: ModernText
-                                        Properties:
-                                          Align: =Align.Right
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Color: =TextSecondary
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =12
-                                          Text: ="Floors " & Text(ThisItem.Floors, "0")
-                                          Width: =80
-                                          Wrap: =false
                                     - lbl_defect_count_wd:
                                         Control: ModernText
                                         Properties:
