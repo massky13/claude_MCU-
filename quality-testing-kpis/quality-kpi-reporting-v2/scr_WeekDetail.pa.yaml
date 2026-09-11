@@ -260,8 +260,7 @@ Screens:
                                       =With(
                                           {tRow: LookUp(col_test_sum, Week_key = varWeekKey && Facility_ID = varFacility && Test_ID = Value(ThisItem.Title))},
                                           With(
-                                              {tStatus: StatusOf(tRow.Test_FPY, varGoalFPY,
-                                                  CountRows(Filter(FirstN(Sort(Filter(col_test_sum, Facility_ID = varFacility && Test_ID = Value(ThisItem.Title) && Week_key <= varWeekKey), Week_key, SortOrder.Descending), 3), Test_FPY < varGoalFPY)))},
+                                              {tStatus: BandStatusOf(tRow.Test_FPY)},
                                               StatusGlyphOf(tStatus) & " " & If(IsBlank(tRow.Test_FPY), "no data", Text(tRow.Test_FPY, "0.0") & "%")
                                           )
                                       )
@@ -269,8 +268,7 @@ Screens:
                                       =With(
                                           {tRow: LookUp(col_test_sum, Week_key = varWeekKey && Facility_ID = varFacility && Test_ID = Value(ThisItem.Title))},
                                           With(
-                                              {tStatus: StatusOf(tRow.Test_FPY, varGoalFPY,
-                                                  CountRows(Filter(FirstN(Sort(Filter(col_test_sum, Facility_ID = varFacility && Test_ID = Value(ThisItem.Title) && Week_key <= varWeekKey), Week_key, SortOrder.Descending), 3), Test_FPY < varGoalFPY)))},
+                                              {tStatus: BandStatusOf(tRow.Test_FPY)},
                                               StatusColorOf(tStatus)
                                           )
                                       )
@@ -289,14 +287,12 @@ Screens:
                               BorderRadius: =8
                               Description: |-
                                 =With(
-                                    {fStatus: StatusOf(varWeekRow.FTT_pct, varGoalFTT,
-                                        CountRows(Filter(FirstN(Sort(Filter(col_week, Facility_ID = varFacility && Week_key <= varWeekKey), Week_key, SortOrder.Descending), 3), FTT_pct < varGoalFTT)))},
+                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
                                     StatusGlyphOf(fStatus) & " " & If(IsBlank(varWeekRow.FTT_pct), "no data", Text(varWeekRow.FTT_pct, "0.0") & "%")
                                 )
                               DescriptionColor: |-
                                 =With(
-                                    {fStatus: StatusOf(varWeekRow.FTT_pct, varGoalFTT,
-                                        CountRows(Filter(FirstN(Sort(Filter(col_week, Facility_ID = varFacility && Week_key <= varWeekKey), Week_key, SortOrder.Descending), 3), FTT_pct < varGoalFTT)))},
+                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
                                     StatusColorOf(fStatus)
                                 )
                               DescriptionSize: =28

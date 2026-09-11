@@ -163,15 +163,15 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow)) & " " &
+                                      =StatusGlyphOf(BandStatusOf(ThisItem.Region_FTT)) & " " &
                                           Text(ThisItem.Region_FTT, "0.0") & "% FTT (12 wk)"
                                     Height: =28
                                     LayoutMinHeight: =0
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusOf(ThisItem.Region_FTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusOf(ThisItem.Region_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusOf(ThisItem.Region_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =140
                               - rect_region_sep:
@@ -237,15 +237,15 @@ Screens:
                                                     Control: Badge
                                                     Properties:
                                                       Content: |-
-                                                        =StatusGlyphOf(CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow)) & " " &
+                                                        =StatusGlyphOf(BandStatusOf(ThisItem.Plant_FTT)) & " " &
                                                             Text(ThisItem.Plant_FTT, "0.0")
                                                       Height: =30
                                                       LayoutMinWidth: =0
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
                                                       ThemeColor: |-
-                                                        =If(CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                                            CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                                            CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                                        =If(BandStatusOf(ThisItem.Plant_FTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                                            BandStatusOf(ThisItem.Plant_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                                            BandStatusOf(ThisItem.Plant_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                                             'BadgeCanvas.ThemeColor'.Danger)
                                                       Width: =60
                                                 - lbl_plant_row_stale:

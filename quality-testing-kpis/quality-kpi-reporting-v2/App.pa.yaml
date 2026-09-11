@@ -29,16 +29,6 @@ App:
       BaselineColor = RGBA(195, 194, 183, 1);
       CardBorder = RGBA(11, 11, 11, 0.1);
 
-      // ===== Status helpers (CLAUDE.md §7, §10) =====
-      // goal must be passed explicitly (varGoalFPY for FPY/Test_FPY/TTW, varGoalFTT for FTT_pct) -
-      // never hardcoded, so FTT is graded against its own configured goal, not FPY's.
-      StatusOf(value: Number, goal: Number, consecutiveWeeksBelow: Number): Text =
-          If(IsBlank(value), "nodata",
-             value >= goal, "good",
-             value >= goal - 5, "warning",
-             consecutiveWeeksBelow >= 3, "critical",
-             "serious");
-
       StatusColorOf(status: Text): Color =
           If(status = "good", StatusGoodColor,
              status = "warning", StatusWarningColor,
@@ -60,19 +50,28 @@ App:
              status = "critical", "Below 3+ wks",
              "No data");
 
-      // ===== Corporate grading (scr_CorporateHome) =====
-      // Three explicit bands rather than StatusOf's goal / goal-5 pair: green at or above
-      // the target, yellow down to the second threshold, red below it. Returns the same
-      // status strings StatusOf does, so StatusGlyphOf/StatusColorOf and the badge
-      // ThemeColor mapping all keep working unchanged.
-      // Both thresholds are read from qk_config - CLAUDE.md §11: no threshold literal
-      // appears anywhere in the app. A missing setting yields Blank(), which grades as
-      // "nodata" (grey) rather than silently passing or failing every plant.
-      CorpStatusOf(value: Number, green: Number, yellow: Number): Text =
+      // ===== Status banding (whole app) =====
+      // Three bands from two configured thresholds: green at or above Goal_green, yellow
+      // down to Goal_yellow, red below it. One definition for every screen and every
+      // metric - FPY, Test_FPY, FTT and TTW all grade identically, which is what makes a
+      // green badge mean the same thing wherever it appears.
+      //
+      // This replaced StatusOf(value, goal, consecutiveWeeksBelow), whose warning band was
+      // hardwired to goal-5 and which graded FTT against Goal_FTT and FPY against Goal_FPY,
+      // so the same colour meant different things on different tiles.
+      //
+      // Thresholds come from qk_config - CLAUDE.md §11: no threshold literal appears
+      // anywhere in the app. A missing setting grades as "nodata" (grey) rather than
+      // silently passing or failing everything.
+      //
+      // Returns the same status strings the old function did, so StatusColorOf,
+      // StatusGlyphOf and StatusLabelOf are unchanged. "serious" is no longer produced -
+      // below-yellow is "critical" (red), matching the three-band model.
+      BandStatusOf(value: Number): Text =
           If(IsBlank(value), "nodata",
-             IsBlank(green) || IsBlank(yellow), "nodata",
-             value >= green, "good",
-             value >= yellow, "warning",
+             IsBlank(varGoalGreen) || IsBlank(varGoalYellow), "nodata",
+             value >= varGoalGreen, "good",
+             value >= varGoalYellow, "warning",
              "critical");
 
       TestColorOf(testId: Number): Color =
@@ -555,11 +554,11 @@ App:
       Set(varGoalFTT, Value(LookUp(col_config, Title = "Goal_FTT", Setting_value)));
       Set(varWindowMonths, Value(LookUp(col_config, Title = "Window_months", Setting_value)));
 
-      // Corporate-only bands (scr_CorporateHome). Separate from Goal_FPY/Goal_FTT on
-      // purpose: those grade a plant against its own operating target, while these are the
-      // corporate review thresholds and are deliberately stricter.
-      Set(varCorpGreen,  Value(LookUp(col_config, Title = "Corp_goal_green",  Setting_value)));
-      Set(varCorpYellow, Value(LookUp(col_config, Title = "Corp_goal_yellow", Setting_value)));
+      // Status bands, used by BandStatusOf on every screen. Goal_FPY/Goal_FTT are still
+      // read above - they remain the plants' own operating targets and are what the trend
+      // chart's goal rule is drawn at - but they no longer drive any badge colour.
+      Set(varGoalGreen,  Value(LookUp(col_config, Title = "Goal_green",  Setting_value)));
+      Set(varGoalYellow, Value(LookUp(col_config, Title = "Goal_yellow", Setting_value)));
       // Home_number_pattern (qk_config) is intentionally unused - plants use their own
       // production-number coding, so scr_Entry no longer validates a fixed format.
 

@@ -334,7 +334,7 @@ Screens:
                               - rect_fpy_accent:
                                   Control: Rectangle
                                   Properties:
-                                    Fill: =StatusColorOf(StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY))
+                                    Fill: =StatusColorOf(BandStatusOf(varLatestWeek.Week_FPY))
                                     Height: =Parent.Height
                                     Width: =3
                               - btn_fpy_overlay:
@@ -352,14 +352,14 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY)) & " " &
+                                      =StatusGlyphOf(BandStatusOf(varLatestWeek.Week_FPY)) & " " &
                                           Text(varLatestWeek.Week_FPY - varPriorWeek.Week_FPY, "0.0")
                                     Height: '=Parent.Height*0.6   '
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          StatusOf(varLatestWeek.Week_FPY, varGoalFPY, varConsecBelowFPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusOf(varLatestWeek.Week_FPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusOf(varLatestWeek.Week_FPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusOf(varLatestWeek.Week_FPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
                                     X: =Parent.Width*1.2/2
@@ -412,7 +412,7 @@ Screens:
                               - rect_ftt_accent:
                                   Control: Rectangle
                                   Properties:
-                                    Fill: =StatusColorOf(StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT))
+                                    Fill: =StatusColorOf(BandStatusOf(varLatestWeek.FTT_pct))
                                     Height: =Parent.Height
                                     Width: =3
                               - btn_ftt_overlay:
@@ -430,14 +430,14 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT)) & " " &
+                                      =StatusGlyphOf(BandStatusOf(varLatestWeek.FTT_pct)) & " " &
                                           Text(varLatestWeek.FTT_pct - varPriorWeek.FTT_pct, "0.0")
                                     Height: =Parent.Height*0.6
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          StatusOf(varLatestWeek.FTT_pct, varGoalFTT, varConsecBelowFTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusOf(varLatestWeek.FTT_pct) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusOf(varLatestWeek.FTT_pct) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusOf(varLatestWeek.FTT_pct) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
                                     X: =Parent.Width*1.2/2
@@ -490,7 +490,7 @@ Screens:
                               - rect_ttw_accent:
                                   Control: Rectangle
                                   Properties:
-                                    Fill: =StatusColorOf(StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY))
+                                    Fill: =StatusColorOf(BandStatusOf(varPlantSummary.TTW_FPY))
                                     Height: =Parent.Height
                                     Width: =3
                               - btn_ttw_overlay:
@@ -508,14 +508,14 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY)) & " " &
+                                      =StatusGlyphOf(BandStatusOf(varPlantSummary.TTW_FPY)) & " " &
                                           Text(Coalesce(varPlantSummary.Weeks_counted, 0), "0") & " wks"
                                     Height: '=Parent.Height*0.6   '
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          StatusOf(varPlantSummary.TTW_FPY, varGoalFPY, varConsecBelowFPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusOf(varPlantSummary.TTW_FPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusOf(varPlantSummary.TTW_FPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusOf(varPlantSummary.TTW_FPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
                                     X: =Parent.Width*1.2/2
@@ -984,19 +984,16 @@ Screens:
                                                     Control: Badge
                                                     Properties:
                                                       Content: |-
-                                                        =StatusGlyphOf(StatusOf(
-                                                            LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY),
-                                                            varGoalFPY,
-                                                            0)) & " " &
+                                                        =StatusGlyphOf(BandStatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY))) & " " &
                                                             Text(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), "0.0")
                                                       Height: '=gal_qm_tests.TemplateHeight-4   '
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
                                                       ThemeColor: |-
-                                                        =If(StatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), varGoalFPY, 0) = "good",
+                                                        =If(BandStatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY)) = "good",
                                                                 'BadgeCanvas.ThemeColor'.Success,
-                                                            StatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), varGoalFPY, 0) = "warning",
+                                                            BandStatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY)) = "warning",
                                                                 'BadgeCanvas.ThemeColor'.Warning,
-                                                            StatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY), varGoalFPY, 0) = "nodata",
+                                                            BandStatusOf(LookUp(col_test_sum, Week_key = ThisItem.Week_key && Test_ID = ThisItem.Test_ID, Test_FPY)) = "nodata",
                                                                 'BadgeCanvas.ThemeColor'.Subtle,
                                                             'BadgeCanvas.ThemeColor'.Danger)
                                                       Width: '=(cnt_qmatrix.Width-cnt_qmatrix.X)/4 '

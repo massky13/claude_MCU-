@@ -300,26 +300,26 @@ Screens:
                                         Control: Badge
                                         Properties:
                                           AlignInContainer: =AlignInContainer.Center
-                                          Content: =StatusGlyphOf(StatusOf(ThisItem.Week_FPY, varGoalFPY, 0)) & " " & Text(ThisItem.Week_FPY, "0.0") & "%"
+                                          Content: =StatusGlyphOf(BandStatusOf(ThisItem.Week_FPY)) & " " & Text(ThisItem.Week_FPY, "0.0") & "%"
                                           Height: =20
                                           Shape: ='BadgeCanvas.Shape'.Rounded
                                           ThemeColor: |-
-                                            =If(StatusOf(ThisItem.Week_FPY, varGoalFPY, 0) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                                StatusOf(ThisItem.Week_FPY, varGoalFPY, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                                StatusOf(ThisItem.Week_FPY, varGoalFPY, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                            =If(BandStatusOf(ThisItem.Week_FPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                                BandStatusOf(ThisItem.Week_FPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                                BandStatusOf(ThisItem.Week_FPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                                 'BadgeCanvas.ThemeColor'.Danger)
                                           Width: =80
                                     - badge_gw_ftt:
                                         Control: Badge
                                         Properties:
                                           AlignInContainer: =AlignInContainer.Center
-                                          Content: =StatusGlyphOf(StatusOf(ThisItem.FTT_pct, varGoalFTT, 0)) & " " & Text(ThisItem.FTT_pct, "0.0") & "%"
+                                          Content: =StatusGlyphOf(BandStatusOf(ThisItem.FTT_pct)) & " " & Text(ThisItem.FTT_pct, "0.0") & "%"
                                           Height: =20
                                           Shape: ='BadgeCanvas.Shape'.Rounded
                                           ThemeColor: |-
-                                            =If(StatusOf(ThisItem.FTT_pct, varGoalFTT, 0) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                                StatusOf(ThisItem.FTT_pct, varGoalFTT, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                                StatusOf(ThisItem.FTT_pct, varGoalFTT, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                            =If(BandStatusOf(ThisItem.FTT_pct) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                                BandStatusOf(ThisItem.FTT_pct) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                                BandStatusOf(ThisItem.FTT_pct) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                                 'BadgeCanvas.ThemeColor'.Danger)
                                           Width: =80
                                     - lbl_gw_defects:
