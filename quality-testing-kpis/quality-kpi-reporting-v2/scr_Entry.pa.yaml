@@ -1528,6 +1528,18 @@ Screens:
                           Set(varPSDefects, Sum(col_plant_12, Total_defects));
                           Set(varPSCost,    Sum(col_plant_12, Total_cost));
 
+                          // Latest week only, for scr_CorporateHome. The 12-week aggregate above is what
+                          // FTT_pct holds, and it smooths exactly the signal a corporate QM needs to see: a
+                          // plant that cratered last week but had eleven good ones still reads fine. This is
+                          // the same number that plant's own dashboard tile shows.
+                          //
+                          // Still WEIGHTED across the plant's facilities (Sum clean / Sum tested) rather than
+                          // picking one facility's row - varPSEndKey can match several rows for a multi-
+                          // facility plant. Reuses col_plant_12, so it costs no extra query.
+                          Set(varPSLatestRows, Filter(col_plant_12, Week_key = varPSEndKey));
+                          Set(varPSLatestFloorsT, Sum(varPSLatestRows, Floors_tested));
+                          Set(varPSLatestFloorsC, Sum(varPSLatestRows, Floors_clean));
+
                           IfError(
                               Patch(qk_plant_summary,
                                   Coalesce(
@@ -1557,6 +1569,10 @@ Screens:
                                       // A trailing window moves with the calendar, not with data entry - a plant
                                       // that stops reporting keeps a figure computed over a window that has since
                                       // slid. These three make that visible instead of silently wrong.
+                                      FTT_latest_pct: If(varPSLatestFloorsT > 0,
+                                          Round(varPSLatestFloorsC / varPSLatestFloorsT * 100, 1),
+                                          Blank()),
+                                      Latest_week_key: varPSEndKey,
                                       Window_start_key: varPSStartKey,
                                       Window_end_key:   varPSEndKey,
                                       Weeks_counted:    CountRows(varPSWeeks),

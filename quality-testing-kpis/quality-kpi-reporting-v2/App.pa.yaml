@@ -430,11 +430,18 @@ App:
                       // region as hard as a 400-floor one (CLAUDE.md §7).
                       Plant_Floors_clean:  Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Floors_clean), 0),
                       Plant_Floors_tested: Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Floors_tested), 0),
+
                       // Read the stored percentage rather than recomputing - one definition,
                       // written once, so the corporate card and the plant's own dashboard tile
                       // cannot drift apart.
                       Plant_TTW: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, TTW_FPY),
-                      Plant_FTT: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_pct),
+                      // Plant_FTT is the LATEST WEEK's FTT, not the 12-week aggregate - it is the
+                      // same figure that plant's own dashboard tile shows, and it is what makes
+                      // this screen an alert rather than a smoothed scorecard.
+                      // Plant_FTT_window keeps the 12-week number alongside it for context.
+                      Plant_FTT: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_latest_pct),
+                      Plant_FTT_window: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_pct),
+                      Plant_Latest_week: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Latest_week_key),
                       Plant_Weeks: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Weeks_counted),
                       Plant_Updated: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Updated_at),
                       // Days since this plant last recomputed. Blank = never reported.
@@ -462,9 +469,16 @@ App:
           );
           ClearCollect(col_corp_regions,
               AddColumns(col_corp_regions_raw As RG,
-                  // Weighted region FTT - floors passing all three / floors fully tested,
-                  // summed across the region's plants. Region_TTW is kept alongside it so the
-                  // FPY view is one binding away if corporate wants it back.
+                  // Weighted region FTT over the TRAILING 12 WEEKS - floors passing all three /
+                  // floors fully tested, summed across the region's plants from real stored
+                  // counts. Deliberately NOT the latest week: qk_plant_summary stores each
+                  // plant's latest-week PERCENTAGE but not its latest-week clean/tested counts,
+                  // so a latest-week region number could only be weighted by an invented
+                  // figure, or degraded into a mean of plant percentages - which CLAUDE.md §7
+                  // forbids. Making the region latest-week too needs Floors_tested_latest and
+                  // Floors_clean_latest on qk_plant_summary. The plant cards ARE latest-week,
+                  // so the region reads as the slower-moving context around them.
+                  // Region_TTW is kept alongside so the FPY view is one binding away.
                   Region_FTT,
                       If(RG.Region_Floors_tested > 0,
                           Round(RG.Region_Floors_clean / RG.Region_Floors_tested * 100, 1), Blank()),

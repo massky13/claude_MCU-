@@ -68,7 +68,7 @@ Screens:
                               PaddingRight: =0
                               PaddingTop: =0
                               Size: =16
-                              Text: ="Quality KPI Reporting - Corporate Overview (First Time Through)"
+                              Text: ="Quality KPI Reporting - Corporate Overview (First Time Through, latest week)"
                               Width: =340
                               Wrap: =false
                   - cnt_header_right_corp:
@@ -164,7 +164,7 @@ Screens:
                                   Properties:
                                     Content: |-
                                       =StatusGlyphOf(StatusOf(ThisItem.Region_FTT, varGoalFTT, 0)) & " " &
-                                          Text(ThisItem.Region_FTT, "0.0") & "% FTT"
+                                          Text(ThisItem.Region_FTT, "0.0") & "% FTT (12 wk)"
                                     Height: =28
                                     LayoutMinHeight: =0
                                     Shape: ='BadgeCanvas.Shape'.Rounded
@@ -262,9 +262,17 @@ Screens:
                                                       PaddingTop: =0
                                                       Size: =10
                                                       Text: |-
-                                                        =If(IsBlank(ThisItem.Plant_Updated), "n/a",
-                                                            ThisItem.Plant_Stale_days <= 7, "",
-                                                            Text(ThisItem.Plant_Stale_days, "0") & "d old")
+                                                        =If(IsBlank(ThisItem.Plant_Updated), "never reported",
+                                                            ThisItem.Plant_Stale_days > 7,
+                                                                Text(ThisItem.Plant_Stale_days, "0") & "d old",
+                                                            IsBlank(ThisItem.Plant_Latest_week), "",
+                                                            // Which week the headline FTT is actually for. A plant can have been
+                                                            // recomputed recently and still be reporting an old week.
+                                                            "w/e " & Text(
+                                                                Date(RoundDown(ThisItem.Plant_Latest_week/10000, 0),
+                                                                     Mod(RoundDown(ThisItem.Plant_Latest_week/100, 0), 100),
+                                                                     Mod(ThisItem.Plant_Latest_week, 100)),
+                                                                "[$-en-US]mm/dd"))
                                                       Width: =78
                                           - btn_plant_overlay:
                                               Control: Classic/Button
