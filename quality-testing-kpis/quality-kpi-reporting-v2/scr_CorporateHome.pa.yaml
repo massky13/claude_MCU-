@@ -163,15 +163,15 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(StatusOf(ThisItem.Region_FTT, varGoalFTT, 0)) & " " &
+                                      =StatusGlyphOf(CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow)) & " " &
                                           Text(ThisItem.Region_FTT, "0.0") & "% FTT (12 wk)"
                                     Height: =28
                                     LayoutMinHeight: =0
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(StatusOf(ThisItem.Region_FTT, varGoalFTT, 0) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          StatusOf(ThisItem.Region_FTT, varGoalFTT, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          StatusOf(ThisItem.Region_FTT, varGoalFTT, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          CorpStatusOf(ThisItem.Region_FTT, varCorpGreen, varCorpYellow) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =140
                               - rect_region_sep:
@@ -189,7 +189,7 @@ Screens:
                                     Items: |-
                                       =Sort(
                                           Filter(col_corp_plant_metrics, Plant_Region = ThisItem.Region_Name),
-                                          Plant_FTT, SortOrder.Descending)
+                                          Plant_Name, SortOrder.Ascending)
                                     LayoutMaxWidth: =gal_regions.TemplateWidth
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
@@ -222,6 +222,7 @@ Screens:
                                                     Control: ModernText
                                                     Properties:
                                                       Color: =TextPrimary
+                                                      FontWeight: =FontWeight.Semibold
                                                       Height: =50
                                                       LayoutMinWidth: =0
                                                       PaddingBottom: =0
@@ -229,22 +230,22 @@ Screens:
                                                       PaddingRight: =0
                                                       PaddingTop: =0
                                                       Size: =12
-                                                      Text: =Text(ThisItem.Plant_ID) & " - " & ThisItem.Plant_Name
-                                                      Width: =120
+                                                      Text: =ThisItem.Plant_Name //Text(ThisItem.Plant_ID) & " - " & ThisItem.Plant_Name
+                                                      Width: =100
                                                       Wrap: =false
                                                 - badge_plant_row_metric:
                                                     Control: Badge
                                                     Properties:
                                                       Content: |-
-                                                        =StatusGlyphOf(StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0)) & " " &
+                                                        =StatusGlyphOf(CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow)) & " " &
                                                             Text(ThisItem.Plant_FTT, "0.0")
                                                       Height: =30
                                                       LayoutMinWidth: =0
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
                                                       ThemeColor: |-
-                                                        =If(StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                                            StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                                            StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                                        =If(CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                                            CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                                            CorpStatusOf(ThisItem.Plant_FTT, varCorpGreen, varCorpYellow) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                                             'BadgeCanvas.ThemeColor'.Danger)
                                                       Width: =60
                                                 - lbl_plant_row_stale:
@@ -262,13 +263,13 @@ Screens:
                                                       PaddingTop: =0
                                                       Size: =10
                                                       Text: |-
-                                                        =If(IsBlank(ThisItem.Plant_Updated), "never reported",
+                                                        =If(IsBlank(ThisItem.Plant_Updated), "n/a",
                                                             ThisItem.Plant_Stale_days > 7,
                                                                 Text(ThisItem.Plant_Stale_days, "0") & "d old",
                                                             IsBlank(ThisItem.Plant_Latest_week), "",
                                                             // Which week the headline FTT is actually for. A plant can have been
                                                             // recomputed recently and still be reporting an old week.
-                                                            "w/e " & Text(
+                                                            "w. " & Text(
                                                                 Date(RoundDown(ThisItem.Plant_Latest_week/10000, 0),
                                                                      Mod(RoundDown(ThisItem.Plant_Latest_week/100, 0), 100),
                                                                      Mod(ThisItem.Plant_Latest_week, 100)),

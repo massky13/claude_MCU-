@@ -1692,7 +1692,7 @@ Screens:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =11
-                        Text: ="Any defects already recorded on this floor move with it."
+                        Text: ="Any defects already recorded on this floor will be kept."
                         Width: =Parent.Width - 48
                         X: =24
                         Y: =136
@@ -1704,8 +1704,8 @@ Screens:
                         OnSelect: =Set(varShowFloorEdit, false)
                         Text: ="Cancel"
                         Width: =100
-                        X: =Parent.Width - 232
-                        Y: =Parent.Height - 64
+                        X: =115
+                        Y: =195
                   - btn_fe_save:
                       Control: ModernButton
                       Properties:
@@ -1768,8 +1768,8 @@ Screens:
                           )
                         Text: ="Save"
                         Width: =110
-                        X: =Parent.Width - 124
-                        Y: =Parent.Height - 64
+                        X: =223
+                        Y: =195
                   - txt_fe_floor_id:
                       Control: ModernTextInput
                       Properties:

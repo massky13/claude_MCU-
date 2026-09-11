@@ -60,6 +60,21 @@ App:
              status = "critical", "Below 3+ wks",
              "No data");
 
+      // ===== Corporate grading (scr_CorporateHome) =====
+      // Three explicit bands rather than StatusOf's goal / goal-5 pair: green at or above
+      // the target, yellow down to the second threshold, red below it. Returns the same
+      // status strings StatusOf does, so StatusGlyphOf/StatusColorOf and the badge
+      // ThemeColor mapping all keep working unchanged.
+      // Both thresholds are read from qk_config - CLAUDE.md §11: no threshold literal
+      // appears anywhere in the app. A missing setting yields Blank(), which grades as
+      // "nodata" (grey) rather than silently passing or failing every plant.
+      CorpStatusOf(value: Number, green: Number, yellow: Number): Text =
+          If(IsBlank(value), "nodata",
+             IsBlank(green) || IsBlank(yellow), "nodata",
+             value >= green, "good",
+             value >= yellow, "warning",
+             "critical");
+
       TestColorOf(testId: Number): Color =
           If(testId = 1, ElecColor,
              testId = 2, PlumbColor,
@@ -539,6 +554,12 @@ App:
       Set(varGoalFPY, Value(LookUp(col_config, Title = "Goal_FPY", Setting_value)));
       Set(varGoalFTT, Value(LookUp(col_config, Title = "Goal_FTT", Setting_value)));
       Set(varWindowMonths, Value(LookUp(col_config, Title = "Window_months", Setting_value)));
+
+      // Corporate-only bands (scr_CorporateHome). Separate from Goal_FPY/Goal_FTT on
+      // purpose: those grade a plant against its own operating target, while these are the
+      // corporate review thresholds and are deliberately stricter.
+      Set(varCorpGreen,  Value(LookUp(col_config, Title = "Corp_goal_green",  Setting_value)));
+      Set(varCorpYellow, Value(LookUp(col_config, Title = "Corp_goal_yellow", Setting_value)));
       // Home_number_pattern (qk_config) is intentionally unused - plants use their own
       // production-number coding, so scr_Entry no longer validates a fixed format.
 
