@@ -231,7 +231,6 @@ Screens:
                       Control: GroupContainer
                       Variant: AutoLayout
                       Properties:
-                        FillPortions: =0
                         Height: =476
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
@@ -304,129 +303,234 @@ Screens:
                                     Title: =ThisItem.Test_name
                                     TitleColor: =TextPrimary
                                     Width: =220
-                  - gal_week_homes_detail:
-                      Control: Gallery
-                      Variant: Vertical
+                  - cnt_homes_panel:
+                      Control: GroupContainer
+                      Variant: AutoLayout
                       Properties:
-                        Height: =CountRows(Self.AllItems) * Self.TemplateHeight
-                        Items: =Sort(col_homes, Home_number, SortOrder.Descending)
+                        FillPortions: =4
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
-                        TemplateSize: =56
                         Visible: =!(IsBlank(varWeekKey) || IsBlank(varFacility))
                       Children:
-                        - crd_home_row:
+                        - cnt_homes_header:
                             Control: GroupContainer
-                            Variant: ManualLayout
+                            Variant: AutoLayout
                             Properties:
-                              Height: =56
+                              FillPortions: =0
+                              Height: =24
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =12
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingLeft: =12
+                              PaddingRight: =12
                               Width: =Parent.Width
                             Children:
-                              - cnt_home_row_content:
-                                  Control: GroupContainer
-                                  Variant: AutoLayout
+                              - lbl_hh_floor:
+                                  Control: ModernText
                                   Properties:
-                                    Fill: =CardBg
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="FLOOR"
+                                    Width: =90
+                                    Wrap: =false
+                              - lbl_hh_elec:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="ELECTRICAL"
+                                    Width: =80
+                                    Wrap: =false
+                              - lbl_hh_plumb:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="PLUMBING"
+                                    Width: =80
+                                    Wrap: =false
+                              - lbl_hh_gas:
+                                  Control: ModernText
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="GAS"
+                                    Width: =80
+                                    Wrap: =false
+                              - lbl_hh_defects:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Right
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="DEFECTS"
+                                    Width: =90
+                                    Wrap: =false
+                        - rect_homes_header_rule:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =Parent.Width
+                        - gal_week_homes_detail:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              FillPortions: =0
+                              Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                              Items: =Sort(col_homes, Home_number, SortOrder.Descending)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              TemplateSize: =56
+                              Visible: =!(IsBlank(varWeekKey) || IsBlank(varFacility))
+                            Children:
+                              - crd_home_row:
+                                  Control: GroupContainer
+                                  Variant: ManualLayout
+                                  Properties:
                                     Height: =56
-                                    LayoutAlignItems: =LayoutAlignItems.Center
-                                    LayoutDirection: =LayoutDirection.Horizontal
-                                    LayoutGap: =12
-                                    PaddingLeft: =12
-                                    PaddingRight: =12
-                                    RadiusBottomLeft: =6
-                                    RadiusBottomRight: =6
-                                    RadiusTopLeft: =6
-                                    RadiusTopRight: =6
                                     Width: =Parent.Width
                                   Children:
-                                    - lbl_home_number:
-                                        Control: ModernText
+                                    - cnt_home_row_content:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Color: =TextPrimary
-                                          FontWeight: =FontWeight.Semibold
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =14
-                                          Text: =Text(ThisItem.Home_number, "0")
-                                          Width: =90
-                                          Wrap: =false
-                                    - bdg_elec:
-                                        Control: Badge
+                                          Fill: =CardBg
+                                          Height: =56
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =12
+                                          PaddingLeft: =12
+                                          PaddingRight: =12
+                                          RadiusBottomLeft: =6
+                                          RadiusBottomRight: =6
+                                          RadiusTopLeft: =6
+                                          RadiusTopRight: =6
+                                          Width: =Parent.Width
+                                        Children:
+                                          - lbl_home_number:
+                                              Control: ModernText
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =TextPrimary
+                                                FontWeight: =FontWeight.Semibold
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =Text(ThisItem.Home_number, "0")
+                                                Width: =90
+                                                Wrap: =false
+                                          - bdg_elec:
+                                              Control: Badge
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                Content: |-
+                                                  =If(IsBlank(ThisItem.Elec_result), StatusGlyphOf("nodata") & " N/T",
+                                                      If(ThisItem.Elec_result = 1, StatusGlyphOf("good") & " Pass", StatusGlyphOf("critical") & " Fail"))
+                                                Height: =20
+                                                Shape: ='BadgeCanvas.Shape'.Rounded
+                                                ThemeColor: |-
+                                                  =If(IsBlank(ThisItem.Elec_result), 'BadgeCanvas.ThemeColor'.Subtle,
+                                                      If(ThisItem.Elec_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
+                                                Width: =80
+                                          - bdg_plumb:
+                                              Control: Badge
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                Content: |-
+                                                  =If(IsBlank(ThisItem.Plumb_result), StatusGlyphOf("nodata") & " N/T",
+                                                      If(ThisItem.Plumb_result = 1, StatusGlyphOf("good") & " Pass", StatusGlyphOf("critical") & " Fail"))
+                                                Height: =20
+                                                Shape: ='BadgeCanvas.Shape'.Rounded
+                                                ThemeColor: |-
+                                                  =If(IsBlank(ThisItem.Plumb_result), 'BadgeCanvas.ThemeColor'.Subtle,
+                                                      If(ThisItem.Plumb_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
+                                                Width: =80
+                                          - bdg_gas:
+                                              Control: Badge
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                Content: |-
+                                                  =If(IsBlank(ThisItem.Gas_result), StatusGlyphOf("nodata") & " N/T",
+                                                      If(ThisItem.Gas_result = 1, StatusGlyphOf("good") & " Pass", StatusGlyphOf("critical") & " Fail"))
+                                                Height: =20
+                                                Shape: ='BadgeCanvas.Shape'.Rounded
+                                                ThemeColor: |-
+                                                  =If(IsBlank(ThisItem.Gas_result), 'BadgeCanvas.ThemeColor'.Subtle,
+                                                      If(ThisItem.Gas_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
+                                                Width: =80
+                                          - lbl_defect_count_wd:
+                                              Control: ModernText
+                                              Properties:
+                                                Align: =Align.Right
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =TextSecondary
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: ="Defects " & Text(Coalesce(Sum(Filter(col_week_defects, Home_number = Text(ThisItem.Home_number, "0")), Coalesce(Qty, 1)), 0), "0")
+                                                Width: =90
+                                                Wrap: =false
+                                    - btn_home_row_overlay:
+                                        Control: Button
                                         Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Appearance: ='BadgeCanvas.Appearance'.Tint
-                                          Content: |-
-                                            =If(IsBlank(ThisItem.Elec_result), StatusGlyphOf("nodata") & " N/T",
-                                                If(ThisItem.Elec_result = 1, StatusGlyphOf("good") & " Pass", StatusGlyphOf("critical") & " Fail"))
-                                          Height: =20
-                                          Shape: ='BadgeCanvas.Shape'.Rounded
-                                          ThemeColor: |-
-                                            =If(IsBlank(ThisItem.Elec_result), 'BadgeCanvas.ThemeColor'.Subtle,
-                                                If(ThisItem.Elec_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
-                                          Width: =80
-                                    - bdg_plumb:
-                                        Control: Badge
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Appearance: ='BadgeCanvas.Appearance'.Tint
-                                          Content: |-
-                                            =If(IsBlank(ThisItem.Plumb_result), StatusGlyphOf("nodata") & " N/T",
-                                                If(ThisItem.Plumb_result = 1, StatusGlyphOf("good") & " Pass", StatusGlyphOf("critical") & " Fail"))
-                                          Height: =20
-                                          Shape: ='BadgeCanvas.Shape'.Rounded
-                                          ThemeColor: |-
-                                            =If(IsBlank(ThisItem.Plumb_result), 'BadgeCanvas.ThemeColor'.Subtle,
-                                                If(ThisItem.Plumb_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
-                                          Width: =80
-                                    - bdg_gas:
-                                        Control: Badge
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Appearance: ='BadgeCanvas.Appearance'.Tint
-                                          Content: |-
-                                            =If(IsBlank(ThisItem.Gas_result), StatusGlyphOf("nodata") & " N/T",
-                                                If(ThisItem.Gas_result = 1, StatusGlyphOf("good") & " Pass", StatusGlyphOf("critical") & " Fail"))
-                                          Height: =20
-                                          Shape: ='BadgeCanvas.Shape'.Rounded
-                                          ThemeColor: |-
-                                            =If(IsBlank(ThisItem.Gas_result), 'BadgeCanvas.ThemeColor'.Subtle,
-                                                If(ThisItem.Gas_result = 1, 'BadgeCanvas.ThemeColor'.Success, 'BadgeCanvas.ThemeColor'.Danger))
-                                          Width: =80
-                                    - lbl_defect_count_wd:
-                                        Control: ModernText
-                                        Properties:
-                                          Align: =Align.Right
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Color: =TextSecondary
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =12
-                                          Text: ="Defects " & Text(Coalesce(Sum(Filter(col_week_defects, Home_number = Text(ThisItem.Home_number, "0")), Coalesce(Qty, 1)), 0), "0")
-                                          Width: =90
-                                          Wrap: =false
-                              - btn_home_row_overlay:
-                                  Control: Button
-                                  Properties:
-                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                    BorderThickness: =0
-                                    Height: =56
-                                    OnSelect: |-
-                                      =Set(varExpandedHomeNum,
-                                          If(varExpandedHomeNum = ThisItem.Home_number, Blank(), ThisItem.Home_number));
-                                      If(!IsBlank(varExpandedHomeNum),
-                                          Set(varHomeNumberNum, varExpandedHomeNum);
-                                          Set(varHomeNumberText, Text(varExpandedHomeNum, "0"));
-                                          ClearCollect(col_home_defects,
-                                              Filter(qk_home_defect,
-                                                  Plant_ID = varPID && Home_number = varHomeNumberText))
-                                      )
-                                    Text: =""
-                                    Width: =Parent.Width
+                                          Appearance: ='ButtonCanvas.Appearance'.Transparent
+                                          BorderThickness: =0
+                                          Height: =56
+                                          OnSelect: |-
+                                            =Set(varExpandedHomeNum,
+                                                If(varExpandedHomeNum = ThisItem.Home_number, Blank(), ThisItem.Home_number));
+                                            If(!IsBlank(varExpandedHomeNum),
+                                                Set(varHomeNumberNum, varExpandedHomeNum);
+                                                Set(varHomeNumberText, Text(varExpandedHomeNum, "0"));
+                                                ClearCollect(col_home_defects,
+                                                    Filter(qk_home_defect,
+                                                        Plant_ID = varPID && Home_number = varHomeNumberText))
+                                            )
+                                          Text: =""
+                                          Width: =Parent.Width
                   - cnt_defect_detail:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -434,7 +538,6 @@ Screens:
                         BorderColor: =CardBorder
                         BorderThickness: =1
                         Fill: =CardBg
-                        FillPortions: =0
                         Height: =24 + 20 + 8 + gal_home_defects.Height + 8 + If(CountRows(col_home_defects) = 0, 16, 0)
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =8
