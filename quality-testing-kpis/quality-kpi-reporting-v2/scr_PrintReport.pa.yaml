@@ -1,7 +1,7 @@
 Screens:
   scr_PrintReport:
     Properties:
-      Fill: =PageBg
+      Fill: =RGBA(255, 255, 255, 1)
       OnVisible: |-
         =// varPrintFloor is set by btn_print_report (scr_WeekDetail) before navigating.
         // Re-read the defects here rather than trusting whatever col_home_defects held:
@@ -17,8 +17,8 @@ Screens:
           Control: GroupContainer
           Variant: AutoLayout
           Properties:
-            Fill: =PageBg
-            Height: =Parent.Height
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 64
             LayoutDirection: =LayoutDirection.Vertical
             LayoutOverflowY: =LayoutOverflow.Scroll
             Width: =Parent.Width
@@ -32,32 +32,11 @@ Screens:
                   Height: =1056
                   Width: =816
                 Children:
-                  - rect_pr_logo:
-                      Control: Rectangle
-                      Properties:
-                        Fill: =RGBA(243, 244, 242, 1)
-                        Height: =64
-                        X: =48
-                        Y: =40
-                  - lbl_pr_logo_hint:
-                      Control: ModernText
-                      Properties:
-                        Align: =Align.Center
-                        Color: =TextMuted
-                        Height: =64
-                        PaddingBottom: =0
-                        PaddingLeft: =0
-                        PaddingRight: =0
-                        PaddingTop: =0
-                        Size: =10
-                        Text: ="COMPANY LOGO"
-                        Wrap: =false
-                        X: =48
-                        Y: =40
                   - lbl_pr_title:
                       Control: ModernText
                       Properties:
                         Align: =Align.Right
+                        AutoHeight: =true
                         Color: =ChampionBlue
                         FontWeight: =FontWeight.Bold
                         PaddingBottom: =0
@@ -65,7 +44,7 @@ Screens:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =24
-                        Text: ="QUALITY TEST REPORT"
+                        Text: ="QUALITY SYSTEM TESTING REPORT"
                         Width: =450
                         Wrap: =false
                         X: =318
@@ -245,7 +224,7 @@ Screens:
                               Text: =ThisItem.val2
                               Width: =240
                               Wrap: =false
-                              X: =480
+                              X: =470
                   - lbl_pr_sec2:
                       Control: ModernText
                       Properties:
@@ -270,14 +249,6 @@ Screens:
                         Width: =720
                         X: =48
                         Y: =372
-                  - rect_pr_ftt_band:
-                      Control: Rectangle
-                      Properties:
-                        Fill: =RGBA(243, 244, 242, 1)
-                        Height: =40
-                        Width: =720
-                        X: =48
-                        Y: =538
                   - lbl_pr_th_test:
                       Control: ModernText
                       Properties:
@@ -294,22 +265,6 @@ Screens:
                         Wrap: =false
                         X: =48
                         Y: =380
-                  - lbl_pr_ftt_label:
-                      Control: ModernText
-                      Properties:
-                        Color: =TextPrimary
-                        FontWeight: =FontWeight.Bold
-                        Height: =40
-                        PaddingBottom: =0
-                        PaddingLeft: =12
-                        PaddingRight: =0
-                        PaddingTop: =0
-                        Size: =12
-                        Text: ="FIRST TIME THROUGH  (all three tests passed)"
-                        Width: =460
-                        Wrap: =false
-                        X: =48
-                        Y: =538
                   - lbl_pr_th_proc:
                       Control: ModernText
                       Properties:
@@ -326,35 +281,6 @@ Screens:
                         Wrap: =false
                         X: =208
                         Y: =380
-                  - lbl_pr_ftt_result:
-                      Control: ModernText
-                      Properties:
-                        Align: =Align.Right
-                        Color: |-
-                          =With({e: varPrintFloor.Elec_result,
-                                 p: varPrintFloor.Plumb_result,
-                                 g: varPrintFloor.Gas_result},
-                              If(IsBlank(e) || IsBlank(p) || IsBlank(g), TextMuted,
-                                 e = 1 && p = 1 && g = 1, StatusGoodColor,
-                                 AlertRed))
-                        FontWeight: =FontWeight.Bold
-                        Height: =40
-                        PaddingBottom: =0
-                        PaddingLeft: =0
-                        PaddingRight: =12
-                        PaddingTop: =0
-                        Size: =14
-                        Text: |-
-                          =With({e: varPrintFloor.Elec_result,
-                                 p: varPrintFloor.Plumb_result,
-                                 g: varPrintFloor.Gas_result},
-                              If(IsBlank(e) || IsBlank(p) || IsBlank(g), "INCOMPLETE",
-                                 e = 1 && p = 1 && g = 1, "PASS",
-                                 "FAIL"))
-                        Width: =240
-                        Wrap: =false
-                        X: =528
-                        Y: =538
                   - lbl_pr_th_result:
                       Control: ModernText
                       Properties:
@@ -372,24 +298,6 @@ Screens:
                         Wrap: =false
                         X: =608
                         Y: =380
-                  - lbl_pr_sec3:
-                      Control: ModernText
-                      Properties:
-                        Color: =ChampionBlue
-                        FontWeight: =FontWeight.Bold
-                        Height: =22
-                        PaddingBottom: =0
-                        PaddingLeft: =0
-                        PaddingRight: =0
-                        PaddingTop: =0
-                        Size: =12
-                        Text: |-
-                          ="3.  DEFECTS RECORDED  (" &
-                          Text(Coalesce(Sum(col_print_defects, Coalesce(Qty, 1)), 0), "0") & " total)"
-                        Width: =720
-                        Wrap: =false
-                        X: =48
-                        Y: =606
                   - gal_pr_tests:
                       Control: Gallery
                       Variant: Vertical
@@ -402,6 +310,13 @@ Screens:
                         X: =48
                         Y: =404
                       Children:
+                        - rect_pr_test_sep:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =710
+                              Y: =41
                         - rect_pr_test_accent:
                             Control: Rectangle
                             Properties:
@@ -469,13 +384,77 @@ Screens:
                               Width: =548
                               Wrap: =false
                               X: =160
-                        - rect_pr_test_sep:
-                            Control: Rectangle
-                            Properties:
-                              Fill: =GridLine
-                              Height: =1
-                              Width: =720
-                              Y: =41
+                  - rect_pr_ftt_band:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(243, 244, 242, 1)
+                        Height: =40
+                        Width: =720
+                        X: =48
+                        Y: =538
+                  - lbl_pr_ftt_label:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        Height: =40
+                        PaddingBottom: =0
+                        PaddingLeft: =12
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="FIRST TIME THROUGH  (all three tests passed)"
+                        Width: =460
+                        Wrap: =false
+                        X: =48
+                        Y: =538
+                  - lbl_pr_ftt_result:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: |-
+                          =With({e: varPrintFloor.Elec_result,
+                                 p: varPrintFloor.Plumb_result,
+                                 g: varPrintFloor.Gas_result},
+                              If(IsBlank(e) || IsBlank(p) || IsBlank(g), TextMuted,
+                                 e = 1 && p = 1 && g = 1, StatusGoodColor,
+                                 AlertRed))
+                        FontWeight: =FontWeight.Bold
+                        Height: =40
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =12
+                        PaddingTop: =0
+                        Size: =14
+                        Text: |-
+                          =With({e: varPrintFloor.Elec_result,
+                                 p: varPrintFloor.Plumb_result,
+                                 g: varPrintFloor.Gas_result},
+                              If(IsBlank(e) || IsBlank(p) || IsBlank(g), "INCOMPLETE",
+                                 e = 1 && p = 1 && g = 1, "PASS",
+                                 "FAIL"))
+                        Width: =240
+                        Wrap: =false
+                        X: =528
+                        Y: =538
+                  - lbl_pr_sec3:
+                      Control: ModernText
+                      Properties:
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        Height: =22
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          ="3.  DEFECTS RECORDED  (" &
+                          Text(Coalesce(Sum(col_print_defects, Coalesce(Qty, 1)), 0), "0") & " total)"
+                        Width: =720
+                        Wrap: =false
+                        X: =48
+                        Y: =606
                   - rect_pr_rule_s3:
                       Control: Rectangle
                       Properties:
@@ -560,7 +539,7 @@ Screens:
                         Visible: =CountRows(col_print_defects) > 0
                         Width: =720
                         X: =48
-                        Y: =662
+                        Y: =586
                       Children:
                         - lbl_pr_d_name:
                             Control: ModernText
@@ -623,7 +602,7 @@ Screens:
                               Text: =Text(Coalesce(ThisItem.Qty, 1), "0")
                               Width: =110
                               Wrap: =false
-                              X: =610
+                              X: =600
                   - lbl_pr_no_defects:
                       Control: ModernText
                       Properties:
@@ -647,7 +626,7 @@ Screens:
                         Height: =1
                         Width: =720
                         X: =48
-                        Y: =884
+                        Y: =767
                   - lbl_pr_sign_insp:
                       Control: ModernText
                       Properties:
@@ -662,7 +641,7 @@ Screens:
                         Width: =300
                         Wrap: =false
                         X: =48
-                        Y: =944
+                        Y: =748
                   - rect_pr_sign_insp_line:
                       Control: Rectangle
                       Properties:
@@ -670,7 +649,7 @@ Screens:
                         Height: =1
                         Width: =300
                         X: =48
-                        Y: =938
+                        Y: =767
                   - lbl_pr_sign_qm:
                       Control: ModernText
                       Properties:
@@ -685,7 +664,7 @@ Screens:
                         Width: =300
                         Wrap: =false
                         X: =396
-                        Y: =944
+                        Y: =748
                   - rect_pr_sign_qm_line:
                       Control: Rectangle
                       Properties:
@@ -693,7 +672,7 @@ Screens:
                         Height: =1
                         Width: =300
                         X: =396
-                        Y: =938
+                        Y: =767
                   - lbl_pr_footer:
                       Control: ModernText
                       Properties:
@@ -711,7 +690,25 @@ Screens:
                         Width: =720
                         Wrap: =false
                         X: =48
-                        Y: =1004
+                        Y: =748
+                  - Image5:
+                      Control: Image
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(0, 0, 0, 0)
+                        FocusedBorderThickness: =4
+                        Height: =73
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        Image: ='new company cropped transp - Copy'
+                        PressedBorderColor: =RGBA(0, 0, 0, 0)
+                        PressedFill: =RGBA(0, 0, 0, 0)
+                        Width: =248
+                        X: =48
+                        Y: =38
       - cnt_pr_actions:
           Control: GroupContainer
           Variant: AutoLayout
@@ -759,3 +756,20 @@ Screens:
                   OnSelect: =Navigate(scr_WeekDetail, ScreenTransition.None)
                   Text: ="Close"
                   Width: =140
+            - lbl_pr_hint:
+                Control: ModernText
+                Properties:
+                  Color: =TextMuted
+                  Height: =44
+                  PaddingBottom: =0
+                  PaddingLeft: =16
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =11
+                  Text: |-
+                    =// Orientation, paper size and margins live in the browser print dialog -
+                    // Power Apps Print() cannot set them, so the sheet is laid out at exact
+                    // Letter portrait dimensions and the operator is told what to pick.
+                    "In the print dialog choose:  Letter  .  Portrait  .  Margins: None"
+                  Width: =380
+                  Wrap: =false
