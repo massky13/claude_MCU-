@@ -192,7 +192,23 @@ Screens:
                         PaddingTop: =0
                         Size: =20
                         Text: ="Week ending " & If(IsBlank(varWeekRow), "-", Text(varWeekRow.Week_end, "mmmm d, yyyy")) & " . Facility " & Text(varFacility, "0")
+                        Width: =500
                         Wrap: =false
+                  - btn_print_report:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: ="Print the test report for the selected floor"
+                        BasePaletteColor: =ChampionBlue
+                        Height: =36
+                        Icon: ="Print"
+                        OnSelect: |-
+                          =Set(varPrintFloor,
+                              LookUp(col_homes, Home_number = Text(varExpandedHomeNum, "0")));
+                          Navigate(scr_PrintReport, ScreenTransition.None)
+                        Size: =12
+                        Text: ="Print floor report"
+                        Visible: =!IsBlank(varExpandedHomeNum)
+                        Width: =190
             - cnt_main_wd:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -224,6 +240,7 @@ Screens:
                       Control: GroupContainer
                       Variant: AutoLayout
                       Properties:
+                        DropShadow: =DropShadow.None
                         Height: =476
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
@@ -251,22 +268,27 @@ Screens:
                               DescriptionSize: =28
                               Fill: =CardBg
                               Height: =110
+                              ImagePosition: =ImagePosition.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
                               Subtitle: ="All 3 tests pass"
                               SubtitleColor: =TextSecondary
                               SubtitleSize: =11
-                              Title: ="First Time Through"
+                              Title: ="FPR"
                               TitleColor: =TextPrimary
-                              Width: =220
+                              Width: '=Parent.Width-20 '
                         - gal_test_cards:
                             Control: Gallery
                             Variant: Vertical
                             Properties:
-                              Height: =CountRows(Self.AllItems) * Self.TemplateHeight
+                              AlignInContainer: =AlignInContainer.Center
+                              Height: =Parent.Height-Self.Y
                               Items: =Sort(col_test, Sort_order)
+                              LayoutMinHeight: =0
                               LayoutMinWidth: =0
                               ShowScrollbar: =false
-                              TemplateSize: =122
-                              Width: =Parent.Width
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height/3
+                              Width: '=Parent.Width-15 '
                             Children:
                               - crd_test:
                                   Control: ModernCard
@@ -288,14 +310,20 @@ Screens:
                                               StatusColorOf(tStatus)
                                           )
                                       )
-                                    DescriptionSize: =28
+                                    DescriptionSize: =24
                                     Fill: =CardBg
+                                    HeaderImage: =
+                                    Height: =Parent.Height/3-15
+                                    Image: =
                                     Subtitle: ="Test FPY"
                                     SubtitleColor: =TextSecondary
                                     SubtitleSize: =11
                                     Title: =ThisItem.Test_name
                                     TitleColor: =TextPrimary
-                                    Width: =220
+                                    TitleSize: =18
+                                    Width: '=Parent.Width-10 '
+                                    X: =5
+                                    Y: =5
                   - cnt_homes_panel:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -528,7 +556,7 @@ Screens:
                                                         Plant_ID = varPID && Home_number = varHomeNumberText))
                                             )
                                           Text: =""
-                                          Width: '=Parent.Width-24 '
+                                          Width: =Parent.Width
                   - cnt_defect_detail:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -565,6 +593,7 @@ Screens:
                             Control: GroupContainer
                             Variant: ManualLayout
                             Properties:
+                              DropShadow: =DropShadow.None
                               FillPortions: =0
                               Height: =20
                               Visible: =CountRows(col_home_defects) > 0
@@ -618,7 +647,7 @@ Screens:
                               Fill: =GridLine
                               Height: =1
                               Visible: =CountRows(col_home_defects) > 0
-                              Width: =Parent.Width
+                              Width: =Parent.Width-28
                         - gal_home_defects:
                             Control: Gallery
                             Variant: Vertical

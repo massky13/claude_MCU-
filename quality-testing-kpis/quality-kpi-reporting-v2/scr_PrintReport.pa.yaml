@@ -1,0 +1,761 @@
+Screens:
+  scr_PrintReport:
+    Properties:
+      Fill: =PageBg
+      OnVisible: |-
+        =// varPrintFloor is set by btn_print_report (scr_WeekDetail) before navigating.
+        // Re-read the defects here rather than trusting whatever col_home_defects held:
+        // the user may have collapsed or changed the selected floor on the way in.
+        Set(varPrinting, false);
+        If(!IsBlank(varPrintFloor),
+            ClearCollect(col_print_defects,
+                Filter(qk_home_defect,
+                    Plant_ID = varPID && Home_number = varPrintFloor.Home_number))
+        )
+    Children:
+      - cnt_pr_scroll:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Fill: =PageBg
+            Height: =Parent.Height
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            Width: =Parent.Width
+          Children:
+            - cnt_pr_page:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =1056
+                  Width: =816
+                Children:
+                  - rect_pr_logo:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(243, 244, 242, 1)
+                        Height: =64
+                        X: =48
+                        Y: =40
+                  - lbl_pr_logo_hint:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Center
+                        Color: =TextMuted
+                        Height: =64
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="COMPANY LOGO"
+                        Wrap: =false
+                        X: =48
+                        Y: =40
+                  - lbl_pr_title:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =24
+                        Text: ="QUALITY TEST REPORT"
+                        Width: =450
+                        Wrap: =false
+                        X: =318
+                        Y: =44
+                  - lbl_pr_subtitle:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: =TextSecondary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="Electrical  .  Plumbing  .  Gas   |   Per-floor first-time-through record"
+                        Width: =450
+                        Wrap: =false
+                        X: =318
+                        Y: =78
+                  - rect_pr_rule_top:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =ChampionBlue
+                        Height: =3
+                        Width: =720
+                        X: =48
+                        Y: =120
+                  - lbl_pr_refno:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =11
+                        Text: |-
+                          ="Report no.  " &
+                          If(IsBlank(varPrintFloor), "-",
+                             Text(varPID, "0") & "." & Text(varFacility, "0") & "." &
+                             Text(varPrintFloor.Home_number, "0"))
+                        Width: =400
+                        Wrap: =false
+                        X: =48
+                        Y: =132
+                  - lbl_pr_issued:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: =TextSecondary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =11
+                        Text: ="Issued " & Text(Now(), "[$-en-US]mmmm d, yyyy  h:mm AM/PM")
+                        Width: =320
+                        Wrap: =false
+                        X: =448
+                        Y: =132
+                  - lbl_pr_sec1:
+                      Control: ModernText
+                      Properties:
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        Height: =22
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="1.  FLOOR IDENTIFICATION"
+                        Width: =720
+                        Wrap: =false
+                        X: =48
+                        Y: =172
+                  - rect_pr_rule_s1:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =GridLine
+                        Height: =1
+                        Width: =720
+                        X: =48
+                        Y: =196
+                  - gal_pr_ident:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        Height: =120
+                        Items: |-
+                          =// Built as rows so the label/value pairs cannot drift out of alignment
+                          // the way eight separately positioned labels would.
+                          Table(
+                            {lbl: "Production number", val:
+                                If(IsBlank(varPrintFloor), "-", Text(varPrintFloor.Home_number, "0")),
+                             lbl2: "Model", val2:
+                                Coalesce(varPrintFloor.Model, "-")},
+                            {lbl: "Floor", val:
+                                If(IsBlank(varPrintFloor), "-",
+                                   Text(varPrintFloor.Floor_number, "0") & " of " &
+                                   Text(Coalesce(varPrintFloor.Floors, 1), "0")),
+                             lbl2: "Plant", val2:
+                                Text(varPID, "0") & " - " &
+                                Coalesce(LookUp(col_plants, Plant_ID = varPID, Plant_Names), "-")},
+                            {lbl: "Week ending", val:
+                                If(IsBlank(varPrintFloor), "-",
+                                   Text(varPrintFloor.Week_end, "[$-en-US]mmmm d, yyyy")),
+                             lbl2: "Facility", val2: Text(varFacility, "0")},
+                            {lbl: "Entered by", val:
+                                Coalesce(varPrintFloor.Entered_by, "-"),
+                             lbl2: "Entered at", val2:
+                                If(IsBlank(varPrintFloor.Entered_at), "-",
+                                   Text(varPrintFloor.Entered_at, "[$-en-US]mm/dd/yyyy h:mm AM/PM"))}
+                          )
+                        ShowScrollbar: =false
+                        TemplateSize: =30
+                        Width: =720
+                        X: =48
+                        Y: =208
+                      Children:
+                        - lbl_pr_id_l1:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextSecondary
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: =ThisItem.lbl
+                              Width: =130
+                              Wrap: =false
+                        - lbl_pr_id_v1:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextPrimary
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: =ThisItem.val
+                              Width: =210
+                              Wrap: =false
+                              X: =130
+                        - lbl_pr_id_l2:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextSecondary
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: =ThisItem.lbl2
+                              Width: =120
+                              Wrap: =false
+                              X: =360
+                        - lbl_pr_id_v2:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextPrimary
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =11
+                              Text: =ThisItem.val2
+                              Width: =240
+                              Wrap: =false
+                              X: =480
+                  - lbl_pr_sec2:
+                      Control: ModernText
+                      Properties:
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        Height: =22
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="2.  TEST RESULTS"
+                        Width: =720
+                        Wrap: =false
+                        X: =48
+                        Y: =348
+                  - rect_pr_rule_s2:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =GridLine
+                        Height: =1
+                        Width: =720
+                        X: =48
+                        Y: =372
+                  - rect_pr_ftt_band:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(243, 244, 242, 1)
+                        Height: =40
+                        Width: =720
+                        X: =48
+                        Y: =538
+                  - lbl_pr_th_test:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="TEST"
+                        Width: =160
+                        Wrap: =false
+                        X: =48
+                        Y: =380
+                  - lbl_pr_ftt_label:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        Height: =40
+                        PaddingBottom: =0
+                        PaddingLeft: =12
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="FIRST TIME THROUGH  (all three tests passed)"
+                        Width: =460
+                        Wrap: =false
+                        X: =48
+                        Y: =538
+                  - lbl_pr_th_proc:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="QUALITY PROCEDURES APPLIED"
+                        Width: =400
+                        Wrap: =false
+                        X: =208
+                        Y: =380
+                  - lbl_pr_ftt_result:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: |-
+                          =With({e: varPrintFloor.Elec_result,
+                                 p: varPrintFloor.Plumb_result,
+                                 g: varPrintFloor.Gas_result},
+                              If(IsBlank(e) || IsBlank(p) || IsBlank(g), TextMuted,
+                                 e = 1 && p = 1 && g = 1, StatusGoodColor,
+                                 AlertRed))
+                        FontWeight: =FontWeight.Bold
+                        Height: =40
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =12
+                        PaddingTop: =0
+                        Size: =14
+                        Text: |-
+                          =With({e: varPrintFloor.Elec_result,
+                                 p: varPrintFloor.Plumb_result,
+                                 g: varPrintFloor.Gas_result},
+                              If(IsBlank(e) || IsBlank(p) || IsBlank(g), "INCOMPLETE",
+                                 e = 1 && p = 1 && g = 1, "PASS",
+                                 "FAIL"))
+                        Width: =240
+                        Wrap: =false
+                        X: =528
+                        Y: =538
+                  - lbl_pr_th_result:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="RESULT"
+                        Width: =160
+                        Wrap: =false
+                        X: =608
+                        Y: =380
+                  - lbl_pr_sec3:
+                      Control: ModernText
+                      Properties:
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        Height: =22
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          ="3.  DEFECTS RECORDED  (" &
+                          Text(Coalesce(Sum(col_print_defects, Coalesce(Qty, 1)), 0), "0") & " total)"
+                        Width: =720
+                        Wrap: =false
+                        X: =48
+                        Y: =606
+                  - gal_pr_tests:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        Height: =126
+                        Items: =Sort(col_test, Sort_order)
+                        ShowScrollbar: =false
+                        TemplateSize: =42
+                        Width: =720
+                        X: =48
+                        Y: =404
+                      Children:
+                        - rect_pr_test_accent:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =TestColorOf(Value(ThisItem.Title))
+                              Height: =24
+                              Width: =3
+                              Y: =9
+                        - lbl_pr_test_name:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextPrimary
+                              FontWeight: =FontWeight.Semibold
+                              Height: =42
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: =ThisItem.Test_name
+                              Width: =148
+                              Wrap: =false
+                              X: =12
+                        - lbl_pr_test_proc:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextSecondary
+                              Height: =42
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =10
+                              Text: |-
+                                =Concat(
+                                    Sort(Filter(col_type, Test_ID = Value(ThisItem.Title)), Sort_order),
+                                    Type_name & " (" & QP_ref & ")", ",  ")
+                              Width: =400
+                              Wrap: =false
+                              X: =160
+                        - lbl_pr_test_result:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: |-
+                                =With({r: Switch(Value(ThisItem.Title),
+                                                 1, varPrintFloor.Elec_result,
+                                                 2, varPrintFloor.Plumb_result,
+                                                 3, varPrintFloor.Gas_result)},
+                                    If(r = 1, StatusGoodColor, r = 0, AlertRed, TextMuted))
+                              FontWeight: =FontWeight.Bold
+                              Height: =42
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                =// Glyph plus word, never colour alone (CLAUDE.md §11) - this sheet
+                                // gets printed in black and white as often as not.
+                                With({r: Switch(Value(ThisItem.Title),
+                                                1, varPrintFloor.Elec_result,
+                                                2, varPrintFloor.Plumb_result,
+                                                3, varPrintFloor.Gas_result)},
+                                    If(r = 1, "PASS", r = 0, "FAIL", "NOT TESTED"))
+                              Width: =548
+                              Wrap: =false
+                              X: =160
+                        - rect_pr_test_sep:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Width: =720
+                              Y: =41
+                  - rect_pr_rule_s3:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =GridLine
+                        Height: =1
+                        Width: =720
+                        X: =48
+                        Y: =630
+                  - lbl_pr_dh_defect:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="DEFECT"
+                        Width: =260
+                        Wrap: =false
+                        X: =48
+                        Y: =638
+                  - lbl_pr_dh_test:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="TEST"
+                        Width: =110
+                        Wrap: =false
+                        X: =308
+                        Y: =638
+                  - lbl_pr_dh_proc:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="PROCEDURE"
+                        Width: =240
+                        Wrap: =false
+                        X: =418
+                        Y: =638
+                  - lbl_pr_dh_qty:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Color: =TextMuted
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="QTY"
+                        Width: =110
+                        Wrap: =false
+                        X: =658
+                        Y: =638
+                  - gal_pr_defects:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        Height: =182
+                        Items: =col_print_defects
+                        ShowScrollbar: =false
+                        TemplateSize: =26
+                        Visible: =CountRows(col_print_defects) > 0
+                        Width: =720
+                        X: =48
+                        Y: =662
+                      Children:
+                        - lbl_pr_d_name:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextPrimary
+                              Height: =26
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =10
+                              Text: |-
+                                =Coalesce(
+                                    LookUp(col_defect_all, Value(Title) = ThisItem.Defect_ID).Defect_name,
+                                    "Unknown defect")
+                              Width: =260
+                              Wrap: =false
+                        - lbl_pr_d_test:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextSecondary
+                              Height: =26
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =10
+                              Text: =Coalesce(LookUp(col_test, Value(Title) = ThisItem.Test_ID).Test_name, "-")
+                              Width: =110
+                              Wrap: =false
+                              X: =260
+                        - lbl_pr_d_proc:
+                            Control: ModernText
+                            Properties:
+                              Color: =TextSecondary
+                              Height: =26
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =10
+                              Text: |-
+                                =With({t: LookUp(col_type, Value(Title) = ThisItem.Type_ID)},
+                                    Coalesce(t.Type_name, "-") & "  (" & Coalesce(t.QP_ref, "-") & ")")
+                              Width: =240
+                              Wrap: =false
+                              X: =370
+                        - lbl_pr_d_qty:
+                            Control: ModernText
+                            Properties:
+                              Align: =Align.Right
+                              Color: =TextPrimary
+                              FontWeight: =FontWeight.Semibold
+                              Height: =26
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =10
+                              Text: =Text(Coalesce(ThisItem.Qty, 1), "0")
+                              Width: =110
+                              Wrap: =false
+                              X: =610
+                  - lbl_pr_no_defects:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =26
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =11
+                        Text: ="No defects were recorded against this floor."
+                        Visible: =CountRows(col_print_defects) = 0
+                        Width: =720
+                        Wrap: =false
+                        X: =48
+                        Y: =662
+                  - rect_pr_rule_sign:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =GridLine
+                        Height: =1
+                        Width: =720
+                        X: =48
+                        Y: =884
+                  - lbl_pr_sign_insp:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Inspector signature"
+                        Width: =300
+                        Wrap: =false
+                        X: =48
+                        Y: =944
+                  - rect_pr_sign_insp_line:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =BaselineColor
+                        Height: =1
+                        Width: =300
+                        X: =48
+                        Y: =938
+                  - lbl_pr_sign_qm:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Quality manager signature"
+                        Width: =300
+                        Wrap: =false
+                        X: =396
+                        Y: =944
+                  - rect_pr_sign_qm_line:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =BaselineColor
+                        Height: =1
+                        Width: =300
+                        X: =396
+                        Y: =938
+                  - lbl_pr_footer:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Center
+                        Color: =TextMuted
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =9
+                        Text: |-
+                          ="Generated from Quality KPI Reporting.  This report records first-time-through " &
+                          "results only; retests and rework are not tracked."
+                        Width: =720
+                        Wrap: =false
+                        X: =48
+                        Y: =1004
+      - cnt_pr_actions:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.Regular
+            Fill: =CardBg
+            Height: =64
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =12
+            LayoutJustifyContent: =LayoutJustifyContent.Center
+            PaddingBottom: =10
+            PaddingLeft: =16
+            PaddingRight: =16
+            PaddingTop: =10
+            Visible: =!varPrinting
+            Width: =Parent.Width
+            Y: =Parent.Height - 64
+          Children:
+            - btn_pr_print:
+                Control: ModernButton
+                Properties:
+                  AccessibleLabel: ="Print this report"
+                  BasePaletteColor: =ChampionBlue
+                  Height: =44
+                  Icon: ="Print"
+                  OnSelect: |-
+                    =// Print() hands the rendered screen to the browser's own print dialog. It is
+                    // the only built-in method and the most reliable one here - PDF generation
+                    // would mean Power Automate, a premium connector and an async round trip.
+                    // varPrinting hides this action bar for the render so the buttons do not
+                    // appear on the printed sheet.
+                    Set(varPrinting, true);
+                    Print();
+                    Set(varPrinting, false)
+                  Text: ="Print"
+                  Width: =140
+            - btn_pr_close:
+                Control: ModernButton
+                Properties:
+                  AccessibleLabel: ="Close and return to week detail"
+                  Appearance: =ButtonAppearance.Secondary
+                  Height: =44
+                  Icon: ="Cancel"
+                  OnSelect: =Navigate(scr_WeekDetail, ScreenTransition.None)
+                  Text: ="Close"
+                  Width: =140

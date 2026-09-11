@@ -8,3 +8,4 @@ EditorState:
     - scr_WeekDetail
     - scr_ParetoTest
     - scr_CorporateHome
+    - scr_PrintReport
