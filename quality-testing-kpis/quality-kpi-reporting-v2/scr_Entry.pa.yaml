@@ -4,6 +4,8 @@ Screens:
       Fill: =PageBg
       OnVisible: |-
         =Reset(tabs_main_en);
+        Set(varShowFloorEdit, false);
+        Set(varShowFloorDelete, false);
         Set(varHomeOpen, Coalesce(varHomeOpen, false));
         Set(varToday, Today());
 
@@ -326,12 +328,27 @@ Screens:
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
                                   Children:
+                                    - lbl_progress_1:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =TextSecondary
+                                          Height: =18
+                                          PaddingBottom: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: |-
+                                            ="Production: "
+                                          Width: =70
+                                          Wrap: =false
                                     - txt_home_number:
                                         Control: ModernTextInput
                                         Properties:
                                           AccessibleLabel: ="Home production number (floor suffix is added automatically)"
                                           AlignInContainer: =AlignInContainer.Stretch
                                           FillPortions: =1
+                                          LayoutMinWidth: =0
                                           Placeholder: ="e.g. 4471203"
                                     - num_floors:
                                         Control: ModernNumberInput
@@ -341,7 +358,7 @@ Screens:
                                           Default: =1
                                           Max: =6
                                           Min: =1
-                                          Width: =80
+                                          Width: =60
                                     - btn_add_home:
                                         Control: ModernButton
                                         Properties:
@@ -506,12 +523,13 @@ Screens:
                                                       PaddingTop: =0
                                                       Size: =13
                                                       Text: =Text(ThisItem.Home_number, "0")
-                                                      Width: =80
+                                                      Width: =100
                                                       Wrap: =false
                                                 - badge_row_elec:
                                                     Control: Badge
                                                     Properties:
                                                       AccessibleLabel: ="Electrical result"
+                                                      Align: =Align.Center
                                                       AlignInContainer: =AlignInContainer.Center
                                                       Appearance: ='BadgeCanvas.Appearance'.Filled
                                                       BasePaletteColor: |-
@@ -519,12 +537,11 @@ Screens:
                                                             StatusColorOf(If(r=1,"good",r=0,"critical","nodata")))
                                                       Content: |-
                                                         =With({r: ThisItem.Elec_result},
-                                                            "E " & StatusGlyphOf(If(r=1,"good",r=0,"critical","nodata")) &
-                                                            " " & If(r=1,"Pass",r=0,"Fail","-"))
+                                                            "E " & StatusGlyphOf(If(r=1,"good",r=0,"critical","nodata")) &     " " & If(r=1,"Pass",r=0,"Fail","-"))
                                                       FontColor: =RGBA(255,255,255,1)
                                                       Height: =20
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
-                                                      Width: =80
+                                                      Width: =70
                                                 - badge_row_plumb:
                                                     Control: Badge
                                                     Properties:
@@ -541,7 +558,7 @@ Screens:
                                                       FontColor: =RGBA(255,255,255,1)
                                                       Height: =20
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
-                                                      Width: =80
+                                                      Width: =70
                                                 - badge_row_gas:
                                                     Control: Badge
                                                     Properties:
@@ -558,20 +575,7 @@ Screens:
                                                       FontColor: =RGBA(255,255,255,1)
                                                       Height: =20
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
-                                                      Width: =80
-                                                - lbl_row_floors:
-                                                    Control: ModernText
-                                                    Properties:
-                                                      AlignInContainer: =AlignInContainer.Center
-                                                      Color: =TextSecondary
-                                                      PaddingBottom: =0
-                                                      PaddingLeft: =0
-                                                      PaddingRight: =0
-                                                      PaddingTop: =0
-                                                      Size: =11
-                                                      Text: =If(ThisItem.Floors=1,ThisItem.Floors & " Floor", ThisItem.Floors & " Floors")
-                                                      Width: =50
-                                                      Wrap: =false
+                                                      Width: =70
                                                 - lbl_row_defects:
                                                     Control: ModernText
                                                     Properties:
@@ -611,7 +615,52 @@ Screens:
                                                   ClearCollect(col_defect_edit, col_home_defects);
                                                   Set(varHomeOpen, true)
                                                 Text: =""
-                                                Width: =Parent.Width
+                                                Width: |-
+                                                  =// Stops short of the Edit/Delete buttons - this used to span the full row
+                                                  // and would otherwise swallow their taps.
+                                                  Parent.Width - 104
+                                          - btn_row_delete:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Delete this floor"
+                                                Appearance: =ButtonAppearance.Subtle
+                                                BasePaletteColor: =AlertRed
+                                                DisplayMode: =If(varCanEdit, DisplayMode.Edit, DisplayMode.Disabled)
+                                                Height: =40
+                                                Icon: ="Delete"
+                                                Layout: =ButtonLayout.IconOnly
+                                                OnSelect: |-
+                                                  =Set(varFDHome, Text(ThisItem.Home_number, "0"));
+                                                  // Count what goes with it, so the confirm can say so rather than just
+                                                  // asking 'are you sure'.
+                                                  Set(varFDDefects,
+                                                      Coalesce(Sum(Filter(col_week_defects,
+                                                          Home_number = Text(ThisItem.Home_number, "0")), Coalesce(Qty, 1)), 0));
+                                                  Set(varShowFloorDelete, true)
+                                                Width: =30
+                                                X: =Parent.Width - Self.Width-2
+                                                Y: =8
+                                          - btn_row_edit:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Edit floor number"
+                                                Appearance: =ButtonAppearance.Subtle
+                                                DisplayMode: =If(varCanEdit, DisplayMode.Edit, DisplayMode.Disabled)
+                                                Height: =40
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: |-
+                                                  =Set(varFEHome, Text(ThisItem.Home_number, "0"));
+                                                  Set(varFEFloor, ThisItem.Floor_number);
+                                                  Set(varFEFloors, Coalesce(ThisItem.Floors, 1));
+                                                  // Reset so the box re-reads varFEHome - otherwise it keeps whatever was
+                                                  // typed the last time the popup was opened.
+                                                  Reset(txt_fe_floor_id);
+                                                  Set(varShowFloorEdit, true)
+                                                Size: =12
+                                                Text: ="Edit"
+                                                Width: =52
+                                                X: =Parent.Width - 100
+                                                Y: =8
                         - cnt_home_detail:
                             Control: GroupContainer
                             Variant: AutoLayout
@@ -1523,3 +1572,312 @@ Screens:
                         Text: =""
                         Visible: =false
                         Width: =1
+      - cnt_floor_edit_overlay:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Visible: =varShowFloorEdit
+            Width: =Parent.Width
+          Children:
+            - rect_fe_scrim:
+                Control: Rectangle
+                Properties:
+                  Fill: =RGBA(11, 11, 11, 0.55)
+                  Height: =Parent.Height
+                  Width: =Parent.Width
+            - btn_fe_scrim_cancel:
+                Control: Button
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Transparent
+                  BorderThickness: =0
+                  Height: =Parent.Height
+                  OnSelect: =Set(varShowFloorEdit, false)
+                  Text: =""
+                  Width: =Parent.Width
+            - cnt_fe_card:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  Fill: =CardBg
+                  Height: =260
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: =Min(Parent.Width - 64, 420)
+                  X: =(Parent.Width - Self.Width)/2
+                  Y: =(Parent.Height - Self.Height)/2
+                Children:
+                  - lbl_fe_title:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Edit floor number"
+                        Width: =Parent.Width - 48
+                        Wrap: =false
+                        X: =24
+                        Y: =20
+                  - lbl_fe_sub:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =20
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =varFEHome & " - " &
+                          If(varFEFloors = 1, "single floor home",
+                             "floor " & Text(varFEFloor, "0") & " of " & Text(varFEFloors, "0"))
+                        Width: =Parent.Width - 48
+                        Wrap: =false
+                        X: =24
+                        Y: =50
+                  - lbl_fe_preview:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =44
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =// The trailing letter IS the floor indicator, so the stored ordinal is read
+                          // back off it instead of being typed separately - the two can never disagree.
+                          // No suffix means floor 1. CLAUDE.md §9 forbids validating a production
+                          // number's format, so any other coding a plant uses is left untouched.
+                          If(IsBlank(Trim(txt_fe_floor_id.Text)), "",
+                              "Stored as floor " &
+                              Text(Coalesce(Find(Upper(Right(Trim(txt_fe_floor_id.Text), 1)),
+                                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 1), "0"))
+                        Width: =Parent.Width - 228
+                        X: =214
+                        Y: =84
+                  - lbl_fe_note:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextMuted
+                        Height: =34
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =11
+                        Text: ="Any defects already recorded on this floor move with it."
+                        Width: =Parent.Width - 48
+                        X: =24
+                        Y: =136
+                  - btn_fe_cancel:
+                      Control: ModernButton
+                      Properties:
+                        Appearance: =ButtonAppearance.Subtle
+                        Height: =44
+                        OnSelect: =Set(varShowFloorEdit, false)
+                        Text: ="Cancel"
+                        Width: =100
+                        X: =Parent.Width - 232
+                        Y: =Parent.Height - 64
+                  - btn_fe_save:
+                      Control: ModernButton
+                      Properties:
+                        BasePaletteColor: =ChampionBlue
+                        Height: =44
+                        OnSelect: |-
+                          =// The user edits the FULL floor number, suffix included - it is the identifier, not
+                          // an ordinal picked from a spinner. Floor_number is derived from the trailing letter
+                          // so the two views of the same fact are always written together.
+                          Set(varFENew, Trim(txt_fe_floor_id.Text));
+                          Set(varFENewFloor,
+                              Coalesce(Find(Upper(Right(varFENew, 1)),
+                                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 1));
+
+                          If( IsBlank(varFENew),
+                              Notify("Enter a floor number.", NotificationType.Error),
+
+                              // Renaming onto a floor that already exists would create a duplicate production
+                              // number for the plant (CLAUDE.md §9). No format rule beyond that - plants use
+                              // their own coding, so anything unique is allowed.
+                              varFENew <> varFEHome &&
+                                  !IsBlank(LookUp(qk_home, Plant_ID = varPID && Home_number = varFENew)),
+                              Notify(varFENew & " already exists for this plant.", NotificationType.Error),
+
+                              // qk_home_defect rows are keyed by Home_number, so they are renamed in the same
+                              // action or every defect on this floor orphans.
+                              ClearCollect(col_fe_defects,
+                                  Filter(qk_home_defect, Plant_ID = varPID && Home_number = varFEHome));
+
+                              IfError(
+                                  Patch(qk_home,
+                                      LookUp(qk_home, Plant_ID = varPID && Home_number = varFEHome),
+                                      {
+                                          Home_number:  varFENew,
+                                          Floor_number: varFENewFloor,
+                                          Title: varPID & "." & varFacility & "." & varFENew
+                                      }),
+                                  Notify("Could not update the floor. " & FirstError.Message,
+                                      NotificationType.Error)
+                              );
+
+                              IfError(
+                                  Patch(qk_home_defect,
+                                      col_fe_defects,
+                                      ForAll(col_fe_defects As D, {
+                                          Home_number:  varFENew,
+                                          Floor_number: varFENewFloor,
+                                          Title: varPID & "." & varFacility & "." & varFENew &
+                                              "." & Text(D.Defect_ID, "0")
+                                      })),
+                                  Notify("Floor saved, but its defect rows could not be moved. " &
+                                      FirstError.Message, NotificationType.Error)
+                              );
+
+                              Notify("Saved as " & varFENew & ".", NotificationType.Success);
+                              Set(varShowFloorEdit, false);
+                              Set(varHomeOpen, false);
+                              Select(btn_load_week);
+                              Select(btn_rebuild_rollups)
+                          )
+                        Text: ="Save"
+                        Width: =110
+                        X: =Parent.Width - 124
+                        Y: =Parent.Height - 64
+                  - txt_fe_floor_id:
+                      Control: ModernTextInput
+                      Properties:
+                        AccessibleLabel: ="Floor number"
+                        Default: =varFEHome
+                        Height: =44
+                        Placeholder: ="e.g. 4471203B"
+                        Type: ='TextInputType'.SingleLine
+                        Width: =180
+                        X: =24
+                        Y: =84
+      - cnt_floor_delete_overlay:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Visible: =varShowFloorDelete
+            Width: =Parent.Width
+          Children:
+            - rect_fd_scrim:
+                Control: Rectangle
+                Properties:
+                  Fill: =RGBA(11, 11, 11, 0.55)
+                  Height: =Parent.Height
+                  Width: =Parent.Width
+            - btn_fd_scrim_cancel:
+                Control: Button
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Transparent
+                  BorderThickness: =0
+                  Height: =Parent.Height
+                  OnSelect: =Set(varShowFloorDelete, false)
+                  Text: =""
+                  Width: =Parent.Width
+            - cnt_fd_card:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  Fill: =CardBg
+                  Height: =220
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: =Min(Parent.Width - 64, 420)
+                  X: =(Parent.Width - Self.Width)/2
+                  Y: =(Parent.Height - Self.Height)/2
+                Children:
+                  - lbl_fd_title:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Delete " & varFDHome & "?"
+                        Width: =Parent.Width - 48
+                        Wrap: =false
+                        X: =24
+                        Y: =20
+                  - lbl_fd_body:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextSecondary
+                        Height: =72
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =If(varFDDefects > 0,
+                              "This also deletes " & Text(varFDDefects, "0") &
+                                  " recorded defect(s) on this floor.",
+                              "No defects are recorded on this floor.") &
+                          "  This cannot be undone."
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =Parent.Width - 48
+                        X: =24
+                        Y: =56
+                  - btn_fd_cancel:
+                      Control: ModernButton
+                      Properties:
+                        Appearance: =ButtonAppearance.Subtle
+                        Height: =44
+                        OnSelect: =Set(varShowFloorDelete, false)
+                        Text: ="Cancel"
+                        Width: =100
+                        X: =Parent.Width - 232
+                        Y: =Parent.Height - 64
+                  - btn_fd_delete:
+                      Control: ModernButton
+                      Properties:
+                        BasePaletteColor: =AlertRed
+                        Height: =44
+                        OnSelect: |-
+                          =// Defects first: they are keyed by Home_number, so removing the floor
+                          // row first would strand them with nothing to point at.
+                          IfError(
+                              Remove(qk_home_defect,
+                                  Filter(qk_home_defect,
+                                      Plant_ID = varPID && Home_number = varFDHome)),
+                              Notify("Could not remove this floor's defect rows. " &
+                                  FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                              Remove(qk_home,
+                                  LookUp(qk_home,
+                                      Plant_ID = varPID && Home_number = varFDHome)),
+                              Notify("Could not delete the floor. " & FirstError.Message,
+                                  NotificationType.Error)
+                          );
+                          Notify("Deleted " & varFDHome & ".", NotificationType.Success);
+                          Set(varShowFloorDelete, false);
+                          // The detail panel may still be open on the row just deleted.
+                          Set(varHomeOpen, false);
+                          Select(btn_load_week);
+                          Select(btn_rebuild_rollups)
+                        Text: ="Delete"
+                        Width: =110
+                        X: =Parent.Width - 124
+                        Y: =Parent.Height - 64

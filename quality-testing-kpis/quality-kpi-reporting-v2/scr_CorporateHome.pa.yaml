@@ -222,7 +222,7 @@ Screens:
                                                     Control: ModernText
                                                     Properties:
                                                       Color: =TextPrimary
-                                                      FillPortions: =1
+                                                      Height: =50
                                                       LayoutMinWidth: =0
                                                       PaddingBottom: =0
                                                       PaddingLeft: =0
@@ -230,6 +230,7 @@ Screens:
                                                       PaddingTop: =0
                                                       Size: =12
                                                       Text: =Text(ThisItem.Plant_ID) & " - " & ThisItem.Plant_Name
+                                                      Width: =120
                                                       Wrap: =false
                                                 - badge_plant_row_metric:
                                                     Control: Badge
@@ -237,7 +238,7 @@ Screens:
                                                       Content: |-
                                                         =StatusGlyphOf(StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0)) & " " &
                                                             Text(ThisItem.Plant_FTT, "0.0")
-                                                      Height: =20
+                                                      Height: =30
                                                       LayoutMinWidth: =0
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
                                                       ThemeColor: |-
@@ -245,13 +246,15 @@ Screens:
                                                             StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
                                                             StatusOf(ThisItem.Plant_FTT, varGoalFTT, 0) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                                             'BadgeCanvas.ThemeColor'.Danger)
-                                                      Width: =70
+                                                      Width: =60
                                                 - lbl_plant_row_stale:
                                                     Control: ModernText
                                                     Properties:
                                                       Align: =Align.Right
                                                       AlignInContainer: =AlignInContainer.Center
+                                                      AutoHeight: =true
                                                       Color: =If(Coalesce(ThisItem.Plant_Stale_days, 999) > 7, AlertRed, TextMuted)
+                                                      FillPortions: =1
                                                       LayoutMinWidth: =0
                                                       PaddingBottom: =0
                                                       PaddingLeft: =0
@@ -259,11 +262,10 @@ Screens:
                                                       PaddingTop: =0
                                                       Size: =10
                                                       Text: |-
-                                                        =If(IsBlank(ThisItem.Plant_Updated), "never reported",
+                                                        =If(IsBlank(ThisItem.Plant_Updated), "n/a",
                                                             ThisItem.Plant_Stale_days <= 7, "",
-                                                            Text(ThisItem.Plant_Stale_days, "0") & "d stale")
+                                                            Text(ThisItem.Plant_Stale_days, "0") & "d old")
                                                       Width: =78
-                                                      Wrap: =false
                                           - btn_plant_overlay:
                                               Control: Classic/Button
                                               Properties:
