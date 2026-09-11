@@ -95,6 +95,7 @@ Screens:
                       Control: GroupContainer
                       Variant: AutoLayout
                       Properties:
+                        DropShadow: =DropShadow.None
                         FillPortions: =0
                         Height: =32
                         LayoutAlignItems: =VerticalAlign.Middle
@@ -116,14 +117,6 @@ Screens:
                                 =If(IsBlank(varPID), "Select a plant",
                                     Text(varPID) & " - " & LookUp(col_plants, Plant_ID = varPID, Plant_Names))
                               Wrap: =false
-                        - ico_admin_wd:
-                            Control: ModernIcon
-                            Properties:
-                              Icon: ="Settings"
-                              IconColor: =RGBA(255, 255, 255, 1)
-                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
-                              Tooltip: ="Admin"
-                              Visible: =varIsAdmin
             - cnt_nav_wd:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -307,7 +300,7 @@ Screens:
                       Control: GroupContainer
                       Variant: AutoLayout
                       Properties:
-                        FillPortions: =4
+                        FillPortions: =3
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =4
@@ -319,6 +312,7 @@ Screens:
                             Control: GroupContainer
                             Variant: AutoLayout
                             Properties:
+                              DropShadow: =DropShadow.None
                               FillPortions: =0
                               Height: =24
                               LayoutAlignItems: =LayoutAlignItems.Center
@@ -347,6 +341,7 @@ Screens:
                               - lbl_hh_elec:
                                   Control: ModernText
                                   Properties:
+                                    Align: =Align.Center
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =TextMuted
                                     FontWeight: =FontWeight.Semibold
@@ -361,6 +356,7 @@ Screens:
                               - lbl_hh_plumb:
                                   Control: ModernText
                                   Properties:
+                                    Align: =Align.Center
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =TextMuted
                                     FontWeight: =FontWeight.Semibold
@@ -375,6 +371,7 @@ Screens:
                               - lbl_hh_gas:
                                   Control: ModernText
                                   Properties:
+                                    Align: =Align.Center
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =TextMuted
                                     FontWeight: =FontWeight.Semibold
@@ -389,7 +386,7 @@ Screens:
                               - lbl_hh_defects:
                                   Control: ModernText
                                   Properties:
-                                    Align: =Align.Right
+                                    Align: =Align.Center
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =TextMuted
                                     FontWeight: =FontWeight.Semibold
@@ -399,7 +396,7 @@ Screens:
                                     PaddingTop: =0
                                     Size: =11
                                     Text: ="DEFECTS"
-                                    Width: =90
+                                    Width: =70
                                     Wrap: =false
                         - rect_homes_header_rule:
                             Control: Rectangle
@@ -411,11 +408,12 @@ Screens:
                             Control: Gallery
                             Variant: Vertical
                             Properties:
-                              FillPortions: =0
                               Height: =CountRows(Self.AllItems) * Self.TemplateHeight
                               Items: =Sort(col_homes, Home_number, SortOrder.Descending)
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
+                              ShowNavigation: =true
+                              ShowScrollbar: =false
                               TemplateSize: =56
                               Visible: =!(IsBlank(varWeekKey) || IsBlank(varFacility))
                             Children:
@@ -424,7 +422,7 @@ Screens:
                                   Variant: ManualLayout
                                   Properties:
                                     Height: =56
-                                    Width: =Parent.Width
+                                    Width: '=Parent.Width-Parent.TemplatePadding*2   '
                                   Children:
                                     - cnt_home_row_content:
                                         Control: GroupContainer
@@ -502,7 +500,7 @@ Screens:
                                           - lbl_defect_count_wd:
                                               Control: ModernText
                                               Properties:
-                                                Align: =Align.Right
+                                                Align: =Align.Center
                                                 AlignInContainer: =AlignInContainer.Stretch
                                                 Color: =TextSecondary
                                                 PaddingBottom: =0
@@ -511,7 +509,7 @@ Screens:
                                                 PaddingTop: =0
                                                 Size: =12
                                                 Text: ="Defects " & Text(Coalesce(Sum(Filter(col_week_defects, Home_number = Text(ThisItem.Home_number, "0")), Coalesce(Qty, 1)), 0), "0")
-                                                Width: =90
+                                                Width: =70
                                                 Wrap: =false
                                     - btn_home_row_overlay:
                                         Control: Button
@@ -530,7 +528,7 @@ Screens:
                                                         Plant_ID = varPID && Home_number = varHomeNumberText))
                                             )
                                           Text: =""
-                                          Width: =Parent.Width
+                                          Width: '=Parent.Width-24 '
                   - cnt_defect_detail:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -538,7 +536,8 @@ Screens:
                         BorderColor: =CardBorder
                         BorderThickness: =1
                         Fill: =CardBg
-                        Height: =24 + 20 + 8 + gal_home_defects.Height + 8 + If(CountRows(col_home_defects) = 0, 16, 0)
+                        FillPortions: =4
+                        Height: =24 + 20 + 8 + If(CountRows(col_home_defects) > 0, 37, 0) + gal_home_defects.Height + 8 + If(CountRows(col_home_defects) = 0, 16, 0)
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =8
                         LayoutMinHeight: =0
@@ -547,7 +546,7 @@ Screens:
                         PaddingLeft: =16
                         PaddingRight: =16
                         PaddingTop: =12
-                        Visible: =!IsBlank(varExpandedHomeNum)
+                        Visible: =true    //!IsBlank(varExpandedHomeNum)
                       Children:
                         - lbl_defect_detail_header:
                             Control: ModernText
@@ -560,30 +559,89 @@ Screens:
                               PaddingRight: =0
                               PaddingTop: =0
                               Size: =14
-                              Text: ="Defects for home " & If(IsBlank(varExpandedHomeNum), "", Text(varExpandedHomeNum, "0"))
+                              Text: ="Defects for floor " & If(IsBlank(varExpandedHomeNum), "", Text(varExpandedHomeNum, "0"))
                               Wrap: =false
+                        - cnt_wd_defects_header:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              FillPortions: =0
+                              Height: =20
+                              Visible: =CountRows(col_home_defects) > 0
+                              Width: =Parent.Width
+                            Children:
+                              - lbl_wd_dh_defect:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="DEFECT"
+                                    Width: =220
+                                    Wrap: =false
+                              - lbl_wd_dh_type:
+                                  Control: ModernText
+                                  Properties:
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="TYPE / QP REF"
+                                    Width: =180
+                                    Wrap: =false
+                                    X: =220
+                              - lbl_wd_dh_qty:
+                                  Control: ModernText
+                                  Properties:
+                                    Align: =Align.Right
+                                    Color: =TextMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="QTY"
+                                    Width: =70
+                                    Wrap: =false
+                                    X: =478
+                        - rect_wd_defects_rule:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =GridLine
+                              Height: =1
+                              Visible: =CountRows(col_home_defects) > 0
+                              Width: =Parent.Width
                         - gal_home_defects:
                             Control: Gallery
                             Variant: Vertical
                             Properties:
-                              FillPortions: =0
                               Height: =CountRows(Self.AllItems) * Self.TemplateHeight
                               Items: =col_home_defects
                               TemplateSize: =40
                               Visible: =CountRows(col_home_defects) > 0
                             Children:
-                              - lbl_defect_name_wd:
+                              - lbl_defect_qty:
                                   Control: ModernText
                                   Properties:
-                                    Color: =TextPrimary
+                                    Align: =Align.Right
+                                    Color: =TextSecondary
                                     PaddingBottom: =0
                                     PaddingLeft: =0
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =12
-                                    Text: =Coalesce(LookUp(col_defect, Value(Title) = ThisItem.Defect_ID).Defect_name, "Unknown defect")
-                                    Width: =220
+                                    Text: ="Qty " & Text(ThisItem.Qty, "0")
+                                    Width: =70
                                     Wrap: =false
+                                    X: =478
                               - lbl_defect_type:
                                   Control: ModernText
                                   Properties:
@@ -600,31 +658,18 @@ Screens:
                                       )
                                     Width: =180
                                     Wrap: =false
-                              - lbl_defect_qty:
+                                    X: =220
+                              - lbl_defect_name_wd:
                                   Control: ModernText
                                   Properties:
-                                    Align: =Align.Right
-                                    Color: =TextSecondary
+                                    Color: =TextPrimary
                                     PaddingBottom: =0
                                     PaddingLeft: =0
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =12
-                                    Text: ="Qty " & Text(ThisItem.Qty, "0")
-                                    Width: =70
-                                    Wrap: =false
-                              - lbl_defect_severity:
-                                  Control: ModernText
-                                  Properties:
-                                    Align: =Align.Right
-                                    Color: =TextSecondary
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =12
-                                    Text: ="Severity " & Text(ThisItem.Severity, "0")
-                                    Width: =90
+                                    Text: =Coalesce(LookUp(col_defect, Value(Title) = ThisItem.Defect_ID).Defect_name, "Unknown defect")
+                                    Width: =220
                                     Wrap: =false
                         - lbl_no_defects:
                             Control: ModernText
