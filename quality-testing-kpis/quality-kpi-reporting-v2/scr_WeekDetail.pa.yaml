@@ -185,14 +185,15 @@ Screens:
                       Properties:
                         AlignInContainer: =AlignInContainer.Stretch
                         Color: =TextPrimary
+                        FillPortions: =1
                         FontWeight: =FontWeight.Bold
                         PaddingBottom: =0
                         PaddingLeft: =0
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =20
-                        Text: ="Week ending " & If(IsBlank(varWeekRow), "-", Text(varWeekRow.Week_end, "mmmm d, yyyy")) & " . Facility " & Text(varFacility, "0")
-                        Width: =500
+                        Text: ="Week ending " & If(IsBlank(varWeekRow), "-", Text(varWeekRow.Week_end, "mmmm d, yyyy")) & ". " & LookUp(col_plants, Plant_ID = varPID, Plant_Names) &", facility " & Text(varFacility, "0")
+                        Width: =600
                         Wrap: =false
                   - btn_print_report:
                       Control: ModernButton
@@ -257,12 +258,12 @@ Screens:
                               BorderRadius: =8
                               Description: |-
                                 =With(
-                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
+                                    {fStatus: BandStatusFTPR(varWeekRow.FTT_pct)},
                                     StatusGlyphOf(fStatus) & " " & If(IsBlank(varWeekRow.FTT_pct), "no data", Text(varWeekRow.FTT_pct, "0.0") & "%")
                                 )
                               DescriptionColor: |-
                                 =With(
-                                    {fStatus: BandStatusOf(varWeekRow.FTT_pct)},
+                                    {fStatus: BandStatusFTPR(varWeekRow.FTT_pct)},
                                     StatusColorOf(fStatus)
                                 )
                               DescriptionSize: =28
@@ -273,7 +274,7 @@ Screens:
                               Subtitle: ="All 3 tests pass"
                               SubtitleColor: =TextSecondary
                               SubtitleSize: =11
-                              Title: ="FPR"
+                              Title: ="First Time Pass Rate"
                               TitleColor: =TextPrimary
                               Width: '=Parent.Width-20 '
                         - gal_test_cards:
@@ -315,7 +316,7 @@ Screens:
                                     HeaderImage: =
                                     Height: =Parent.Height/3-15
                                     Image: =
-                                    Subtitle: ="Test FPY"
+                                    Subtitle: ="Pass rate"
                                     SubtitleColor: =TextSecondary
                                     SubtitleSize: =11
                                     Title: =ThisItem.Test_name

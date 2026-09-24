@@ -62,13 +62,14 @@ Screens:
                             Properties:
                               AlignInContainer: =AlignInContainer.Stretch
                               Color: =RGBA(255, 255, 255, 1)
+                              FillPortions: =1
                               FontWeight: =FontWeight.Bold
                               PaddingBottom: =0
                               PaddingLeft: =0
                               PaddingRight: =0
                               PaddingTop: =0
                               Size: =16
-                              Text: ="Quality KPI Reporting - Corporate Overview (First Time Through, latest week)"
+                              Text: ="Quality KPI Reporting - Corporate Overview (First Time Pass Rate, latest week)"
                               Width: =340
                               Wrap: =false
                   - cnt_header_right_corp:
@@ -163,17 +164,17 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(BandStatusOf(ThisItem.Region_FTT)) & " " &
-                                          Text(ThisItem.Region_FTT, "0.0") & "% FTT (12 wk)"
+                                      =StatusGlyphOf(BandStatusFTPR(ThisItem.Region_FTT)) & " " &
+                                          Text(ThisItem.Region_FTT, "0.0") & "% First Time Pass Rate (last wk)"
                                     Height: =28
                                     LayoutMinHeight: =0
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(BandStatusOf(ThisItem.Region_FTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          BandStatusOf(ThisItem.Region_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          BandStatusOf(ThisItem.Region_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusFTPR(ThisItem.Region_FTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusFTPR(ThisItem.Region_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusFTPR(ThisItem.Region_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
-                                    Width: =140
+                                    Width: =270
                               - rect_region_sep:
                                   Control: Rectangle
                                   Properties:
@@ -237,15 +238,15 @@ Screens:
                                                     Control: Badge
                                                     Properties:
                                                       Content: |-
-                                                        =StatusGlyphOf(BandStatusOf(ThisItem.Plant_FTT)) & " " &
+                                                        =StatusGlyphOf(BandStatusFTPR(ThisItem.Plant_FTT)) & " " &
                                                             Text(ThisItem.Plant_FTT, "0.0")
                                                       Height: =30
                                                       LayoutMinWidth: =0
                                                       Shape: ='BadgeCanvas.Shape'.Rounded
                                                       ThemeColor: |-
-                                                        =If(BandStatusOf(ThisItem.Plant_FTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                                            BandStatusOf(ThisItem.Plant_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                                            BandStatusOf(ThisItem.Plant_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                                        =If(BandStatusFTPR(ThisItem.Plant_FTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                                            BandStatusFTPR(ThisItem.Plant_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                                            BandStatusFTPR(ThisItem.Plant_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                                             'BadgeCanvas.ThemeColor'.Danger)
                                                       Width: =60
                                                 - lbl_plant_row_stale:
@@ -267,7 +268,7 @@ Screens:
                                                             ThisItem.Plant_Stale_days > 7,
                                                                 Text(ThisItem.Plant_Stale_days, "0") & "d old",
                                                             IsBlank(ThisItem.Plant_Latest_week), "",
-                                                            // Which week the headline FTT is actually for. A plant can have been
+                                                            // Which week the headline First Time Pass Rate is actually for. A plant can have been
                                                             // recomputed recently and still be reporting an old week.
                                                             "w. " & Text(
                                                                 Date(RoundDown(ThisItem.Plant_Latest_week/10000, 0),

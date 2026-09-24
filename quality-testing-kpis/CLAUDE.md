@@ -158,8 +158,12 @@ There is no time-based edit restriction — see §7, "Editability" (the 24-hour 
 
 | Title | Value | Used for |
 |---|---|---|
-| `Goal_FPY` | `90` | Status thresholds everywhere |
-| `Goal_FTT` | `75` | FTT tile status |
+| `Goal_FTPR_green` | `80` | First Time Pass Rate / TTW — green at or above (`BandStatusFTPR`) |
+| `Goal_FTPR_yellow` | `65` | First Time Pass Rate / TTW — yellow at or above, red below |
+| `Goal_green` | `90` | Per-test pass rates — green at or above (`BandStatusOf`) |
+| `Goal_yellow` | `80` | Per-test pass rates — yellow at or above, red below |
+| `Goal_FPY` | `90` | Legacy — still loaded, drives nothing |
+| `Goal_FTT` | `75` | Legacy — still loaded, drives nothing |
 | `Window_months` | `6` | Load window |
 
 **No threshold literal appears anywhere in the app.** Read from here. (`Home_number_pattern` was removed from this list — see §9.)
@@ -199,6 +203,10 @@ ClearCollect(col_plants,   Plant_List);
 
 Set(varGoalFPY,      Value(LookUp(col_config, Title = "Goal_FPY",      Setting_value)));
 Set(varGoalFTT,      Value(LookUp(col_config, Title = "Goal_FTT",      Setting_value)));
+Set(varGoalGreen,      Value(LookUp(col_config, Title = "Goal_green",       Setting_value)));
+Set(varGoalYellow,     Value(LookUp(col_config, Title = "Goal_yellow",      Setting_value)));
+Set(varGoalFTPRGreen,  Value(LookUp(col_config, Title = "Goal_FTPR_green",  Setting_value)));
+Set(varGoalFTPRYellow, Value(LookUp(col_config, Title = "Goal_FTPR_yellow", Setting_value)));
 Set(varWindowMonths, Value(LookUp(col_config, Title = "Window_months", Setting_value)));
 
 // Administrators pick a plant before anything loads.
@@ -268,43 +276,48 @@ If(IsBlank(varFacility),
 
 All rates stored **0–100**, one decimal.
 
+**The app has one quality metric: First Time Pass Rate, on a floor basis.**
+
 ```powerfx
-// Per test, per facility-week
+// First Time Pass Rate - one week: floors that passed ALL THREE tests / floors tested
+First_Time_Pass_Rate = Floors_clean / Floors_tested * 100      // qk_week_summary.FTT_pct
+
+// TTW - the same ratio over the trailing 12 weeks, WEIGHTED (never an average of weekly %)
+TTW = Sum(Floors_clean) / Sum(Floors_tested) * 100              // qk_plant_summary.FTT_pct
+
+// Per test, per facility-week - labelled "Electrical pass rate" etc., never "FPY"
 Test_FPY = homes passing that test / homes tested for that test * 100
-
-// Across all three tests
-Week_FPY = Sum(passes) / Sum(tests) * 100
-
-// First Time Through — homes passing ALL THREE
-FTT = Homes_clean / Homes_tested * 100
-
-// Trailing twelve weeks — ONE definition, used by display and storage alike
-TTW(week, facility) =
-    Average(
-        FirstN(
-            SortByColumns(
-                Filter(col_week, Facility_ID = facility && Week_key <= week.Week_key),
-                "Week_key", SortOrder.Descending), 12),
-        Week_FPY)
 
 Defects_per_home  = Sum(Qty) / Homes_tested
 Defects_per_floor = Sum(Qty) / Sum(Floors)
 ```
 
-> **FTT will read much lower than FPY, and that is correct.** FPY is the share of *tests* passed; FTT the share of *homes* with nothing wrong at all. At 87% FPY, FTT lands near 66%. Show both side by side and label them plainly.
+The headline figure is the **last completed** calendar week (`PastWeekKey` in `App.Formulas`) — the week in progress is always mid-entry. Cross-plant and cross-facility figures are always weighted sums of `Floors_clean` / `Floors_tested`, never a mean of percentages.
 
-> **TTW had one definition in v1 for display and a different one for storage, and they disagreed.** There is one definition here. Use it in both places.
+**Retired from the UI:** the composite test-weighted FPY — `Week_FPY` (`Sum(passes) / Sum(tests)`) and `TTW_FPY`. `scr_Entry` still writes both columns so nothing downstream breaks, but no screen displays or grades them. For a single test a floor and a test are the same thing, so the per-test pass rates (`Test_FPY`) stay.
+
+**Labels:** "First Time Pass Rate" for the weekly figure, "TTW" / "Trailing 12 weeks" for the 12-week figure. No user-facing "FTT", "First Time Through" or "FPY".
+
+> **TTW had one definition in v1 for display and a different one for storage, and they disagreed.** There is one definition here — `qk_plant_summary.FTT_pct`, written by `btn_rebuild_rollups`. Use it in both places.
 
 ### Status
 
+Two band functions in `App.Formulas`, same shape, both returning `"good" | "warning" | "critical" | "nodata"`. A missing config row grades `"nodata"`.
+
 ```powerfx
-// Returns "good" | "warning" | "serious" | "critical" | "nodata"
-If(IsBlank(value), "nodata",
-   value >= varGoalFPY, "good",
-   value >= varGoalFPY - 5, "warning",
-   consecutiveWeeksBelow >= 3, "critical",
-   "serious")
+// First Time Pass Rate and TTW - every tile, badge, card and the trend goal rule
+BandStatusFTPR(value) =
+    If(IsBlank(value), "nodata",
+       IsBlank(varGoalFTPRGreen) || IsBlank(varGoalFTPRYellow), "nodata",
+       value >= varGoalFTPRGreen,  "good",      // qk_config Goal_FTPR_green
+       value >= varGoalFTPRYellow, "warning",   // qk_config Goal_FTPR_yellow
+       "critical")
+
+// Per-test pass rates (Test_FPY) only - same shape, Goal_green / Goal_yellow
+BandStatusOf(value)
 ```
+
+The floor-basis rate needs its own, lower bands: a floor must clear three tests to count, so a plant at 90% on every test lands near 73% here.
 
 ### Editability
 
@@ -330,7 +343,7 @@ A region × plant comparison, reached only by non-admin users whose resolved `Pl
 
 Deliberately scoped to **`qk_week_summary` only** — never `qk_home`/`qk_home_defect`. A trailing-12-week window across every plant stays a few hundred rows regardless of plant count, unlike home/defect-level drill-down, which is what makes full cross-plant benchmarking a later, Dataverse-scale phase (§13). Facilities are consolidated up to plants (`Plant_List` is one row per plant × facility); regions come from `Plant_List.Plant_Region`, generated as columns rather than hardcoded, same principle as the Q-matrix's test columns (§8.1).
 
-Per-plant and per-region metrics are both the same trailing-12-week FPY-style number (`Sum(Total_pass) / Sum(Total_tests) * 100`) — **weighted**, never an average of each plant's own percentage, matching how `Week_FPY` itself is computed (§7). Selecting a plant calls the app-level `SelectCorporatePlant()` UDF (sets `varPID`/`varFacility`, runs `RunFullPlantLoad()`, navigates to `scr_Dashboard`) rather than duplicating load logic. A "region overview" icon on `scr_Dashboard`'s header (visible only when `varAccessRow.Plant_ID = 0`) lets a Corporate user get back here after drilling into a plant.
+Every figure is First Time Pass Rate on the floor basis (§7), graded with `BandStatusFTPR`. Plant badges show each plant's latest reported week (`qk_plant_summary.FTT_latest_pct`); region badges show the last completed week, `Sum(Floors_clean) / Sum(Floors_tested)` over the region's plants from `qk_week_summary`. `Plant_TTW` (`qk_plant_summary.FTT_pct`) and `Region_TTW` (`Sum(Floors_clean) / Sum(Floors_tested)` over the plants' 12-week components) are computed on the same floor basis. All of them are **weighted**, never an average of each plant's own percentage. Selecting a plant calls the app-level `SelectCorporatePlant()` UDF (sets `varPID`/`varFacility`, runs `RunFullPlantLoad()`, navigates to `scr_Dashboard`) rather than duplicating load logic. A "region overview" icon on `scr_Dashboard`'s header (visible only when `varAccessRow.Plant_ID = 0`) lets a Corporate user get back here after drilling into a plant.
 
 ### 8.1 `scr_Dashboard`
 
@@ -339,13 +352,13 @@ Per-plant and per-region metrics are both the same trailing-12-week FPY-style nu
 **Filter row**, scoping everything below it — never per-card filters:
 `drp_plant` (visible `varIsAdmin`, `OnChange` sets `varPID` then `Select(btn_load_plant)`) · `drp_facility` · `drp_window` · `lbl_loaded`.
 
-**`cnt_tiles`** — five stat tiles: First Time Pass Rate · **First Time Through** · TTW · Defects per Home · Homes Tested. Each shows value, delta vs prior week, and a status accent.
+**`cnt_tiles`** — stat tiles: **First Time Pass Rate (last wk)** (`tile_ftt`) · **TTW** (`tile_ttw`, `qk_plant_summary.FTT_pct`) · Defects per Home · Cost · Floors Tested. Each shows value, delta or context, and a status accent. The two rate tiles grade with `BandStatusFTPR` (§7).
 
-**`cnt_qmatrix`** — the app's signature visual, kept from v1. `gal_qmatrix` over `Filter(col_calendar, Month = Month(Today()), Year = Year(Today()))`, one row per week of the current month. Columns are **generated from `col_test`**, not hardcoded, plus a fourth FTT column. Each cell carries **glyph + value + colour** and drills into the week.
+**`cnt_qmatrix`** — the app's signature visual, kept from v1. `gal_qmatrix` over `Filter(col_calendar, Month = Month(Today()), Year = Year(Today()))`, one row per week of the current month. Columns are **generated from `col_test`**, not hardcoded: one per-test pass rate per column, graded with `BandStatusOf`. There is no First Time Pass Rate column; that figure lives on `tile_ftt`, the trend and `scr_History`. Each cell carries **glyph + value + colour** and drills into the week.
 
-**`cnt_trend`** — a **single line** (`Week_FPY`) on **one axis**, with the goal as a labelled horizontal reference rule. Add FTT as a second line. Nothing else. v1 plotted nine series including `ID` and `Period_day` as data — do not repeat that.
+**`cnt_trend`** — one axis. The overall line is **First Time Pass Rate** (`FTT_pct`, labelled so in the legend), plus the three per-test pass-rate lines in their slot colours, and the goal as a labelled horizontal reference rule at `Goal_FTPR_green`. Nothing else. v1 plotted nine series including `ID` and `Period_day` as data — do not repeat that.
 
-**`gal_weeks`** — week ending · homes · per-test pass/fail · FPY · FTT · TTW · defects · defects per floor. Row select opens `scr_WeekDetail`.
+**`gal_weeks`** (on `scr_History`) — week ending · floors · per-test pass/fail · First Time Pass Rate · defects · defects per floor. Row select opens `scr_WeekDetail`.
 
 **`cnt_pareto`** — defect Pareto over the window, with a **By defect / By type** toggle. Bars are each item's **percentage share** so bars and the cumulative line share one 0–100% axis. **Never a dual-axis Pareto.** All bars one colour.
 
@@ -411,7 +424,7 @@ Defect: Sort(Filter(col_defect, Type_ID = ThisItem.Type_ID), Sort_order)
 
 ### 8.3 `scr_WeekDetail`
 
-Per-test cards for the week, an FTT card, then the homes tested with their three results and defect counts, and each home's defect lines. Reached from a Q-matrix cell or a `gal_weeks` row.
+Per-test cards for the week (subtitle "Pass rate"), a First Time Pass Rate card, then the homes tested with their three results and defect counts, and each home's defect lines. Reached from a Q-matrix cell or a `gal_weeks` row.
 
 ### 8.4 `scr_TaxonomyAdmin` — `varIsAdmin` only
 
@@ -609,7 +622,7 @@ Build and verify one phase at a time. Do not start a phase before the previous o
 | 2 | **Set Scale to fit / Lock aspect ratio / Lock orientation OFF**; set `MinScreenWidth` 720, `MinScreenHeight` 640 | Confirmed in `Settings → Display` before any layout work |
 | 3 | `App.OnStart`, `btn_load_plant`, role resolution, filter row | Admin plant switch reloads under 2s · **zero delegation warnings** |
 | 4 | `scr_Entry` — add home, gallery, test cards, defect rows, save, rollup rebuild | Round-trip a week of ~18 homes; every §9 rule fires correctly |
-| 5 | `scr_Dashboard` — tiles, Q matrix, trend, week gallery | FPY reconciles against a hand-computed week |
+| 5 | `scr_Dashboard` — tiles, Q matrix, trend, week gallery | First Time Pass Rate reconciles against a hand-computed week |
 | 6 | `scr_WeekDetail`, Pareto | Pareto matches a hand-computed sample at both levels |
 | 7 | `scr_TaxonomyAdmin`, `scr_AccessAdmin` | An admin adds a defect type and assigns a QM unaided |
 | 8 | Full pass | Delegation warnings zero · every write has `IfError` · every status has a glyph · **every screen checked at 1920 / 1280 / 1024 / 768** |

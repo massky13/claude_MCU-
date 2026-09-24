@@ -1,5 +1,6 @@
 App:
   Properties:
+    ConfirmExit: =true
     Formulas: |-
       =// ===== Champion Home Builders brand chrome (CLAUDE.md §10) =====
       ChampionBlue = RGBA(2, 66, 109, 1);
@@ -52,9 +53,9 @@ App:
 
       // ===== Status banding (whole app) =====
       // Three bands from two configured thresholds: green at or above Goal_green, yellow
-      // down to Goal_yellow, red below it. One definition for every screen and every
-      // metric - FPY, Test_FPY, FTT and TTW all grade identically, which is what makes a
-      // green badge mean the same thing wherever it appears.
+      // down to Goal_yellow, red below it. Grades the PER-TEST pass rates (Test_FPY) on
+      // every screen. First Time Pass Rate and TTW grade with BandStatusFTPR below - a
+      // floor-basis all-three-tests rate needs its own, lower bands.
       //
       // This replaced StatusOf(value, goal, consecutiveWeeksBelow), whose warning band was
       // hardwired to goal-5 and which graded FTT against Goal_FTT and FPY against Goal_FPY,
@@ -72,6 +73,23 @@ App:
              IsBlank(varGoalGreen) || IsBlank(varGoalYellow), "nodata",
              value >= varGoalGreen, "good",
              value >= varGoalYellow, "warning",
+             "critical");
+
+      // ===== First Time Pass Rate banding =====
+      // The app's ONE quality metric is First Time Pass Rate: floors that passed all
+      // three tests / floors tested (qk_week_summary.Floors_clean / Floors_tested), and
+      // TTW is the same ratio weighted over the trailing 12 weeks
+      // (qk_plant_summary.FTT_pct). A floor has to clear three tests to count, so this
+      // runs well below any single test's pass rate and cannot share BandStatusOf's
+      // test-level thresholds - a plant at 90% on every test lands near 73% here.
+      // Same shape and status strings as BandStatusOf; thresholds from qk_config
+      // (Goal_FTPR_green / Goal_FTPR_yellow), never a literal. Missing setting = "nodata".
+      // BandStatusOf stays for the per-test pass rates (Test_FPY) only.
+      BandStatusFTPR(value: Number): Text =
+          If(IsBlank(value), "nodata",
+             IsBlank(varGoalFTPRGreen) || IsBlank(varGoalFTPRYellow), "nodata",
+             value >= varGoalFTPRGreen, "good",
+             value >= varGoalFTPRYellow, "warning",
              "critical");
 
       TestColorOf(testId: Number): Color =
@@ -120,6 +138,30 @@ App:
       // from 1 week ahead of today back to 9 weeks before that. Recomputes live off
       // col_calendar, so it never drifts from Today() across a long-running session.
       EntryWeekAnchorEnd = Min(Filter(col_calendar, W_end >= DateAdd(Today(), 7, TimeUnit.Days)), W_end);
+
+      // ===== FTT reporting week - the LAST COMPLETED calendar week =====
+      // The week containing today is always incomplete - some plants enter results
+      // as late as Friday - so headline FTT (tile_ftt on scr_Dashboard, the region
+      // badges on scr_CorporateHome) reads the week BEFORE the one containing
+      // today, and its delta compares against the week before that. Anchored on
+      // col_calendar (the same source as scr_Entry's picker), never on whatever
+      // weeks happen to have data - a plant that skipped the reporting week must
+      // grade "nodata", not silently show an older week's number.
+      PastWeekKey =
+          Value(Text(
+              LookUp(col_calendar,
+                  W_start <= DateAdd(Today(), -7, TimeUnit.Days) &&
+                  W_end >= DateAdd(Today(), -7, TimeUnit.Days),
+                  W_end),
+              "yyyymmdd"));
+
+      PriorWeekKey =
+          Value(Text(
+              LookUp(col_calendar,
+                  W_start <= DateAdd(Today(), -14, TimeUnit.Days) &&
+                  W_end >= DateAdd(Today(), -14, TimeUnit.Days),
+                  W_end),
+              "yyyymmdd"));
 
       BuildParetoDerived(): Void = {
           ClearCollect(col_pareto_share,
@@ -253,12 +295,13 @@ App:
           // Row-indexed series for the SVG trend chart (img_trend_db, scr_Dashboard).
           // The SVG computes each point's x from a 1..n position; varChartWeeks has no
           // index column, so materialise one here. Local collection - no delegation.
-          // Column names (idx/fpy/ftt/elec/plumb/gas/lbl) match what the chart formula reads.
+          // Column names (idx/ftt/elec/plumb/gas/lbl) match what the chart formula reads.
+          // The composite test-weighted Week_FPY series (fpy) was retired from the UI -
+          // the overall line is First Time Pass Rate (ftt), floor basis.
           ClearCollect(col_trend_chart,
               ForAll(Sequence(CountRows(varChartWeeks)) As S,
                   {
                       idx: S.Value,
-                      fpy: Index(varChartWeeks, S.Value).Week_FPY,
                       ftt: Index(varChartWeeks, S.Value).FTT_pct,
                       elec: TrendTestFPY(Index(varChartWeeks, S.Value).Week_key, 1),
                       plumb: TrendTestFPY(Index(varChartWeeks, S.Value).Week_key, 2),
@@ -279,19 +322,18 @@ App:
           // for headroom, never below 0. Min(table, column) skips blank rows; Coalesce
           // covers a column that is blank for every week (a test never run this window).
           //
-          // ftt is deliberately NOT in this Min. The chart no longer plots it, and FTT runs
-          // far below FPY by construction (~66% against ~87% at the same quality level -
-          // CLAUDE.md §7), so including it would drag the floor ~20 points below anything
-          // actually drawn and squash all four live series into the top of the plot.
+          // ftt is the overall line (First Time Pass Rate) and runs well below the per-test
+          // lines by construction, so it must be in this Min - and so must the goal rule
+          // it is drawn against (the First Time Pass Rate green band, varGoalFTPRGreen).
           Set(varTrendFloor,
               Max(0,
                   RoundDown(
                       Min(
-                          Coalesce(Min(col_trend_chart, fpy), 100),
+                          Coalesce(Min(col_trend_chart, ftt), 100),
                           Coalesce(Min(col_trend_chart, elec), 100),
                           Coalesce(Min(col_trend_chart, plumb), 100),
                           Coalesce(Min(col_trend_chart, gas), 100),
-                          varGoalFPY
+                          Coalesce(varGoalFTPRGreen, 100)
                       ) / 10, 0) * 10 - 10));
 
           // The plant's own qk_plant_summary row - source for the dashboard TTW tile.
@@ -305,15 +347,29 @@ App:
           Set(varPriorWeek,
               Last(FirstN(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending), 2)));
 
-          Set(varConsecBelowFPY,
-              CountRows(Filter(
-                  FirstN(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending), 3),
-                  Week_FPY < varGoalFPY)));
+          // FTT tile figures (tile_ftt, scr_Dashboard) - the last COMPLETED week
+          // (PastWeekKey) and the week before it (PriorWeekKey), not varLatestWeek:
+          // the current week's row is always mid-entry and read low all week.
+          // Weighted across the rows in view (CLAUDE.md §7) - varWeekViewWindowed is
+          // already facility-scoped, and the all-facilities view must never read a
+          // single facility's row the way varLatestWeek's First() does.
+          Set(varPastWeekFTT,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PastWeekKey)},
+                  If(Sum(rows, Floors_tested) > 0,
+                      Round(Sum(rows, Floors_clean) / Sum(rows, Floors_tested) * 100, 1),
+                      Blank())));
 
+          Set(varPriorWeekFTT,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PriorWeekKey)},
+                  If(Sum(rows, Floors_tested) > 0,
+                      Round(Sum(rows, Floors_clean) / Sum(rows, Floors_tested) * 100, 1),
+                      Blank())));
+
+          // Weeks below the First Time Pass Rate green band, of the latest three.
           Set(varConsecBelowFTT,
               CountRows(Filter(
                   FirstN(Sort(varWeekViewWindowed, Week_key, SortOrder.Descending), 3),
-                  FTT_pct < varGoalFTT)));
+                  FTT_pct < varGoalFTPRGreen)));
 
           If(IsBlank(varFacility),
               ClearCollect(col_defect_window,
@@ -445,16 +501,16 @@ App:
                       Plant_Floors_clean:  Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Floors_clean), 0),
                       Plant_Floors_tested: Coalesce(LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Floors_tested), 0),
 
-                      // Read the stored percentage rather than recomputing - one definition,
-                      // written once, so the corporate card and the plant's own dashboard tile
-                      // cannot drift apart.
-                      Plant_TTW: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, TTW_FPY),
-                      // Plant_FTT is the LATEST WEEK's FTT, not the 12-week aggregate - it is the
-                      // same figure that plant's own dashboard tile shows, and it is what makes
-                      // this screen an alert rather than a smoothed scorecard.
-                      // Plant_FTT_window keeps the 12-week number alongside it for context.
+                      // TTW = trailing-12-week First Time Pass Rate, floor basis, weighted
+                      // (qk_plant_summary.FTT_pct). Read the stored percentage rather than
+                      // recomputing - one definition, written once, so the corporate card and
+                      // the plant's own dashboard TTW tile cannot drift apart. The composite
+                      // test-weighted TTW_FPY column is retired from the UI.
+                      Plant_TTW: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_pct),
+                      // Plant_FTT is the LATEST WEEK's First Time Pass Rate, not the 12-week
+                      // aggregate - it is what makes this screen an alert rather than a
+                      // smoothed scorecard.
                       Plant_FTT: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_latest_pct),
-                      Plant_FTT_window: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, FTT_pct),
                       Plant_Latest_week: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Latest_week_key),
                       Plant_Weeks: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Weeks_counted),
                       Plant_Updated: LookUp(col_corp_plant_sum, Plant_ID = CP.Plant_ID, Updated_at),
@@ -468,6 +524,36 @@ App:
               )
           );
 
+          // ===== Past-week floor counts, straight from qk_week_summary =====
+          // Region_FTT below is the LAST COMPLETED calendar week (PastWeekKey - the
+          // week before the one containing today). It was briefly the current week,
+          // but the current week is always incomplete: plants can enter results as
+          // late as Friday, so mid-week the region read low or "nodata". Weighted
+          // from real floor counts: Sum(Floors_clean) / Sum(Floors_tested) across
+          // the region's plants - never a mean of each plant's own FTT percentage
+          // (CLAUDE.md §7).
+          //
+          // qk_plant_summary cannot supply this - it stores each plant's latest-week
+          // PERCENTAGE (FTT_latest_pct) but not per-week counts. Reading
+          // qk_week_summary for ONE week key is safe where the old unbounded
+          // cross-plant read was not: a single delegable Week_key equality returns at
+          // most one row per plant x facility (~40-80 rows), never the
+          // plant x facility x week explosion that forced qk_plant_summary into
+          // existence.
+          // No calendar row covering last week -> empty collection -> every region
+          // grades "nodata" (grey), matching how scr_Entry declines to default a week.
+          If(IsBlank(PastWeekKey),
+              Clear(col_corp_pastweek_raw),
+              ClearCollect(col_corp_pastweek_raw,
+                  Filter(qk_week_summary, Week_key = PastWeekKey))
+          );
+
+          // Tag each facility-week row with its plant's region so the regional sums
+          // below stay one local Filter. qk_week_summary itself carries no region.
+          ClearCollect(col_corp_pastweek,
+              AddColumns(col_corp_pastweek_raw As CW, CW_Region,
+                  LookUp(col_corp_plants, Plant_ID = CW.Plant_ID, Plant_Region)));
+
           ClearCollect(col_corp_region_roster, Distinct(col_corp_plant_metrics, Plant_Region));
 
           ClearCollect(col_corp_regions_raw,
@@ -477,27 +563,37 @@ App:
                       Region_Pass: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Pass),
                       Region_Tests: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Tests),
                       Region_Floors_clean: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Floors_clean),
-                      Region_Floors_tested: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Floors_tested)
+                      Region_Floors_tested: Sum(Filter(col_corp_plant_metrics, Plant_Region = RR.Value), Plant_Floors_tested),
+                      // Past-week components from col_corp_pastweek (qk_week_summary),
+                      // NOT from qk_plant_summary's trailing-window columns.
+                      Region_PastFloors_clean: Sum(Filter(col_corp_pastweek, CW_Region = RR.Value), Floors_clean),
+                      Region_PastFloors_tested: Sum(Filter(col_corp_pastweek, CW_Region = RR.Value), Floors_tested)
                   }
               )
           );
           ClearCollect(col_corp_regions,
               AddColumns(col_corp_regions_raw As RG,
-                  // Weighted region FTT over the TRAILING 12 WEEKS - floors passing all three /
-                  // floors fully tested, summed across the region's plants from real stored
-                  // counts. Deliberately NOT the latest week: qk_plant_summary stores each
-                  // plant's latest-week PERCENTAGE but not its latest-week clean/tested counts,
-                  // so a latest-week region number could only be weighted by an invented
-                  // figure, or degraded into a mean of plant percentages - which CLAUDE.md §7
-                  // forbids. Making the region latest-week too needs Floors_tested_latest and
-                  // Floors_clean_latest on qk_plant_summary. The plant cards ARE latest-week,
-                  // so the region reads as the slower-moving context around them.
-                  // Region_TTW is kept alongside so the FPY view is one binding away.
+                  // Weighted region FTT for the LAST COMPLETED WEEK - floors passing all
+                  // three / floors fully tested, summed across the region's plants from
+                  // the real qk_week_summary counts collected above (col_corp_pastweek).
+                  // This replaced first the trailing-12-week figure (which smoothed a bad
+                  // week away) and then the current-week figure (which was always
+                  // mid-entry and read low or grey until Friday). NEVER an average of
+                  // the plants' own FTT percentages - a 4-floor plant must not swing the
+                  // region as hard as a 400-floor one (CLAUDE.md §7). A week nobody
+                  // reported grades "nodata", not 0. The plant rows below the badge still
+                  // show each plant's own LATEST reported week (FTT_latest_pct).
                   Region_FTT,
-                      If(RG.Region_Floors_tested > 0,
-                          Round(RG.Region_Floors_clean / RG.Region_Floors_tested * 100, 1), Blank()),
+                      If(RG.Region_PastFloors_tested > 0,
+                          Round(RG.Region_PastFloors_clean / RG.Region_PastFloors_tested * 100, 1), Blank()),
+                  // Region TTW - trailing-12-week First Time Pass Rate, floor basis:
+                  // Sum(Floors_clean) / Sum(Floors_tested) over the region's plants, from
+                  // qk_plant_summary's window components. Weighted, never a mean of the
+                  // plants' own TTW percentages. (Replaces both the old test-weighted
+                  // Region_TTW and the duplicate Region_FTT_window.)
                   Region_TTW,
-                      If(RG.Region_Tests > 0, Round(RG.Region_Pass / RG.Region_Tests * 100, 1), Blank())
+                      If(RG.Region_Floors_tested > 0,
+                          Round(RG.Region_Floors_clean / RG.Region_Floors_tested * 100, 1), Blank())
               )
           );
 
@@ -554,11 +650,15 @@ App:
       Set(varGoalFTT, Value(LookUp(col_config, Title = "Goal_FTT", Setting_value)));
       Set(varWindowMonths, Value(LookUp(col_config, Title = "Window_months", Setting_value)));
 
-      // Status bands, used by BandStatusOf on every screen. Goal_FPY/Goal_FTT are still
-      // read above - they remain the plants' own operating targets and are what the trend
-      // chart's goal rule is drawn at - but they no longer drive any badge colour.
+      // Per-test status bands, used by BandStatusOf. Goal_FPY/Goal_FTT are still read
+      // above for compatibility but no longer drive any badge colour or the trend goal rule.
       Set(varGoalGreen,  Value(LookUp(col_config, Title = "Goal_green",  Setting_value)));
       Set(varGoalYellow, Value(LookUp(col_config, Title = "Goal_yellow", Setting_value)));
+      // First Time Pass Rate bands, used by BandStatusFTPR for every First Time Pass Rate
+      // and TTW figure (and the trend chart's goal rule). Goal_green/Goal_yellow above now
+      // grade the per-test pass rates only.
+      Set(varGoalFTPRGreen,  Value(LookUp(col_config, Title = "Goal_FTPR_green",  Setting_value)));
+      Set(varGoalFTPRYellow, Value(LookUp(col_config, Title = "Goal_FTPR_yellow", Setting_value)));
       // Home_number_pattern (qk_config) is intentionally unused - plants use their own
       // production-number coding, so scr_Entry no longer validates a fixed format.
 

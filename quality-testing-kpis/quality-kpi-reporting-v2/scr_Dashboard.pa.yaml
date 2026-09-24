@@ -97,15 +97,6 @@ Screens:
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
                       Children:
-                        - ico_admin_db:
-                            Control: ModernIcon
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              Icon: ="Settings"
-                              IconColor: =RGBA(255, 255, 255, 1)
-                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
-                              Tooltip: ="Admin"
-                              Visible: =varIsAdmin
                         - btn_load_plant:
                             Control: Button
                             Properties:
@@ -141,6 +132,7 @@ Screens:
                               Text: |-
                                 =If(IsBlank(varPID), "Select a plant",
                                     Text(varPID) & " - " & LookUp(col_plants, Plant_ID = varPID, Plant_Names))
+                              Width: =200
                               Wrap: =false
             - cnt_nav_db:
                 Control: GroupContainer
@@ -316,85 +308,6 @@ Screens:
                         Visible: =!IsBlank(varPID)
                         Width: =Parent.Width
                       Children:
-                        - tile_fpy:
-                            Control: GroupContainer
-                            Variant: ManualLayout
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              Fill: =CardBg
-                              Height: =Parent.Height-4
-                              LayoutMinHeight: =0
-                              RadiusBottomLeft: =8
-                              RadiusBottomRight: =8
-                              RadiusTopLeft: =8
-                              RadiusTopRight: =8
-                              Visible: =false
-                              Width: =220
-                            Children:
-                              - rect_fpy_accent:
-                                  Control: Rectangle
-                                  Properties:
-                                    Fill: =StatusColorOf(BandStatusOf(varLatestWeek.Week_FPY))
-                                    Height: =Parent.Height
-                                    Width: =3
-                              - btn_fpy_overlay:
-                                  Control: Button
-                                  Properties:
-                                    Appearance: ='ButtonCanvas.Appearance'.Transparent
-                                    BorderThickness: =0
-                                    Height: =Parent.Height
-                                    OnSelect: |-
-                                      =Set(varWeekKey, varLatestWeek.Week_key);
-                                      Navigate(scr_WeekDetail, ScreenTransition.None)
-                                    Text: =""
-                                    Width: =220
-                              - badge_fpy_delta:
-                                  Control: Badge
-                                  Properties:
-                                    Content: |-
-                                      =StatusGlyphOf(BandStatusOf(varLatestWeek.Week_FPY)) & " " &
-                                          Text(varLatestWeek.Week_FPY - varPriorWeek.Week_FPY, "0.0")
-                                    Height: '=Parent.Height*0.6   '
-                                    Shape: ='BadgeCanvas.Shape'.Rounded
-                                    ThemeColor: |-
-                                      =If(BandStatusOf(varLatestWeek.Week_FPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          BandStatusOf(varLatestWeek.Week_FPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          BandStatusOf(varLatestWeek.Week_FPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
-                                          'BadgeCanvas.ThemeColor'.Danger)
-                                    Width: =80
-                                    X: =Parent.Width*1.2/2
-                                    Y: =(Parent.Height-Self.Height)/2
-                              - lbl_fpy_value:
-                                  Control: ModernText
-                                  Properties:
-                                    Color: =TextPrimary
-                                    FontWeight: =FontWeight.Bold
-                                    Height: =47
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =28
-                                    Text: =Text(varLatestWeek.Week_FPY, "0.0") & "%"
-                                    Width: =107
-                                    Wrap: =false
-                                    X: =20
-                                    Y: =7
-                              - lbl_fpy_label:
-                                  Control: ModernText
-                                  Properties:
-                                    Color: =TextMuted
-                                    FontWeight: =FontWeight.Semibold
-                                    Height: =20
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =11
-                                    Text: ="FIRST TIME PASS RATE"
-                                    Wrap: =false
-                                    X: =20
-                                    Y: =50
                         - tile_ftt:
                             Control: GroupContainer
                             Variant: ManualLayout
@@ -412,7 +325,7 @@ Screens:
                               - rect_ftt_accent:
                                   Control: Rectangle
                                   Properties:
-                                    Fill: =StatusColorOf(BandStatusOf(varLatestWeek.FTT_pct))
+                                    Fill: =StatusColorOf(BandStatusFTPR(varPastWeekFTT))
                                     Height: =Parent.Height
                                     Width: =3
                               - btn_ftt_overlay:
@@ -422,7 +335,9 @@ Screens:
                                     BorderThickness: =0
                                     Height: =71
                                     OnSelect: |-
-                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      =// Open the week the tile is actually showing - the last completed
+                                      // week - not varLatestWeek, which can be the in-progress week.
+                                      Set(varWeekKey, PastWeekKey);
                                       Navigate(scr_WeekDetail, ScreenTransition.None)
                                     Text: =""
                                     Width: =220
@@ -430,14 +345,14 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(BandStatusOf(varLatestWeek.FTT_pct)) & " " &
-                                          Text(varLatestWeek.FTT_pct - varPriorWeek.FTT_pct, "0.0")
+                                      =StatusGlyphOf(BandStatusFTPR(varPastWeekFTT)) & " " &
+                                          Text(varPastWeekFTT - varPriorWeekFTT, "0.0")
                                     Height: =Parent.Height*0.6
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(BandStatusOf(varLatestWeek.FTT_pct) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          BandStatusOf(varLatestWeek.FTT_pct) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          BandStatusOf(varLatestWeek.FTT_pct) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusFTPR(varPastWeekFTT) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusFTPR(varPastWeekFTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusFTPR(varPastWeekFTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
                                     X: =Parent.Width*1.2/2
@@ -453,7 +368,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =28
-                                    Text: =Text(varLatestWeek.FTT_pct, "0.0") & "%"
+                                    Text: =Text(varPastWeekFTT, "0.0") & "%"
                                     Width: =107
                                     Wrap: =false
                                     X: =20
@@ -469,7 +384,8 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =11
-                                    Text: ="FIRST TIME PASS RATE"
+                                    Text: ="FIRST TIME PASS RATE (LAST WK)"
+                                    Width: =200
                                     Wrap: =false
                                     X: =20
                                     Y: =50
@@ -490,7 +406,7 @@ Screens:
                               - rect_ttw_accent:
                                   Control: Rectangle
                                   Properties:
-                                    Fill: =StatusColorOf(BandStatusOf(varPlantSummary.TTW_FPY))
+                                    Fill: =StatusColorOf(BandStatusFTPR(varPlantSummary.FTT_pct))
                                     Height: =Parent.Height
                                     Width: =3
                               - btn_ttw_overlay:
@@ -508,14 +424,14 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =StatusGlyphOf(BandStatusOf(varPlantSummary.TTW_FPY)) & " " &
+                                      =StatusGlyphOf(BandStatusFTPR(varPlantSummary.FTT_pct)) & " " &
                                           Text(Coalesce(varPlantSummary.Weeks_counted, 0), "0") & " wks"
                                     Height: '=Parent.Height*0.6   '
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(BandStatusOf(varPlantSummary.TTW_FPY) = "good", 'BadgeCanvas.ThemeColor'.Success,
-                                          BandStatusOf(varPlantSummary.TTW_FPY) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
-                                          BandStatusOf(varPlantSummary.TTW_FPY) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
+                                      =If(BandStatusFTPR(varPlantSummary.FTT_pct) = "good", 'BadgeCanvas.ThemeColor'.Success,
+                                          BandStatusFTPR(varPlantSummary.FTT_pct) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
+                                          BandStatusFTPR(varPlantSummary.FTT_pct) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
                                     X: =Parent.Width*1.2/2
@@ -531,7 +447,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =28
-                                    Text: =Text(varPlantSummary.TTW_FPY, "0.0") & "%"
+                                    Text: =Text(varPlantSummary.FTT_pct, "0.0") & "%"
                                     Width: =107
                                     Wrap: =false
                                     X: =20
@@ -914,12 +830,10 @@ Screens:
                                     FillPortions: =100
                                     Height: =CountRows(Self.AllItems) * Self.TemplateHeight
                                     Items: |-
-                                      =// Three test columns only - the FTT column was removed from this matrix,
-                                      // so the FTT_pct column this AddColumns used to compute (a weighted
-                                      // Homes_clean / Homes_tested across the week's facilities) is gone with it.
-                                      // Nothing in the row template read it any more. NOTE: this diverges from
-                                      // CLAUDE.md §8.1, which still specifies "plus a fourth FTT column".
-                                      // FTT itself is still surfaced by tile_ftt and by scr_History.
+                                      =// Three per-test pass-rate columns only (Test_FPY, graded by BandStatusOf).
+                                      // The First Time Pass Rate column was removed from this matrix - that
+                                      // figure is surfaced by tile_ftt, the trend chart and scr_History
+                                      // (CLAUDE.md §8.1).
                                       Sort(
                                           AddColumns(
                                               FirstN(
@@ -1092,13 +1006,13 @@ Screens:
 
                                               // --- goal reference rule (CLAUDE.md §8.1) ---
                                               "<line x1='" & PX0 & "' x2='" & PXR & "' y1='" &
-                                                  Text(184 - (varGoalFPY-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & "' y2='" &
-                                                  Text(184 - (varGoalFPY-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") &
+                                                  Text(184 - (varGoalFTPRGreen-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & "' y2='" &
+                                                  Text(184 - (varGoalFTPRGreen-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") &
                                                   "' stroke='#E15242' stroke-width='1.5' stroke-dasharray='6 4'/>" &
                                               "<text x='" & PXR & "' y='" &
-                                                  Text(184 - (varGoalFPY-varTrendFloor)/Max(100-varTrendFloor, 1)*172 - 5, "[$-en-US]0.0") &
+                                                  Text(184 - (varGoalFTPRGreen-varTrendFloor)/Max(100-varTrendFloor, 1)*172 - 5, "[$-en-US]0.0") &
                                                   "' font-size='10' font-weight='700' fill='#E15242' text-anchor='end'>GOAL " &
-                                                  varGoalFPY & "%</text>" &
+                                                  varGoalFTPRGreen & "%</text>" &
 
                                               // --- the three per-test series, fixed slot colours (CLAUDE.md §11):
                                               //     Electrical #1B6FA8, Plumbing #eb6834, Gas #1baf7a. Blank weeks are
@@ -1119,30 +1033,30 @@ Screens:
                                                   Text(184 - (Max(gas, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
                                               "' fill='none' stroke='#1baf7a' stroke-width='1.8' stroke-linejoin='round' opacity='0.95'/>" &
 
-                                              // --- overall Week_FPY last, so it sits on top. Near-black and heaviest:
+                                              // --- overall First Time Pass Rate (ftt, floor basis) last, so it sits on top. Near-black and heaviest:
                                               //     the composite line must not read as a fourth test, and it cannot use
                                               //     Champion Blue without colliding with Electrical's slot colour.
                                               "<polyline points='" &
-                                              Concat(Filter(col_trend_chart, !IsBlank(fpy)),
+                                              Concat(Filter(col_trend_chart, !IsBlank(ftt)),
                                                   Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") & "," &
-                                                  Text(184 - (Max(fpy, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
+                                                  Text(184 - (Max(ftt, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") & " ") &
                                               "' fill='none' stroke='#0b0b0b' stroke-width='2.8' stroke-linejoin='round'/>" &
-                                              Concat(Filter(col_trend_chart, !IsBlank(fpy)),
+                                              Concat(Filter(col_trend_chart, !IsBlank(ftt)),
                                                   "<circle cx='" & Text(PX0 + (idx-1)/N*SPAN, "[$-en-US]0.0") &
-                                                  "' cy='" & Text(184 - (Max(fpy, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") &
+                                                  "' cy='" & Text(184 - (Max(ftt, varTrendFloor)-varTrendFloor)/Max(100-varTrendFloor, 1)*172, "[$-en-US]0.0") &
                                                   "' r='3.2' fill='#0b0b0b' stroke='#ffffff' stroke-width='1.8'/>") &
 
                                               // --- legend ---
                                               "<line x1='44' x2='64' y1='238' y2='238' stroke='#0b0b0b' stroke-width='2.8'/>" &
-                                              "<text x='68' y='242' font-size='11' fill='#525148'>Overall</text>" &
-                                              "<line x1='124' x2='144' y1='238' y2='238' stroke='#1B6FA8' stroke-width='1.8'/>" &
-                                              "<text x='148' y='242' font-size='11' fill='#525148'>Electrical</text>" &
-                                              "<line x1='210' x2='230' y1='238' y2='238' stroke='#eb6834' stroke-width='1.8'/>" &
-                                              "<text x='234' y='242' font-size='11' fill='#525148'>Plumbing</text>" &
-                                              "<line x1='298' x2='318' y1='238' y2='238' stroke='#1baf7a' stroke-width='1.8'/>" &
-                                              "<text x='322' y='242' font-size='11' fill='#525148'>Gas</text>" &
-                                              "<line x1='356' x2='376' y1='238' y2='238' stroke='#E15242' stroke-width='1.5' stroke-dasharray='6 4'/>" &
-                                              "<text x='380' y='242' font-size='11' fill='#525148'>Goal</text>" &
+                                              "<text x='68' y='242' font-size='11' fill='#525148'>First Time Pass Rate</text>" &
+                                              "<line x1='204' x2='224' y1='238' y2='238' stroke='#1B6FA8' stroke-width='1.8'/>" &
+                                              "<text x='228' y='242' font-size='11' fill='#525148'>Electrical</text>" &
+                                              "<line x1='290' x2='310' y1='238' y2='238' stroke='#eb6834' stroke-width='1.8'/>" &
+                                              "<text x='314' y='242' font-size='11' fill='#525148'>Plumbing</text>" &
+                                              "<line x1='378' x2='398' y1='238' y2='238' stroke='#1baf7a' stroke-width='1.8'/>" &
+                                              "<text x='402' y='242' font-size='11' fill='#525148'>Gas</text>" &
+                                              "<line x1='436' x2='456' y1='238' y2='238' stroke='#E15242' stroke-width='1.5' stroke-dasharray='6 4'/>" &
+                                              "<text x='460' y='242' font-size='11' fill='#525148'>Goal</text>" &
                                               "</svg>"
                                               )))
                                           Width: =Parent.Width

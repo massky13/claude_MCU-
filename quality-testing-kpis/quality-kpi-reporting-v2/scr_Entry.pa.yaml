@@ -6,6 +6,7 @@ Screens:
         =Reset(tabs_main_en);
         Set(varShowFloorEdit, false);
         Set(varShowFloorDelete, false);
+        Set(varSaving, false);
         Set(varHomeOpen, Coalesce(varHomeOpen, false));
         Set(varToday, Today());
 
@@ -737,6 +738,12 @@ Screens:
                                                 Notify("Duplicate defect rows found for the same type and defect. Merge them into one row with a combined quantity.",
                                                        NotificationType.Error),
 
+                                                // Raise the saving overlay (cnt_saving_overlay) for the whole
+                                                // save -> reload -> rebuild chain, so the user cannot navigate
+                                                // away mid-write. Cleared at the end of btn_rebuild_rollups.
+                                                // Deliberately AFTER the validation checks above - a rejected
+                                                // save never shows it.
+                                                Set(varSaving, true);
                                                 IfError(
                                                     Patch(qk_home,
                                                         LookUp(qk_home, Plant_ID = varPID && Home_number = varHomeNumberNum),
@@ -802,6 +809,14 @@ Screens:
                                                     ),
                                                     NotificationType.Success
                                                 );
+                                                // Reload the week FIRST so col_homes contains the results just
+                                                // saved, then rebuild - same rule as btn_add_home above. Without
+                                                // this, btn_rebuild_rollups counted floors from the pre-save
+                                                // snapshot, so Floors_tested/Floors_clean (and every FPY figure)
+                                                // in qk_week_summary and qk_plant_summary excluded the floor
+                                                // just saved - the LAST save of a week was always missing from
+                                                // the rollups until something else re-triggered a rebuild.
+                                                Select(btn_load_week);
                                                 Select(btn_rebuild_rollups)
                                             )
                                           Text: ="Save"
@@ -822,6 +837,7 @@ Screens:
                                       =If(varHomeOpen && !varHomeEditable,
                                           "View only - your role does not have edit access",
                                           "")
+                                    Visible: =false
                                     Wrap: =false
                               - card_elec:
                                   Control: GroupContainer
@@ -1540,6 +1556,18 @@ Screens:
                           Set(varPSLatestFloorsT, Sum(varPSLatestRows, Floors_tested));
                           Set(varPSLatestFloorsC, Sum(varPSLatestRows, Floors_clean));
 
+                          // Last COMPLETED calendar week (PastWeekKey, App.Formulas), for the
+                          // Floors_*_lastwk quick-reference stamps below. Distinct from
+                          // varPSLatestRows above: "latest" is the newest REPORTED week (can be
+                          // the in-progress one; feeds FTT_latest_pct), while "lastwk" is pinned
+                          // to the calendar so it never shows a partial week - the same week the
+                          // scr_CorporateHome region badge scores. Weighted across facilities,
+                          // read from col_plant_window (not col_plant_12) so it resolves even
+                          // when a back-fill edit shifts the 12-week window.
+                          Set(varPSPastRows, Filter(col_plant_window, Week_key = PastWeekKey));
+                          Set(varPSPastFloorsT, Sum(varPSPastRows, Floors_tested));
+                          Set(varPSPastFloorsC, Sum(varPSPastRows, Floors_clean));
+
                           IfError(
                               Patch(qk_plant_summary,
                                   Coalesce(
@@ -1557,11 +1585,22 @@ Screens:
                                       Total_pass:    varPSPass,
                                       Floors_tested: varPSFloorsT,
                                       Floors_clean:  varPSFloorsC,
+                                      // Quick-reference stamps: the last completed week's floor
+                                      // counts, so the list row itself answers "how many floors
+                                      // did this plant test last week" - this row's Floors_tested
+                                      // / Floors_clean above are 12-WEEK totals and have been
+                                      // misread as weekly numbers more than once. Corporate's
+                                      // region badge still computes from qk_week_summary live;
+                                      // these stamps are reference, not a consumer feed.
+                                      Floors_tested_lastwk: varPSPastFloorsT,
+                                      Floors_clean_lastwk:  varPSPastFloorsC,
                                       Homes_tested:  varPSHomes,
                                       Total_defects: varPSDefects,
                                       Total_cost:    varPSCost,
-                                      // TTW is the WEIGHTED trailing-12 FPY - one definition, used by this
-                                      // tile, the corporate plant card and the region roll-up alike.
+                                      // TTW_FPY (composite test-weighted trailing-12 FPY) is retained for
+                                      // compatibility only and is NOT displayed anywhere. TTW in the UI is
+                                      // FTT_pct below - the weighted trailing-12-week First Time Pass Rate,
+                                      // floor basis (dashboard TTW tile, corporate plant/region TTW).
                                       TTW_FPY: If(varPSTests > 0,
                                           Round(varPSPass / varPSTests * 100, 1), Blank()),
                                       FTT_pct: If(varPSFloorsT > 0,
@@ -1584,7 +1623,13 @@ Screens:
                                   NotificationType.Error)
                           );
                           RunFullPlantLoad();
-                          Select(btn_load_week)
+                          Select(btn_load_week);
+                          // Drop the saving overlay raised by btn_save_home. Every rollup write
+                          // above has completed by this line - the queued btn_load_week that
+                          // follows is only the local week-view refresh. Harmless no-op for the
+                          // other rebuild callers (add home, floor edit/delete), which never
+                          // raise the flag.
+                          Set(varSaving, false)
                         Text: =""
                         Visible: =false
                         Width: =1
@@ -1897,3 +1942,87 @@ Screens:
                         Width: =110
                         X: =Parent.Width - 124
                         Y: =Parent.Height - 64
+      - cnt_saving_overlay:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Visible: =varSaving
+            Width: =Parent.Width
+          Children:
+            - rect_saving_scrim:
+                Control: Rectangle
+                Properties:
+                  Fill: =RGBA(82, 81, 78, 0.6)
+                  Height: =Parent.Height
+                  Width: =Parent.Width
+            - btn_saving_scrim_block:
+                Control: Button
+                Properties:
+                  Appearance: ='ButtonCanvas.Appearance'.Transparent
+                  BorderThickness: =0
+                  Height: =Parent.Height
+                  OnSelect: |-
+                    =// Deliberate no-op: unlike the other scrims this one does NOT
+                    // dismiss - it exists to absorb every tap (nav tabs included)
+                    // until the save/rebuild chain clears varSaving itself.
+                    false
+                  Text: =""
+                  Width: =Parent.Width
+            - cnt_saving_card:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  Fill: =CardBg
+                  Height: =210
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: =Min(Parent.Width - 64, 380)
+                  X: =(Parent.Width - Self.Width)/2
+                  Y: =(Parent.Height - Self.Height)/2
+                Children:
+                  - spin_saving:
+                      Control: Spinner
+                      Properties:
+                        AccessibleLabel: ="Saving floor and recalculating rollups"
+                        Height: =84
+                        SpinnerColor: =ChampionBlue
+                        SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                        TrackColor: =GridLine
+                        Width: =84
+                        X: =(Parent.Width - Self.Width)/2
+                        Y: =28
+                  - lbl_saving_title:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Center
+                        Color: =TextPrimary
+                        FontWeight: =FontWeight.Bold
+                        Height: =26
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="Saving floor..."
+                        Width: =Parent.Width
+                        Wrap: =false
+                        Y: =122
+                  - lbl_saving_sub:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Center
+                        Color: =TextSecondary
+                        Height: =40
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="Recalculating weekly and plant rollups. Please stay on this screen."
+                        Width: =Parent.Width - 32
+                        X: =16
+                        Y: =152
