@@ -171,15 +171,16 @@ Screens:
                           ={Value: "Data Entry"}
                         FillPortions: =1
                         Items: |-
-                          =If(varIsAdmin,
-                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
-                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
-                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"})
-                              ),
-                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
-                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}),
-                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
-                              )
+                          =// Everyone can return to scr_CorporateHome. A non-admin looking at a plant that
+                          // is not their own (IsForeignPlant) gets its dashboard and nothing further.
+                          If(varIsAdmin,
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
+                              IsForeignPlant(),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
+                              // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
+                              varIsQM && HasPlantCostScope(),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38
                         OnChange: |-
@@ -189,6 +190,7 @@ Screens:
                               tabs_main_en.Selected.Value = "Week Detail", Navigate(scr_WeekDetail, ScreenTransition.None),
                               tabs_main_en.Selected.Value = "History", Navigate(scr_History, ScreenTransition.None),
                               tabs_main_en.Selected.Value = "Taxonomy", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
+                              tabs_main_en.Selected.Value = "Defect Costs", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
                               tabs_main_en.Selected.Value = "Access", Navigate(scr_AccessAdmin, ScreenTransition.None))
             - cnt_filters_en:
                 Control: GroupContainer
@@ -778,10 +780,12 @@ Screens:
                                                             // Denormalised UNIT cost, parallel to Severity - the extended
                                                             // cost is Qty * Defect_cost, computed where it is needed.
                                                             // Stamping it here is what stops past weeks repricing when
-                                                            // an admin edits the taxonomy cost later.
+                                                            // an admin or the plant's QM edits a cost later. A row that
+                                                            // already carries a stamp keeps it on re-save; only a new or
+                                                            // unstamped row takes the plant's current effective cost
+                                                            // (plant override, else corporate default).
                                                             Defect_cost: Coalesce(DefectRow.Defect_cost,
-                                                                LookUp(col_defect_all, Value(Title) = DefectRow.Defect_ID,
-                                                                    Defect_cost), 0)
+                                                                EffectiveDefectCost(DefectRow.Defect_ID), 0)
                                                         })
                                                     ); true,
                                                     Notify("Could not save defect rows. " & FirstError.Message, NotificationType.Error); false
@@ -959,7 +963,7 @@ Screens:
                                                       OnChange: |-
                                                         =Patch(col_defect_edit, ThisItem,
                                                             {Defect_ID: Value(drp_elec_defect.Selected.Title), Severity: drp_elec_defect.Selected.Severity,
-                                                             Defect_cost: drp_elec_defect.Selected.Defect_cost})
+                                                             Defect_cost: EffectiveDefectCost(Value(drp_elec_defect.Selected.Title))})
                                                 - num_elec_qty:
                                                     Control: ModernNumberInput
                                                     Properties:
@@ -999,7 +1003,7 @@ Screens:
                                                         Defect_ID: Value(availDefect.Title),
                                                         Qty: 1,
                                                         Severity: availDefect.Severity,
-                                                        Defect_cost: availDefect.Defect_cost
+                                                        Defect_cost: EffectiveDefectCost(Value(availDefect.Title))
                                                     })
                                                 )
                                             )
@@ -1136,7 +1140,7 @@ Screens:
                                                       OnChange: |-
                                                         =Patch(col_defect_edit, ThisItem,
                                                             {Defect_ID: Value(drp_plumb_defect.Selected.Title), Severity: drp_plumb_defect.Selected.Severity,
-                                                             Defect_cost: drp_plumb_defect.Selected.Defect_cost})
+                                                             Defect_cost: EffectiveDefectCost(Value(drp_plumb_defect.Selected.Title))})
                                                 - num_plumb_qty:
                                                     Control: ModernNumberInput
                                                     Properties:
@@ -1176,7 +1180,7 @@ Screens:
                                                         Defect_ID: Value(availDefect.Title),
                                                         Qty: 1,
                                                         Severity: availDefect.Severity,
-                                                        Defect_cost: availDefect.Defect_cost
+                                                        Defect_cost: EffectiveDefectCost(Value(availDefect.Title))
                                                     })
                                                 )
                                             )
@@ -1313,7 +1317,7 @@ Screens:
                                                       OnChange: |-
                                                         =Patch(col_defect_edit, ThisItem,
                                                             {Defect_ID: Value(drp_gas_defect.Selected.Title), Severity: drp_gas_defect.Selected.Severity,
-                                                             Defect_cost: drp_gas_defect.Selected.Defect_cost})
+                                                             Defect_cost: EffectiveDefectCost(Value(drp_gas_defect.Selected.Title))})
                                                 - num_gas_qty:
                                                     Control: ModernNumberInput
                                                     Properties:
@@ -1353,7 +1357,7 @@ Screens:
                                                         Defect_ID: Value(availDefect.Title),
                                                         Qty: 1,
                                                         Severity: availDefect.Severity,
-                                                        Defect_cost: availDefect.Defect_cost
+                                                        Defect_cost: EffectiveDefectCost(Value(availDefect.Title))
                                                     })
                                                 )
                                             )
@@ -1411,13 +1415,13 @@ Screens:
                           Set(varTotalDefects, Sum(col_week_defects, Coalesce(Qty, 1)));
                           // Cost of poor quality for the facility-week. Extended = Qty * unit cost,
                           // read from the stamp on each qk_home_defect row so it matches what the
-                          // by-test chart computes. Falls back to the live taxonomy only for rows
-                          // written before the stamp existed.
+                          // by-test chart computes. Falls back to the plant's effective cost only
+                          // for rows written before the stamp existed.
                           Set(varTotalCost,
                               Sum(col_week_defects,
                                   Coalesce(Qty, 1) *
                                       Coalesce(Defect_cost,
-                                          LookUp(col_defect_all, Value(Title) = Defect_ID, Defect_cost),
+                                          EffectiveDefectCost(Defect_ID),
                                           0)));
                           IfError(
                               // Base record MUST be Coalesce(LookUp(...), Defaults(...)) - never the four-argument

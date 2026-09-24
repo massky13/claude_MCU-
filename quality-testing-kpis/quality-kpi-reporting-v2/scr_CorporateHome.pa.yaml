@@ -2,7 +2,10 @@ Screens:
   scr_CorporateHome:
     Properties:
       Fill: =PageBg
-      OnVisible: =LoadCorporateHome()
+      OnVisible: |-
+        =// Refresh when returning from a plant. On the very first visit App.OnStart may still
+        // be running (col_plants empty) - skip, OnStart ends by calling LoadCorporateHome().
+        If(!IsEmpty(col_plants), LoadCorporateHome())
     Children:
       - cnt_root_corp:
           Control: GroupContainer
@@ -64,14 +67,16 @@ Screens:
                               Color: =RGBA(255, 255, 255, 1)
                               FillPortions: =1
                               FontWeight: =FontWeight.Bold
+                              Height: =56
                               PaddingBottom: =0
                               PaddingLeft: =0
                               PaddingRight: =0
                               PaddingTop: =0
                               Size: =16
-                              Text: ="Quality KPI Reporting - Corporate Overview (First Time Pass Rate, latest week)"
-                              Width: =340
+                              Text: ="Quality KPI Reporting - Corporate Overview"
+                              Width: =591
                               Wrap: =false
+                              X: =70
                   - cnt_header_right_corp:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -128,8 +133,8 @@ Screens:
                             Control: GroupContainer
                             Variant: AutoLayout
                             Properties:
-                              BorderColor: =CardBorder
-                              BorderThickness: =1
+                              BorderColor: =If(ThisItem.Region_Name = LookUp(col_corp_plants, Plant_ID = varOwnPID, Plant_Region), ChampionBlue, CardBorder)
+                              BorderThickness: =If(ThisItem.Region_Name = LookUp(col_corp_plants, Plant_ID = varOwnPID, Plant_Region), 2, 1)
                               Fill: =CardBg
                               Height: =Parent.TemplateHeight
                               LayoutAlignItems: =LayoutAlignItems.Stretch
@@ -208,8 +213,9 @@ Screens:
                                               Control: GroupContainer
                                               Variant: AutoLayout
                                               Properties:
-                                                BorderColor: =GridLine
-                                                BorderThickness: =1
+                                                BorderColor: =If(ThisItem.Plant_ID = varOwnPID, ChampionBlue, GridLine)
+                                                BorderThickness: =If(ThisItem.Plant_ID = varOwnPID, 4, 1)
+                                                Fill: =If(ThisItem.Plant_ID = varOwnPID, RGBA(156, 212, 234, 0.25), RGBA(0, 0, 0, 0))
                                                 Height: =Parent.Height
                                                 LayoutAlignItems: =LayoutAlignItems.Center
                                                 LayoutDirection: =LayoutDirection.Horizontal
@@ -223,7 +229,7 @@ Screens:
                                                     Control: ModernText
                                                     Properties:
                                                       Color: =TextPrimary
-                                                      FontWeight: =FontWeight.Semibold
+                                                      FontWeight: =If(ThisItem.Plant_ID = varOwnPID, FontWeight.Bold, FontWeight.Semibold)
                                                       Height: =50
                                                       LayoutMinWidth: =0
                                                       PaddingBottom: =0
@@ -291,5 +297,5 @@ Screens:
                                                 PressedColor: =RGBA(145, 143, 141, 1)
                                                 PressedFill: =RGBA(2, 66, 109, 0.16)
                                                 Text: =""
-                                                Tooltip: ="Open plant dashboard"
+                                                Tooltip: =If(ThisItem.Plant_ID = varOwnPID || varIsAdmin, "Open plant dashboard", "View plant dashboard (view only)")
                                                 Width: =Parent.Width

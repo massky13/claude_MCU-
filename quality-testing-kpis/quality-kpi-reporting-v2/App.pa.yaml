@@ -103,36 +103,18 @@ App:
       // this template, so every screen branches on this named formula instead.
       IsWideLayout = App.Width >= 1200;
 
-      // ===== StartScreen routing (CLAUDE.md §5) - StartScreen disallows global variables
-      // entirely, so these two named formulas independently re-derive the same
-      // Plant_ID/Role resolution App.OnStart performs into varPID/varRole, purely from
-      // data, so StartScreen can branch on them without touching a Set() variable.
-      //
-      // KNOWN, ACCEPTED delegation warnings (on StartScreen / these formulas only): the
-      // compiler flags any non-delegable named formula referenced from StartScreen,
-      // regardless of actual data size - there's no real "delegation" concept for one-time
-      // screen selection. sys_test_access is a small, bounded personnel roster (one row per
-      // registered user), never a scaling fact table like qk_home - CLAUDE.md §3
-      // non-negotiable #5 is written with those large tables in mind. Deliberate exception;
-      // do not try to "fix" these warnings away without re-checking they're still just this.
-      //
-      // MUST query sys_test_access directly, NOT col_access. col_access is created by
-      // ClearCollect in App.OnStart, but named formulas backing StartScreen evaluate
-      // independently of OnStart - at that point col_access is still empty, StartAccessRow
-      // comes back blank, and every Corporate user gets routed to scr_Dashboard instead of
-      // scr_CorporateHome. Pointing this at col_access to silence the delegation warnings
-      // above is exactly the regression that caused that bug. Leave it on the data source.
-      StartAccessRow =
-          LookUp(Filter(sys_test_access, Active = true),
-              Lower(Trim(Inspector_email)) = Lower(Trim(User().Email)));
-
-      IsStartCorporate =
-          If(!IsBlank(StartAccessRow),
-              StartAccessRow.Plant_ID = 0,
-              Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation, 3)) = 0
-          );
-
-      IsStartAdmin = Coalesce(StartAccessRow.Role, "Inspector") = "Administrator";
+      // ===== Plant scope - everyone starts on scr_CorporateHome =====
+      // Every user lands on the region x plant comparison (App.StartScreen) and can open
+      // ANY plant's dashboard from its card. varOwnPID is the plant the user belongs to
+      // (sys_test_access, else AD officeLocation - App.OnStart); varPID is the plant
+      // currently being viewed. A plant user viewing someone else's plant gets that
+      // plant's dashboard only - no Data Entry, Week Detail, History or Defect Costs, and
+      // no drill-through from the dashboard. Administrators and Corporate users
+      // (varOwnPID = 0) are unrestricted on every plant. A user with no resolvable plant
+      // (blank varOwnPID) stays restricted.
+      IsForeignPlant(): Boolean =
+          !varIsAdmin && Coalesce(varOwnPID, -1) <> 0 &&
+              (IsBlank(varOwnPID) || IsBlank(varPID) || varPID <> varOwnPID);
 
       // ===== scr_Entry week picker (gal_week_picker) - the 10 consecutive weeks running
       // from 1 week ahead of today back to 9 weeks before that. Recomputes live off
@@ -162,6 +144,31 @@ App:
                   W_end >= DateAdd(Today(), -14, TimeUnit.Days),
                   W_end),
               "yyyymmdd"));
+
+      // ===== Per-plant defect costs (qk_plant_defect_cost) =====
+      // Corporate sets the default cost per occurrence on qk_defect_type.Defect_cost.
+      // A plant's Quality Manager may override any defect's cost for their own plant
+      // (materials, labour pool); the override list holds ONLY the costs a plant has
+      // changed, so a defect with no row falls back to the corporate default. An explicit
+      // override of 0 is honoured (Coalesce skips blanks, not zeros).
+      // col_plant_cost is the current plant's overrides (<= 66 rows), loaded by
+      // RunFullPlantLoad and refreshed after a save by btn_defect_save (scr_TaxonomyAdmin).
+      // The save lives in that button, not a UDF: the compiler flags any data-writing UDF
+      // as non-delegable at its call site.
+      EffectiveDefectCost(defectId: Number): Number =
+          Coalesce(
+              LookUp(col_plant_cost, Defect_ID = defectId, Defect_cost),
+              LookUp(col_defect_all, Value(Title) = defectId, Defect_cost));
+
+      // scr_TaxonomyAdmin's cost-only mode: a Quality Manager may change their own
+      // plant's defect costs there, and nothing else - no adding, renaming or
+      // (de)activating tests, types or defects. Administrators keep full taxonomy rights.
+      IsCostOnlyMode(): Boolean = varIsQM && !varIsAdmin;
+
+      // A real plant is in scope (Corporate is Plant_ID 0), so plant costs can be shown
+      // and edited - the QM's own plant, or the plant an admin has picked.
+      // Never another plant's costs for a non-admin (IsForeignPlant).
+      HasPlantCostScope(): Boolean = !IsBlank(varPID) && varPID > 0 && !IsForeignPlant();
 
       BuildParetoDerived(): Void = {
           ClearCollect(col_pareto_share,
@@ -277,6 +284,10 @@ App:
 
           Clear(col_homes);
           Clear(col_home_defects);
+
+          // This plant's defect-cost overrides (<= 66 rows) - read by EffectiveDefectCost.
+          ClearCollect(col_plant_cost,
+              Filter(qk_plant_defect_cost, Plant_ID = varPID));
           Set(varLoadedAt, Now());
 
           If(IsBlank(varFacility),
@@ -434,14 +445,15 @@ App:
                       // (scr_Entry), exactly as Severity is, so a week's dollars are frozen at
                       // the cost in effect when the defect was recorded and never reprice when
                       // an admin edits the taxonomy.
-                      // The LookUp fallback covers rows written BEFORE the stamp existed: they
-                      // have a blank Defect_cost and would otherwise total $0. It reads
+                      // The fallback covers rows written BEFORE the stamp existed: they have a
+                      // blank Defect_cost and would otherwise total $0. EffectiveDefectCost
+                      // prices them at this plant's cost (or the corporate default), reading
                       // col_defect_all, not col_defect, so a deactivated defect still prices.
                       // Once history is re-saved the stamp wins and the fallback stops firing.
                       Weighted: Sum(Filter(col_defect_window, Test_ID = Value(T.Title)),
                           Coalesce(Qty, 1) *
                               Coalesce(Defect_cost,
-                                  LookUp(col_defect_all, Value(Title) = Defect_ID, Defect_cost),
+                                  EffectiveDefectCost(Defect_ID),
                                   0))
                   }
               )
@@ -600,12 +612,12 @@ App:
           Set(varCorpLoadedAt, Now())
       };
 
-      // Corporate users pick a plant from scr_CorporateHome, same as an admin picking one
-      // from drp_plant - reuses RunFullPlantLoad() rather than duplicating its logic.
+      // Any user picks a plant from its card on scr_CorporateHome, same as an admin picking
+      // one from drp_plant. No RunFullPlantLoad() here: scr_Dashboard.OnVisible already
+      // reloads the plant (btn_refresh_dashboard), so loading here too ran it twice.
       SelectCorporatePlant(plantId: Number): Void = {
           Set(varPID, plantId);
           Set(varFacility, 1);
-          RunFullPlantLoad();
           Navigate(scr_Dashboard, ScreenTransition.None)
       };
     OnStart: |-
@@ -676,15 +688,20 @@ App:
       Set(varFacility, 1);
 
 
-      // Administrators pick a plant before anything loads; Corporate users (Plant_ID = 0)
-      // never had a plant to load in the first place - see StartScreen for how they're
-      // routed (Navigate isn't permitted in OnStart; "Use the StartScreen property instead"
-      // is the compiler's own guidance).
-      If(varIsAdmin,
-          Set(varPID, Blank()),
-          varPID = 0,
-          false,
-          RunFullPlantLoad()
-      )
-    StartScreen: =If(IsStartCorporate, scr_CorporateHome, scr_Dashboard)
+      // The user's own plant - IsForeignPlant compares the plant being viewed against it,
+      // and scr_CorporateHome highlights its card. Captured before the admin blank below.
+      Set(varOwnPID, varPID);
+
+      // Everyone starts on scr_CorporateHome (StartScreen) and opens a plant from its card,
+      // which is what loads it (scr_Dashboard.OnVisible) - so nothing plant-level loads
+      // here. Administrators start with no plant selected, as before.
+      If(varIsAdmin, Set(varPID, Blank()));
+
+      // Load the start screen's data HERE, last, once identity, taxonomy, config and
+      // col_plants exist. In a fresh play session the start screen's OnVisible can run
+      // before OnStart has finished, so a load there alone runs against empty collections
+      // and scr_CorporateHome shows only its header. Its galleries bind to the collections
+      // this fills, so they populate as soon as it completes.
+      LoadCorporateHome()
+    StartScreen: =scr_CorporateHome
     Theme: =PowerAppsTheme

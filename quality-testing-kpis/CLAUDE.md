@@ -22,7 +22,7 @@ Home (production number)
             └─ Defect     the specific finding           — 66
 ```
 
-Six screens: **Corporate Home · Dashboard · Data Entry · Week Detail · Taxonomy Admin · Access Admin.** Corporate Home is the landing screen for `Plant_ID = 0` users only (§8.0) — everyone else starts on the Dashboard.
+Six screens: **Corporate Home · Dashboard · Data Entry · Week Detail · Taxonomy Admin · Access Admin.** **Every user starts on Corporate Home** (§8.0) and opens a plant's dashboard from its card.
 
 **Ready To Ship (RTS) is out of scope for this build.** v1 tracked it as a separate inspection; it is deliberately excluded here. Do not add RTS columns, screens, or metrics.
 
@@ -148,11 +148,13 @@ Three result columns rather than a child table because the tests are fixed at 3 
 | Role | Scope | Can do |
 |---|---|---|
 | `Administrator` | all plants | everything, plus taxonomy and access maintenance |
-| `Quality Manager` | one plant | enter and edit their plant's data, no time limit |
+| `Quality Manager` | one plant | enter and edit their plant's data, no time limit; set their plant's defect costs (§8.4) |
 | `Inspector` | one plant | enter and edit their plant's data, no time limit |
 | `Reader` | one plant | view only |
 
 There is no time-based edit restriction — see §7, "Editability" (the 24-hour lock originally speced here was built, then deliberately removed: it limited legitimate corrections without a compensating benefit).
+
+**`qk_plant_defect_cost`** — per-plant defect cost overrides. `Title` (`PID.DefectID`) · `Plant_ID`* · `Defect_ID`* · `Defect_cost` · `Updated_at` · `Updated_by`. Holds **only** the costs a plant has changed; a defect with no row uses the corporate default `qk_defect_type.Defect_cost`. `EffectiveDefectCost(defectId)` in `App.Formulas` resolves plant override → corporate default over `col_plant_cost` (the current plant's rows, ≤ 66, loaded by `RunFullPlantLoad`). The cost is **stamped** onto `qk_home_defect.Defect_cost` when a defect is recorded, so a cost change applies going forward only — past weeks never reprice, and a re-saved floor keeps its original stamp.
 
 **`qk_config`** — the setting name lives in **`Title`**, not a `Setting_name` column; the value is `Setting_value`.
 
@@ -209,8 +211,10 @@ Set(varGoalFTPRGreen,  Value(LookUp(col_config, Title = "Goal_FTPR_green",  Sett
 Set(varGoalFTPRYellow, Value(LookUp(col_config, Title = "Goal_FTPR_yellow", Setting_value)));
 Set(varWindowMonths, Value(LookUp(col_config, Title = "Window_months", Setting_value)));
 
-// Administrators pick a plant before anything loads.
-If(varIsAdmin, Set(varPID, Blank()), Select(btn_load_plant))
+// The user's own plant - IsForeignPlant() compares the plant being viewed against it.
+Set(varOwnPID, varPID);
+// Everyone starts on scr_CorporateHome; opening a plant's card loads it. Admins start with none.
+If(varIsAdmin, Set(varPID, Blank()))
 ```
 
 Identity is two-tier: an explicit `sys_test_access` grant wins; otherwise the first 3 characters of the user's AD `officeLocation` are parsed as the plant number.
@@ -337,13 +341,21 @@ Follow the HeaderMainFooter responsive template — **§10 defines the responsiv
 
 The mockup (`quality-kpi-v2-mockup.html`) is the visual target. Open it before building each screen.
 
-### 8.0 `scr_CorporateHome` — landing screen for `Plant_ID = 0` users
+### 8.0 `scr_CorporateHome` — landing screen for every user
 
-A region × plant comparison, reached only by non-admin users whose resolved `Plant_ID` is `0` ("Corporate" — see §4's `sys_test_access` note). Routed via **`App.StartScreen`**, not `OnStart` or a screen's own `OnVisible`: `StartScreen` disallows any reference to a `Set()`-created global variable, and `Navigate()` is disallowed both in `OnStart` and in a screen's own `OnVisible` when it targets leaving that screen. The only way to make this work is two named formulas (`IsStartCorporate`, `IsStartAdmin` in `App.Formulas`) that independently re-derive the same `Plant_ID`/`Role` resolution `OnStart` performs into `varPID`/`varRole`, purely from data (`col_access`), so `StartScreen` can branch without touching a variable. This produces two accepted, unavoidable delegation warnings on `StartScreen` itself — see the code comment above `StartAccessRow` in `App.pa.yaml` before treating them as a build break.
+A region × plant comparison, and the landing screen for **everyone**: `App.StartScreen = scr_CorporateHome`, unconditionally. Users see how their plant compares with the others in their region. The user's own plant (`varOwnPID`) has a thick Champion Blue outline, a light fill and a bold name, and their region's card has a heavier outline.
+
+**Plant scope.** Any user can open **any** plant's dashboard from its card. `varOwnPID` is the user's own plant; `varPID` is the plant being viewed. `IsForeignPlant()` (in `App.Formulas`) is true for a plant user viewing a plant that isn't theirs. **Administrators and Corporate users (`varOwnPID = 0`) are unrestricted** on every plant. On another plant's dashboard:
+- the nav shows only Corporate Home and Dashboard;
+- the header reads "(view only)";
+- tiles and Q-matrix cells don't drill into Week Detail;
+- `HasPlantCostScope()` is false, so the user can never touch that plant's costs.
+
+On their own plant a user gets the full nav their role allows.
 
 Deliberately scoped to **`qk_week_summary` only** — never `qk_home`/`qk_home_defect`. A trailing-12-week window across every plant stays a few hundred rows regardless of plant count, unlike home/defect-level drill-down, which is what makes full cross-plant benchmarking a later, Dataverse-scale phase (§13). Facilities are consolidated up to plants (`Plant_List` is one row per plant × facility); regions come from `Plant_List.Plant_Region`, generated as columns rather than hardcoded, same principle as the Q-matrix's test columns (§8.1).
 
-Every figure is First Time Pass Rate on the floor basis (§7), graded with `BandStatusFTPR`. Plant badges show each plant's latest reported week (`qk_plant_summary.FTT_latest_pct`); region badges show the last completed week, `Sum(Floors_clean) / Sum(Floors_tested)` over the region's plants from `qk_week_summary`. `Plant_TTW` (`qk_plant_summary.FTT_pct`) and `Region_TTW` (`Sum(Floors_clean) / Sum(Floors_tested)` over the plants' 12-week components) are computed on the same floor basis. All of them are **weighted**, never an average of each plant's own percentage. Selecting a plant calls the app-level `SelectCorporatePlant()` UDF (sets `varPID`/`varFacility`, runs `RunFullPlantLoad()`, navigates to `scr_Dashboard`) rather than duplicating load logic. A "region overview" icon on `scr_Dashboard`'s header (visible only when `varAccessRow.Plant_ID = 0`) lets a Corporate user get back here after drilling into a plant.
+Every figure is First Time Pass Rate on the floor basis (§7), graded with `BandStatusFTPR`. Plant badges show each plant's latest reported week (`qk_plant_summary.FTT_latest_pct`); region badges show the last completed week, `Sum(Floors_clean) / Sum(Floors_tested)` over the region's plants from `qk_week_summary`. `Plant_TTW` (`qk_plant_summary.FTT_pct`) and `Region_TTW` (`Sum(Floors_clean) / Sum(Floors_tested)` over the plants' 12-week components) are computed on the same floor basis. All of them are **weighted**, never an average of each plant's own percentage. Selecting a plant calls the app-level `SelectCorporatePlant()` UDF, which sets `varPID`/`varFacility` and navigates to `scr_Dashboard`. `scr_Dashboard.OnVisible` does the load (`RunFullPlantLoad()`), so it isn't duplicated. Every screen's nav has a Corporate Home tab to get back here.
 
 ### 8.1 `scr_Dashboard`
 
@@ -426,7 +438,7 @@ Defect: Sort(Filter(col_defect, Type_ID = ThisItem.Type_ID), Sort_order)
 
 Per-test cards for the week (subtitle "Pass rate"), a First Time Pass Rate card, then the homes tested with their three results and defect counts, and each home's defect lines. Reached from a Q-matrix cell or a `gal_weeks` row.
 
-### 8.4 `scr_TaxonomyAdmin` — `varIsAdmin` only
+### 8.4 `scr_TaxonomyAdmin` — Administrators, plus a cost-only mode for Quality Managers
 
 Three panes: **Tests** (read-only, 3) → **Types of test** (CRUD, with editable `QP_ref`) → **Defects** (CRUD, with `Severity`).
 
@@ -436,6 +448,12 @@ Three panes: **Tests** (read-only, 3) → **Types of test** (CRUD, with editable
 - Surface these review flags: inconsistent `QP_ref` formatting (Gas uses `QP04.0` / `QP05.0` without the dot while the other seven use `QP.0X.0`), and how many defects still sit at default severity.
 
 This screen is what keeps the taxonomy a data concern rather than a release concern.
+
+**Plant defect costs.** Whenever a real plant is in scope (`HasPlantCostScope()`: `varPID > 0`), each defect row shows the corporate cost beside the plant's cost ("Plant = corp" when there's no override), and the edit row adds a plant-cost input. Saving a blank plant cost removes the override. Writes go to `qk_plant_defect_cost` from `btn_defect_save`. This is inline, not a UDF, because the compiler flags any data-writing UDF as non-delegable at its call site.
+
+- **Quality Managers** (`IsCostOnlyMode()` = `varIsQM && !varIsAdmin`) reach this screen from a **"Defect Costs"** nav tab, shown only to a QM with a plant. They see active types and defects only, and every add / rename / QP_ref / activate control is hidden. The only action is **Edit cost** for their own plant; they never write `qk_defect_type`.
+- **Administrators** keep the full taxonomy. With a plant picked they can also set that plant's costs from the same row.
+- UI gating is not security. QMs need Contribute on `qk_plant_defect_cost`, and should have read-only access to `qk_test_type` / `qk_defect_type` in SharePoint.
 
 ### 8.5 `scr_AccessAdmin` — `varIsAdmin` only
 

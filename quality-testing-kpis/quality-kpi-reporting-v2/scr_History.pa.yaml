@@ -144,15 +144,16 @@ Screens:
                           ={Value: "History"}
                         FillPortions: =1
                         Items: |-
-                          =If(varIsAdmin,
-                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
-                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
-                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"})
-                              ),
-                              If(!IsBlank(varAccessRow) && varAccessRow.Plant_ID = 0,
-                                  Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}),
-                                  Table({Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
-                              )
+                          =// Everyone can return to scr_CorporateHome. A non-admin looking at a plant that
+                          // is not their own (IsForeignPlant) gets its dashboard and nothing further.
+                          If(varIsAdmin,
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Taxonomy"}, {Value: "Access"}),
+                              IsForeignPlant(),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
+                              // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
+                              varIsQM && HasPlantCostScope(),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38
                         OnChange: |-
@@ -162,6 +163,7 @@ Screens:
                               tabs_main_hist.Selected.Value = "Week Detail", Navigate(scr_WeekDetail, ScreenTransition.None),
                               tabs_main_hist.Selected.Value = "History", Navigate(scr_History, ScreenTransition.None),
                               tabs_main_hist.Selected.Value = "Taxonomy", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
+                              tabs_main_hist.Selected.Value = "Defect Costs", Navigate(scr_TaxonomyAdmin, ScreenTransition.None),
                               tabs_main_hist.Selected.Value = "Access", Navigate(scr_AccessAdmin, ScreenTransition.None))
             - cnt_main_hist:
                 Control: GroupContainer
