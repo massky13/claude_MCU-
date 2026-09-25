@@ -147,10 +147,10 @@ Three result columns rather than a child table because the tests are fixed at 3 
 
 | Role | Scope | Can do |
 |---|---|---|
-| `Administrator` | all plants | everything, plus taxonomy and access maintenance |
-| `Quality Manager` | one plant | enter and edit their plant's data, no time limit; set their plant's defect costs (§8.4) |
+| `Administrator` | all plants | everything, plus taxonomy and access maintenance; the only role that assigns Quality Managers |
+| `Quality Manager` | one plant | enter and edit their plant's data, no time limit; set their plant's defect costs (§8.4); add and manage their plant's Inspectors (§8.5) |
 | `Inspector` | one plant | enter and edit their plant's data, no time limit |
-| `Reader` | one plant | view only |
+| `Reader` | one plant | view only. **The default:** anyone with no active row is a Reader of their office-location plant, so Readers are not listed individually |
 
 There is no time-based edit restriction — see §7, "Editability" (the 24-hour lock originally speced here was built, then deliberately removed: it limited legitimate corrections without a compensating benefit).
 
@@ -345,7 +345,7 @@ The mockup (`quality-kpi-v2-mockup.html`) is the visual target. Open it before b
 
 A region × plant comparison, and the landing screen for **everyone**: `App.StartScreen = scr_CorporateHome`, unconditionally. Users see how their plant compares with the others in their region. The user's own plant (`varOwnPID`) has a thick Champion Blue outline, a light fill and a bold name, and their region's card has a heavier outline.
 
-**Plant scope.** Any user can open **any** plant's dashboard from its card. `varOwnPID` is the user's own plant; `varPID` is the plant being viewed. `IsForeignPlant()` (in `App.Formulas`) is true for a plant user viewing a plant that isn't theirs. **Administrators and Corporate users (`varOwnPID = 0`) are unrestricted** on every plant. On another plant's dashboard:
+**Plant scope.** Any user can open **any** plant's dashboard from its card. `varOwnPID` is the user's own plant; `varPID` is the plant being viewed. `IsForeignPlant()` (in `App.Formulas`) is true for any non-admin viewing a plant that isn't theirs. Corporate users (`varOwnPID = 0`) own no plant, so **every plant is view-only for them**. **Only Administrators are unrestricted.** On another plant's dashboard:
 - the nav shows only Corporate Home and Dashboard;
 - the header reads "(view only)";
 - tiles and Q-matrix cells don't drill into Week Detail;
@@ -362,9 +362,16 @@ Every figure is First Time Pass Rate on the floor basis (§7), graded with `Band
 **Header** — Q logo · "Quality KPI Reporting" · `lbl_plant` (`PID – plant name`) · `ico_theme` · `ico_admin` (visible `varIsAdmin`).
 
 **Filter row**, scoping everything below it — never per-card filters:
-`drp_plant` (visible `varIsAdmin`, `OnChange` sets `varPID` then `Select(btn_load_plant)`) · `drp_facility` · `drp_window` · `lbl_loaded`.
+`drp_plant` (visible `varIsAdmin`, `OnChange` sets `varPID` then `Select(btn_load_plant)`) · `drp_facility` · **`tgl_show_cost`** · `lbl_loaded`.
 
-**`cnt_tiles`** — stat tiles: **First Time Pass Rate (last wk)** (`tile_ftt`) · **TTW** (`tile_ttw`, `qk_plant_summary.FTT_pct`) · Defects per Home · Cost · Floors Tested. Each shows value, delta or context, and a status accent. The two rate tiles grade with `BandStatusFTPR` (§7).
+**Count / cost switch (`tgl_show_cost`, `varShowCost`).** Off by default, and remembered for the session. It switches the dashboard between **defect counts** and **cost of poor quality** (Qty × stamped unit cost, falling back to `EffectiveDefectCost` for unstamped rows, so costs follow the plant being viewed). It affects:
+- **Tiles:** Defects per Floor (off) ↔ Cost per Floor (on), both for the last completed week (`PastWeekKey`) with a delta against the week before.
+- **Pareto:** covers the **last 12 weeks including the current one** (`ParetoStartKey`..`CurrentWeekKey`, filtered locally into `col_defect_pareto`), not the full load window, and is ranked by the active metric. Count view plots each item's **percentage share**; cost view plots **actual dollars**, with a dollar Y axis (compact labels via `CompactMoney()`). The table shows Qty or $. The bar-tap trend overlay plots quantities or dollars. A defect with no cost set drops out of the cost Pareto.
+- **By-test chart (`cnt_catchart`):** defects or dollars by test, **last completed week**.
+
+`cnt_qmatrix_trend_row` is deliberately unaffected. `RunFullPlantLoad` builds both figures (`col_pareto_raw.Qty_Sum` / `Cost_Sum`, `col_by_test.Qty` / `Weighted`), and `ApplyCostMode()` re-ranks and re-scales them locally when the switch changes, with no SharePoint query.
+
+**`cnt_tiles`** — stat tiles: **First Time Pass Rate (last wk)** (`tile_ftt`) · **TTW** (`tile_ttw`, `qk_plant_summary.FTT_pct`) · Defects per Floor *or* Cost per Floor (per `tgl_show_cost`) · Floors Tested. Every week-based tile reads the **last completed week** (`PastWeekKey`), compared against the week before (`PriorWeekKey`). Each shows value, delta or context, and a status accent. The two rate tiles grade with `BandStatusFTPR` (§7).
 
 **`cnt_qmatrix`** — the app's signature visual, kept from v1. `gal_qmatrix` over `Filter(col_calendar, Month = Month(Today()), Year = Year(Today()))`, one row per week of the current month. Columns are **generated from `col_test`**, not hardcoded: one per-test pass rate per column, graded with `BandStatusOf`. There is no First Time Pass Rate column; that figure lives on `tile_ftt`, the trend and `scr_History`. Each cell carries **glyph + value + colour** and drills into the week.
 
@@ -455,9 +462,19 @@ This screen is what keeps the taxonomy a data concern rather than a release conc
 - **Administrators** keep the full taxonomy. With a plant picked they can also set that plant's costs from the same row.
 - UI gating is not security. QMs need Contribute on `qk_plant_defect_cost`, and should have read-only access to `qk_test_type` / `qk_defect_type` in SharePoint.
 
-### 8.5 `scr_AccessAdmin` — `varIsAdmin` only
+### 8.5 `scr_AccessAdmin` — Administrators, plus a scoped mode for Quality Managers
 
-Maintains `sys_test_access`. List filterable by plant and role; add via `Office365Users.SearchUserV2`; assign **Plant** and **Role**; deactivate rather than delete. Warn when a plant has no active Quality Manager.
+Maintains `sys_test_access`.
+
+**Quality Manager mode (`IsQMAccessMode()`: `varIsQM && !varIsAdmin && varOwnPID > 0`).** A QM reaches this screen from an **Access** tab shown on their own plant:
+- **What they see:** only their own plant's Inspectors and Readers. The plant/role filters and the no-QM banner are hidden.
+- **Adding:** they add people **as Inspectors to their own plant only**; the plant and role dropdowns are locked to that.
+- **Existing rows:** they can switch a person between Inspector and Reader, or deactivate them. The plant is fixed.
+- **Admins only:** assigning Quality Managers and Administrators, or moving people between plants.
+
+Adding someone who already has an active row is blocked for every role, because a second row would make `App.OnStart`'s LookUp pick either one.
+
+ List filterable by plant and role; add via `Office365Users.SearchUserV2`; assign **Plant** and **Role**; deactivate rather than delete. Warn when a plant has no active Quality Manager.
 
 > This list is **shared with v1** — a person added here gets v1 access immediately. That is intended, but it means `sys_test_access` is jointly owned. Add columns freely; never rename or retype existing ones.
 

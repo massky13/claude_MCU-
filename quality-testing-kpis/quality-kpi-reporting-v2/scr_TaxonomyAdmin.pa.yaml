@@ -110,15 +110,6 @@ Screens:
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
                       Children:
-                        - ico_admin_ta:
-                            Control: ModernIcon
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              Icon: ="Settings"
-                              IconColor: =RGBA(255, 255, 255, 1)
-                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
-                              Tooltip: ="Admin"
-                              Visible: =varIsAdmin
                         - ico_theme_ta:
                             Control: ModernIcon
                             Properties:
@@ -173,7 +164,7 @@ Screens:
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
                               // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
                               varIsQM && HasPlantCostScope(),
-                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}, {Value: "Access"}),
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38
@@ -545,6 +536,7 @@ Screens:
                                                 AlignInContainer: =AlignInContainer.Center
                                                 Appearance: ='BadgeCanvas.Appearance'.Tint
                                                 Content: =ThisItem.QP_ref
+                                                FillPortions: =1
                                                 Height: =20
                                                 Shape: ='BadgeCanvas.Shape'.Rounded
                                                 ThemeColor: |-
@@ -553,7 +545,7 @@ Screens:
                                                       'BadgeCanvas.ThemeColor'.Warning,
                                                       'BadgeCanvas.ThemeColor'.Informative)
                                                 Visible: =varEditTypeId <> Value(ThisItem.Title)
-                                                Width: =80
+                                                Width: =70
                                           - txt_edit_qp_ref:
                                               Control: ModernTextInput
                                               Properties:
@@ -587,9 +579,9 @@ Screens:
                                           - tgl_type_active:
                                               Control: ModernToggle
                                               Properties:
+                                                AccessibleLabel: ="Active?"
                                                 Default: =ThisItem.Active
-                                                FillPortions: =1
-                                                Label: ="Active"
+                                                Label: =
                                                 LayoutMinWidth: =0
                                                 OnCheck: |-
                                                   =IfError(
@@ -619,8 +611,9 @@ Screens:
                                                   ClearCollect(col_type_admin, qk_test_type);
                                                   ClearCollect(col_type,
                                                       Filter(qk_test_type, Active = true))
-                                                ToggleSize: =16
+                                                ToggleSize: =20
                                                 Visible: =varEditTypeId <> Value(ThisItem.Title) && !IsCostOnlyMode()
+                                                Width: =35
                                           - btn_type_edit:
                                               Control: ModernButton
                                               Properties:
@@ -634,7 +627,7 @@ Screens:
                                                   Reset(txt_edit_qp_ref)
                                                 Text: ="Edit"
                                                 Visible: =varEditTypeId <> Value(ThisItem.Title) && !IsCostOnlyMode()
-                                                Width: =64
+                                                Width: =50
                                           - btn_type_save:
                                               Control: ModernButton
                                               Properties:
@@ -783,10 +776,10 @@ Screens:
                                     - txt_new_defect_cost:
                                         Control: ModernTextInput
                                         Properties:
-                                          AccessibleLabel: ="Cost per occurrence in dollars"
+                                          AccessibleLabel: ="Corporate cost per occurrence in dollars"
                                           AlignInContainer: =AlignInContainer.Stretch
                                           Height: =36
-                                          Placeholder: ="Cost per occurrence, e.g. 45.00"
+                                          Placeholder: ="Corporate cost per occurrence, e.g. 45.00"
                                           Type: ='TextInputType'.SingleLine
                                     - btn_save_new_defect:
                                         Control: ModernButton
@@ -853,7 +846,7 @@ Screens:
                                               Filter(col_defect_admin, Type_ID = varSelectedTypeId && Active),
                                               Filter(col_defect_admin, Type_ID = varSelectedTypeId)),
                                           Sort_order)
-                                    TemplateSize: =44
+                                    TemplateSize: =42
                                   Children:
                                     - cnt_defect_row:
                                         Control: GroupContainer
@@ -909,7 +902,11 @@ Screens:
                                                   =If(HasPlantCostScope(), "Corp ", "") &
                                                       If(Coalesce(ThisItem.Defect_cost, 0) > 0,
                                                           Text(ThisItem.Defect_cost, "[$-en-US]$#,##0.00"),
-                                                          "no cost set")
+                                                          "cost not set")
+                                                FontSize: |-
+                                                  =If(Coalesce(ThisItem.Defect_cost, 0) > 0,
+                                                      12  ,
+                                                      10)
                                                 Height: =20
                                                 Shape: ='BadgeCanvas.Shape'.Rounded
                                                 ThemeColor: |-
@@ -917,7 +914,7 @@ Screens:
                                                       'BadgeCanvas.ThemeColor'.Informative,
                                                       'BadgeCanvas.ThemeColor'.Warning)
                                                 Visible: =varEditDefectId <> Value(ThisItem.Title)
-                                                Width: =If(HasPlantCostScope(), 110, 80)
+                                                Width: '=100 '
                                           - txt_edit_defect_cost:
                                               Control: ModernTextInput
                                               Properties:
@@ -926,10 +923,11 @@ Screens:
                                                 Default: =Text(ThisItem.Defect_cost, "[$-en-US]0.00")
                                                 Height: =36
                                                 LayoutMinWidth: =0
-                                                Placeholder: ="0.00"
+                                                Placeholder: ="Corp cost"
+                                                Size: =12
                                                 Type: ='TextInputType'.SingleLine
                                                 Visible: =varEditDefectId = Value(ThisItem.Title) && !IsCostOnlyMode()
-                                                Width: =110
+                                                Width: =80
                                           - bdg_plant_cost:
                                               Control: Badge
                                               Properties:
@@ -947,7 +945,7 @@ Screens:
                                                       'BadgeCanvas.ThemeColor'.Subtle,
                                                       'BadgeCanvas.ThemeColor'.Brand)
                                                 Visible: =HasPlantCostScope() && varEditDefectId <> Value(ThisItem.Title)
-                                                Width: =120
+                                                Width: =100
                                           - txt_edit_plant_cost:
                                               Control: ModernTextInput
                                               Properties:
@@ -959,9 +957,10 @@ Screens:
                                                 Height: =36
                                                 LayoutMinWidth: =0
                                                 Placeholder: ="Plant cost"
+                                                Size: =12
                                                 Type: ='TextInputType'.SingleLine
                                                 Visible: =HasPlantCostScope() && varEditDefectId = Value(ThisItem.Title)
-                                                Width: =150
+                                                Width: =80
                                           - tgl_defect_active:
                                               Control: ModernToggle
                                               Properties:

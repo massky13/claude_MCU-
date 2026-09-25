@@ -112,14 +112,6 @@ Screens:
                               IconColor: =RGBA(255, 255, 255, 1)
                               OnSelect: =Set(varDarkMode, !Coalesce(varDarkMode, false))
                               Tooltip: ="Toggle theme"
-                        - ico_admin_hist:
-                            Control: ModernIcon
-                            Properties:
-                              Icon: ="Settings"
-                              IconColor: =RGBA(255, 255, 255, 1)
-                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
-                              Tooltip: ="Admin"
-                              Visible: =varIsAdmin
             - cnt_nav_hist:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -152,7 +144,7 @@ Screens:
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
                               // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
                               varIsQM && HasPlantCostScope(),
-                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}, {Value: "Access"}),
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38

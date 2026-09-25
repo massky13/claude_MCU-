@@ -107,14 +107,13 @@ App:
       // Every user lands on the region x plant comparison (App.StartScreen) and can open
       // ANY plant's dashboard from its card. varOwnPID is the plant the user belongs to
       // (sys_test_access, else AD officeLocation - App.OnStart); varPID is the plant
-      // currently being viewed. A plant user viewing someone else's plant gets that
-      // plant's dashboard only - no Data Entry, Week Detail, History or Defect Costs, and
-      // no drill-through from the dashboard. Administrators and Corporate users
-      // (varOwnPID = 0) are unrestricted on every plant. A user with no resolvable plant
-      // (blank varOwnPID) stays restricted.
+      // currently being viewed. A non-admin viewing a plant that is not their own gets
+      // that plant's dashboard only - no Data Entry, Week Detail, History or Defect Costs,
+      // and no drill-through from the dashboard. Corporate users (varOwnPID = 0) own no
+      // plant, so every plant is view-only for them. ONLY Administrators are unrestricted.
+      // A user with no resolvable plant (blank varOwnPID) stays restricted.
       IsForeignPlant(): Boolean =
-          !varIsAdmin && Coalesce(varOwnPID, -1) <> 0 &&
-              (IsBlank(varOwnPID) || IsBlank(varPID) || varPID <> varOwnPID);
+          !varIsAdmin && (IsBlank(varOwnPID) || IsBlank(varPID) || varPID <> varOwnPID);
 
       // ===== scr_Entry week picker (gal_week_picker) - the 10 consecutive weeks running
       // from 1 week ahead of today back to 9 weeks before that. Recomputes live off
@@ -135,6 +134,23 @@ App:
                   W_start <= DateAdd(Today(), -7, TimeUnit.Days) &&
                   W_end >= DateAdd(Today(), -7, TimeUnit.Days),
                   W_end),
+              "yyyymmdd"));
+
+      // The Pareto's window - 12 calendar weeks INCLUDING the current, in-progress week:
+      // the week containing today back to the week containing today-77 days. Calendar-
+      // anchored like PastWeekKey. The upper bound excludes the upcoming week that
+      // scr_Entry's picker allows homes to be entered against early.
+      ParetoStartKey =
+          Value(Text(
+              LookUp(col_calendar,
+                  W_start <= DateAdd(Today(), -77, TimeUnit.Days) &&
+                  W_end >= DateAdd(Today(), -77, TimeUnit.Days),
+                  W_end),
+              "yyyymmdd"));
+
+      CurrentWeekKey =
+          Value(Text(
+              LookUp(col_calendar, W_start <= Today() && W_end >= Today(), W_end),
               "yyyymmdd"));
 
       PriorWeekKey =
@@ -167,14 +183,22 @@ App:
 
       // A real plant is in scope (Corporate is Plant_ID 0), so plant costs can be shown
       // and edited - the QM's own plant, or the plant an admin has picked.
+      // scr_AccessAdmin's Quality Manager mode: a QM manages the Inspectors of their OWN
+      // plant (varOwnPID) and nothing else - add as Inspector, switch Inspector/Reader,
+      // (de)activate. Administrators assign Quality Managers and everything else.
+      IsQMAccessMode(): Boolean =
+          varIsQM && !varIsAdmin && !IsBlank(varOwnPID) && varOwnPID > 0;
+
       // Never another plant's costs for a non-admin (IsForeignPlant).
       HasPlantCostScope(): Boolean = !IsBlank(varPID) && varPID > 0 && !IsForeignPlant();
 
+      // Share and cumulative are computed on Metric - defect quantity, or dollars when the
+      // dashboard's "Show cost" switch (varShowCost) is on. See ApplyCostMode.
       BuildParetoDerived(): Void = {
           ClearCollect(col_pareto_share,
               AddColumns(col_pareto_sorted As SortRow,
                   Share_pct,
-                  If(varParetoTotal > 0, Round(SortRow.Qty_Sum / varParetoTotal * 100, 1), 0)
+                  If(varParetoTotal > 0, Round(SortRow.Metric / varParetoTotal * 100, 1), 0)
               )
           );
 
@@ -183,13 +207,51 @@ App:
                   Cumulative_pct,
                   If(varParetoTotal > 0,
                       Round(
-                          Sum(Filter(col_pareto_share, Qty_Sum >= PRow.Qty_Sum), Qty_Sum)
+                          Sum(Filter(col_pareto_share, Metric >= PRow.Metric), Metric)
                               / varParetoTotal * 100,
                       1),
                       0)
               )
           )
       };
+
+      // ===== Count / cost display mode (tgl_show_cost, scr_Dashboard) =====
+      // varShowCost switches the Pareto, its drill-down and the by-test chart between
+      // defect quantity and cost of poor quality (Qty x unit cost). Both figures are built
+      // by RunFullPlantLoad (col_pareto_raw.Qty_Sum / Cost_Sum, col_by_test.Qty / Weighted),
+      // so switching only re-ranks and re-scales local collections - no SharePoint query.
+      // The Q-matrix / trend row is deliberately unaffected.
+      ApplyCostMode(): Void = {
+          ClearCollect(col_pareto_sorted,
+              SortByColumns(
+                  Filter(
+                      AddColumns(col_pareto_raw As PR, Metric,
+                          If(varShowCost, PR.Cost_Sum, PR.Qty_Sum)),
+                      // In cost view a defect with no cost set carries $0 and drops out.
+                      Metric > 0),
+                  "Metric", SortOrder.Descending));
+          Set(varParetoTotal, Sum(col_pareto_sorted, Metric));
+
+          BuildParetoDerived();
+
+          // Axis scale for the custom bar-gallery Pareto (cnt_pareto, scr_Dashboard) - the
+          // largest displayed bar + 10% headroom, never a fixed range. Count view plots each
+          // item's percentage share; cost view plots actual dollars (Metric = Cost_Sum).
+          Set(varParetoAxisMax,
+              If(varShowCost,
+                  Max(Max(col_pareto, Metric) * 1.1, 1),
+                  Max(Max(col_pareto, Share_pct) * 1.1, 1)));
+
+          // Axis scale for the Defects/Cost-by-Test chart (cnt_catchart) - same +10% headroom.
+          Set(varByTestAxisMax,
+              Max(Max(col_by_test, If(varShowCost, Weighted, Qty)) * 1.1, 1))
+      };
+
+      // Compact dollar label for narrow chart axes: $950, $1.2k, $15k.
+      CompactMoney(v: Number): Text =
+          If(v >= 1000,
+              Text(v / 1000, "[$-en-US]$#,##0.#") & "k",
+              Text(v, "[$-en-US]$#,##0"));
 
       // ===== Per-test trend series (img_trend_db, scr_Dashboard) - one week's Test_FPY for
       // one test, read from col_test_sum (qk_test_summary), which RunFullPlantLoad already
@@ -242,14 +304,18 @@ App:
                       // Coalesce(Qty, 1): Sum() skips blank cells, so a row saved with an
                       // empty Qty would contribute 0 and the defect would vanish from the
                       // trend entirely. A recorded defect is at minimum one occurrence.
+                      // In cost view (varShowCost) the plotted value is dollars instead:
+                      // Qty x the stamped unit cost (plant effective cost for unstamped rows).
                       qty:
                           If(varDrillLevel = "type",
                               Coalesce(Sum(Filter(col_defect_window,
                                   Week_key = Index(col_drill_week_keys, S.Value).Value &&
-                                  Type_ID = varDrillTypeID), Coalesce(Qty, 1)), 0),
+                                  Type_ID = varDrillTypeID),
+                                  If(varShowCost, Coalesce(Qty, 1) * Coalesce(Defect_cost, EffectiveDefectCost(Defect_ID), 0), Coalesce(Qty, 1))), 0),
                               Coalesce(Sum(Filter(col_defect_window,
                                   Week_key = Index(col_drill_week_keys, S.Value).Value &&
-                                  Defect_ID = varDrillDefectID), Coalesce(Qty, 1)), 0)),
+                                  Defect_ID = varDrillDefectID),
+                                  If(varShowCost, Coalesce(Qty, 1) * Coalesce(Defect_cost, EffectiveDefectCost(Defect_ID), 0), Coalesce(Qty, 1))), 0)),
                       lbl:
                           Text(
                               LookUp(col_week,
@@ -376,6 +442,35 @@ App:
                       Round(Sum(rows, Floors_clean) / Sum(rows, Floors_tested) * 100, 1),
                       Blank())));
 
+          // Defects per floor / cost per floor tiles (tile_dph, tile_cost) - the last
+          // COMPLETED week and the one before, like tile_ftt. Weighted across the rows in
+          // view: Sum(total) / Sum(Homes_tested) - each qk_home row is one floor.
+          Set(varPastWeekDPF,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PastWeekKey)},
+                  If(Sum(rows, Homes_tested) > 0,
+                      Round(Sum(rows, Total_defects) / Sum(rows, Homes_tested), 1), Blank())));
+          Set(varPriorWeekDPF,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PriorWeekKey)},
+                  If(Sum(rows, Homes_tested) > 0,
+                      Round(Sum(rows, Total_defects) / Sum(rows, Homes_tested), 1), Blank())));
+          Set(varPastWeekCPF,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PastWeekKey)},
+                  If(Sum(rows, Homes_tested) > 0,
+                      Round(Sum(rows, Total_cost) / Sum(rows, Homes_tested), 2), Blank())));
+          Set(varPriorWeekCPF,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PriorWeekKey)},
+                  If(Sum(rows, Homes_tested) > 0,
+                      Round(Sum(rows, Total_cost) / Sum(rows, Homes_tested), 2), Blank())));
+
+          // Floors tested tile (tile_homes) - same last completed week, summed across the
+          // facilities in view. Blank (not 0) when nothing was reported that week.
+          Set(varPastWeekFloors,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PastWeekKey)},
+                  If(IsEmpty(rows), Blank(), Sum(rows, Floors_tested))));
+          Set(varPriorWeekFloors,
+              With({rows: Filter(varWeekViewWindowed, Week_key = PriorWeekKey)},
+                  If(IsEmpty(rows), Blank(), Sum(rows, Floors_tested))));
+
           // Weeks below the First Time Pass Rate green band, of the latest three.
           Set(varConsecBelowFTT,
               CountRows(Filter(
@@ -389,6 +484,11 @@ App:
                   Filter(qk_home_defect, Plant_ID = varPID && Week_key >= varCutoffKey &&
                       Facility_ID = varFacility))
           );
+
+          // The Pareto covers the LAST 12 WEEKS INCLUDING THIS ONE (ParetoStartKey..CurrentWeekKey),
+          // not the whole Window_months load - a local filter over col_defect_window.
+          ClearCollect(col_defect_pareto,
+              Filter(col_defect_window, Week_key >= ParetoStartKey && Week_key <= CurrentWeekKey));
 
           // GroupBy's nested-table column (Rows) does not resolve reliably in this
           // validator - use the same Sum(Filter(...), ...) pattern already proven below
@@ -404,7 +504,9 @@ App:
                               Pareto_name: Tx.Type_name,
                               // Total defect occurrences (Sum of Qty), never a count of the
                               // rows/homes carrying the defect - see the note on col_drill_trend.
-                              Qty_Sum: Sum(Filter(col_defect_window, Type_ID = Value(Tx.Title)), Coalesce(Qty, 1))
+                              Qty_Sum: Sum(Filter(col_defect_pareto, Type_ID = Value(Tx.Title)), Coalesce(Qty, 1)),
+                              // Cost of poor quality for the same rows - used when varShowCost is on.
+                              Cost_Sum: Sum(Filter(col_defect_pareto, Type_ID = Value(Tx.Title)), Coalesce(Qty, 1) * Coalesce(Defect_cost, EffectiveDefectCost(Defect_ID), 0))
                           }
                       ),
                       Qty_Sum > 0
@@ -417,23 +519,14 @@ App:
                               Type_ID: Blank(),
                               Defect_ID: Value(Dx.Title),
                               Pareto_name: Dx.Defect_name,
-                              Qty_Sum: Sum(Filter(col_defect_window, Defect_ID = Value(Dx.Title)), Coalesce(Qty, 1))
+                              Qty_Sum: Sum(Filter(col_defect_pareto, Defect_ID = Value(Dx.Title)), Coalesce(Qty, 1)),
+                              Cost_Sum: Sum(Filter(col_defect_pareto, Defect_ID = Value(Dx.Title)), Coalesce(Qty, 1) * Coalesce(Defect_cost, EffectiveDefectCost(Defect_ID), 0))
                           }
                       ),
                       Qty_Sum > 0
                   )
               )
           );
-
-          Set(varParetoTotal, Sum(col_pareto_raw, Qty_Sum));
-
-          ClearCollect(col_pareto_sorted, SortByColumns(col_pareto_raw, "Qty_Sum", SortOrder.Descending));
-
-          BuildParetoDerived();
-
-          // Axis scale for the custom bar-gallery Pareto (cnt_pareto, scr_Dashboard) -
-          // max of the displayed Share_pct values + 10% headroom, never a fixed 0-100 range.
-          Set(varParetoAxisMax, Max(Max(col_pareto, Share_pct) * 1.1, 1));
 
           ClearCollect(col_by_test,
               ForAll(col_test As T,
@@ -450,18 +543,22 @@ App:
                       // prices them at this plant's cost (or the corporate default), reading
                       // col_defect_all, not col_defect, so a deactivated defect still prices.
                       // Once history is re-saved the stamp wins and the fallback stops firing.
-                      Weighted: Sum(Filter(col_defect_window, Test_ID = Value(T.Title)),
+                      // LAST COMPLETED WEEK only (PastWeekKey) - the same week as the First
+                      // Time Pass Rate tile - not the whole load window.
+                      Weighted: Sum(Filter(col_defect_window, Test_ID = Value(T.Title) && Week_key = PastWeekKey),
                           Coalesce(Qty, 1) *
                               Coalesce(Defect_cost,
                                   EffectiveDefectCost(Defect_ID),
-                                  0))
+                                  0)),
+                      // Defect quantity for the same week - shown when varShowCost is off.
+                      Qty: Sum(Filter(col_defect_window, Test_ID = Value(T.Title) && Week_key = PastWeekKey),
+                          Coalesce(Qty, 1))
                   }
               )
           );
 
-          // Axis scale for the custom bar-gallery Defects-by-Test chart (cnt_catchart) -
-          // same +10%-headroom convention as varParetoAxisMax above.
-          Set(varByTestAxisMax, Max(Max(col_by_test, Weighted) * 1.1, 1))
+          // Rank / scale the Pareto and by-test chart for the current count/cost mode.
+          ApplyCostMode()
       };
 
       // ===== scr_CorporateHome load routine - Corporate users (varPID = 0) land on a
@@ -631,7 +728,10 @@ App:
       ClearCollect(col_access, Filter(sys_test_access, Active = true));
       Set(varAccessRow, LookUp(col_access, Lower(Trim(Inspector_email)) = varUserEmail));
 
-      Set(varRole, Coalesce(varAccessRow.Role, "Inspector"));
+      // Deny by default (CLAUDE.md §5): anyone without an active sys_test_access row is a
+      // Reader of their office-location plant - view only. Inspectors are added explicitly,
+      // by their plant's Quality Manager or an Administrator (scr_AccessAdmin).
+      Set(varRole, Coalesce(varAccessRow.Role, "Reader"));
       Set(varIsAdmin, varRole = "Administrator");
       Set(varIsQM, varRole = "Quality Manager");
       Set(varCanEdit, varRole <> "Reader");
@@ -686,6 +786,10 @@ App:
       // Facility 1 is the default for every plant (most plants have exactly one) - reset
       // whenever the plant is (re)selected, here and in drp_plant.OnChange (scr_Dashboard).
       Set(varFacility, 1);
+
+      // Dashboard count/cost switch (tgl_show_cost) - counts by default, remembered for the
+      // rest of the session.
+      Set(varShowCost, true);
 
 
       // The user's own plant - IsForeignPlant compares the plant being viewed against it,

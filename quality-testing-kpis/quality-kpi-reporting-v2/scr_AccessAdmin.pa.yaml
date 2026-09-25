@@ -3,19 +3,29 @@ Screens:
     Properties:
       Fill: =PageBg
       OnVisible: |-
-        =// Admin-only screen - Navigate() is not permitted inside OnVisible, so access is
-        // enforced by the nav controls (Visible: =varIsAdmin) rather than a redirect here.
+        =// Administrators get the full access list. A plant's Quality Manager gets a scoped
+        // view (IsQMAccessMode): only their own plant's Inspectors and Readers, adding people
+        // as Inspectors only. Navigate() is not permitted inside OnVisible, so access is
+        // enforced by the nav tabs (Access tab: admins, and QMs on their own plant).
         // Reflect any changes made elsewhere (this session or another) every time we land here.
         Reset(tabs_main_aa);
         ClearCollect(col_access, Filter(sys_test_access, Active = true));
 
         // col_plant_picker (App.OnStart) only carries Plant_ID_Value - join in the display
         // name locally (over the collection, never the list) and prepend an "All plants" row.
+        // "Corporate" (Plant_ID 0) follows it so the list can be filtered to corporate users;
+        // it is flagged Is_Corporate so drp_row_plant leaves it out. drp_new_plant DOES offer
+        // it: a Corporate user can view every plant's dashboard but change nothing
+        // (IsForeignPlant). Skipped if Plant_List already carries a plant 0.
         ClearCollect(col_plant_filter_options,
-            {Plant_ID_Value: Blank(), Plant_Name_Display: "All plants"});
+            {Plant_ID_Value: Blank(), Plant_Name_Display: "All plants", Is_Corporate: false});
+        If(IsBlank(LookUp(col_plant_picker, Plant_ID_Value = 0)),
+            Collect(col_plant_filter_options,
+                {Plant_ID_Value: 0, Plant_Name_Display: "Corporate", Is_Corporate: true}));
         Collect(col_plant_filter_options,
-            AddColumns(col_plant_picker As PP, Plant_Name_Display,
-                LookUp(col_plants, Plant_ID = PP.Plant_ID_Value, Plant_Names)));
+            AddColumns(col_plant_picker As PP,
+                Plant_Name_Display, LookUp(col_plants, Plant_ID = PP.Plant_ID_Value, Plant_Names),
+                Is_Corporate, false));
 
         // Plants with no active Quality Manager - computed once over collections, reused by
         // the warning banner below.
@@ -28,7 +38,8 @@ Screens:
             )
         );
 
-        Clear(col_search_results)
+        Clear(col_search_results);
+        Set(varShowAddPerson, false)
     Children:
       - cnt_root:
           Control: GroupContainer
@@ -109,6 +120,7 @@ Screens:
                         LayoutAlignItems: =VerticalAlign.Middle
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =12
+                        LayoutJustifyContent: =LayoutJustifyContent.End
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
                       Children:
@@ -126,23 +138,6 @@ Screens:
                                 =If(IsBlank(varPID), "Select a plant",
                                     Text(varPID) & " - " & LookUp(col_plants, Plant_ID = varPID, Plant_Names))
                               Wrap: =false
-                        - ico_theme_aa:
-                            Control: ModernIcon
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              Icon: ="WeatherSunny"
-                              IconColor: =RGBA(255, 255, 255, 1)
-                              OnSelect: =Set(varDarkMode, !Coalesce(varDarkMode, false))
-                              Tooltip: ="Toggle theme"
-                        - ico_admin_aa:
-                            Control: ModernIcon
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Center
-                              Icon: ="Settings"
-                              IconColor: =RGBA(255, 255, 255, 1)
-                              OnSelect: =Navigate(scr_TaxonomyAdmin, ScreenTransition.None)
-                              Tooltip: ="Admin"
-                              Visible: =varIsAdmin
             - cnt_nav_aa:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -175,7 +170,7 @@ Screens:
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
                               // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
                               varIsQM && HasPlantCostScope(),
-                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}, {Value: "Access"}),
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38
@@ -213,6 +208,7 @@ Screens:
                         Default: =First(col_plant_filter_options)
                         ItemDisplayText: =ThisItem.Plant_Name_Display
                         Items: =col_plant_filter_options
+                        Visible: =!IsQMAccessMode()
                         Width: =180
                   - drp_role_filter:
                       Control: ModernDropdown
@@ -227,27 +223,21 @@ Screens:
                               {Value: "Quality Manager", Label: "Quality Manager"},
                               {Value: "Inspector", Label: "Inspector"},
                               {Value: "Reader", Label: "Reader"})
+                        Visible: =!IsQMAccessMode()
                         Width: =180
-                  - txt_search:
-                      Control: ModernTextInput
-                      Properties:
-                        AlignInContainer: =AlignInContainer.Center
-                        Placeholder: ="Search directory by name or email"
-                        Type: =TextInputType.Search
-                        Width: =260
-                  - btn_search:
+                  - btn_open_add_person:
                       Control: ModernButton
                       Properties:
+                        AccessibleLabel: ="Add a person to the access list"
                         AlignInContainer: =AlignInContainer.Center
-                        Appearance: =ButtonAppearance.Secondary
                         OnSelect: |-
-                          =IfError(
-                              ClearCollect(col_search_results,
-                                  Office365Users.SearchUserV2({searchTerm: txt_search.Text}).value),
-                              Notify("Could not search the directory. " & FirstError.Message,
-                                     NotificationType.Error)
-                          )
-                        Text: ="Search"
+                          =Reset(txt_search);
+                          Clear(col_search_results);
+                          Reset(drp_new_plant);
+                          Reset(drp_new_role);
+                          Set(varShowAddPerson, true)
+                        Text: ="+ Add person"
+                        Width: =140
             - cnt_main:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -280,7 +270,7 @@ Screens:
                         PaddingLeft: =12
                         PaddingRight: =12
                         PaddingTop: =10
-                        Visible: =CountRows(Filter(col_no_qm_plants, !HasQM)) > 0
+                        Visible: =!IsQMAccessMode() && CountRows(Filter(col_no_qm_plants, !HasQM)) > 0
                       Children:
                         - lbl_noqm_banner:
                             Control: ModernText
@@ -298,7 +288,8 @@ Screens:
                               Text: |-
                                 ="No active Quality Manager assigned for: " &
                                     Concat(Filter(col_no_qm_plants, !HasQM),
-                                        "Plant " & Text(Plant_ID_Value), ", ")
+                                        Coalesce(LookUp(col_plants, Plant_ID = Plant_ID_Value, Plant_Names),
+                                            "Plant " & Text(Plant_ID_Value)), ", ")
                   - lbl_access_header:
                       Control: ModernText
                       Properties:
@@ -310,15 +301,20 @@ Screens:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =18
-                        Text: ="Access List"
+                        Text: |-
+                          =If(IsQMAccessMode(),
+                              "Inspectors - " & LookUp(col_plants, Plant_ID = varOwnPID, Plant_Names),
+                              "Access List")
                         Wrap: =false
                   - gal_access:
                       Control: Gallery
                       Variant: Vertical
                       Properties:
-                        Height: =Self.TemplateHeight
                         Items: |-
-                          =If(IsBlank(drp_plant_filter.Selected.Plant_ID_Value) &&
+                          =If(IsQMAccessMode(),
+                              Filter(col_access, Plant_ID = varOwnPID &&
+                                  (Role = "Inspector" || Role = "Reader")),
+                              IsBlank(drp_plant_filter.Selected.Plant_ID_Value) &&
                                   IsBlank(drp_role_filter.Selected.Value),
                               col_access,
                               IsBlank(drp_role_filter.Selected.Value),
@@ -330,7 +326,7 @@ Screens:
                                   Plant_ID = drp_plant_filter.Selected.Plant_ID_Value &&
                                   Role = drp_role_filter.Selected.Value)
                           )
-                        LayoutMinHeight: =0
+                        LayoutMinHeight: =200
                         LayoutMinWidth: =0
                         Selectable: =false
                         TemplateSize: =72
@@ -346,16 +342,16 @@ Screens:
                               LayoutAlignItems: =LayoutAlignItems.Center
                               LayoutDirection: =LayoutDirection.Horizontal
                               LayoutGap: =12
+                              LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
                               PaddingBottom: =8
                               PaddingLeft: =12
                               PaddingRight: =12
                               PaddingTop: =8
-                              Width: =Parent.Width
+                              Width: '=Parent.Width-20 '
                             Children:
                               - av_person:
                                   Control: Avatar
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
                                     Appearance: ='Avatar.Appearance'.Colorful
                                     Height: =60
                                     Image: =ThisItem.Inspector.Picture
@@ -366,7 +362,8 @@ Screens:
                                   Control: GroupContainer
                                   Variant: AutoLayout
                                   Properties:
-                                    FillPortions: =2
+                                    AlignInContainer: =AlignInContainer.SetByContainer
+                                    FillPortions: =3
                                     LayoutAlignItems: =LayoutAlignItems.Stretch
                                     LayoutDirection: =LayoutDirection.Vertical
                                     LayoutGap: =2
@@ -406,9 +403,8 @@ Screens:
                               - lbl_row_plant_name:
                                   Control: ModernText
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Stretch
                                     Color: =TextSecondary
-                                    FillPortions: =1
+                                    LayoutMinWidth: =100
                                     PaddingBottom: =0
                                     PaddingLeft: =0
                                     PaddingRight: =0
@@ -419,10 +415,9 @@ Screens:
                               - badge_row_role:
                                   Control: Badge
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
                                     Appearance: ='BadgeCanvas.Appearance'.Tint
                                     Content: =ThisItem.Role
-                                    Height: =20
+                                    Height: =35
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
                                       =If(ThisItem.Role = "Administrator",
@@ -436,12 +431,13 @@ Screens:
                               - drp_row_plant:
                                   Control: ModernDropdown
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
                                     Default: |-
                                       =LookUp(col_plant_filter_options,
                                           Plant_ID_Value = ThisItem.Plant_ID)
+                                    DisplayMode: =If(IsQMAccessMode(), DisplayMode.View, DisplayMode.Edit)
+                                    Height: =35
                                     ItemDisplayText: =ThisItem.Plant_Name_Display
-                                    Items: =Filter(col_plant_filter_options, !IsBlank(Plant_ID_Value))
+                                    Items: =Filter(col_plant_filter_options, !IsBlank(Plant_ID_Value) && !Is_Corporate)
                                     OnChange: |-
                                       =IfError(
                                           Patch(sys_test_access, ThisItem, {
@@ -456,30 +452,34 @@ Screens:
                               - drp_row_role:
                                   Control: ModernDropdown
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
                                     Default: |-
                                       =LookUp(
                                           Table({Value: "Administrator"}, {Value: "Quality Manager"},
                                               {Value: "Inspector"}, {Value: "Reader"}),
                                           Value = ThisItem.Role)
+                                    Height: =35
                                     ItemDisplayText: =ThisItem.Value
                                     Items: |-
-                                      =Table({Value: "Administrator"}, {Value: "Quality Manager"},
-                                          {Value: "Inspector"}, {Value: "Reader"})
+                                      =If(IsQMAccessMode(),
+                                          Table({Value: "Inspector"}, {Value: "Reader"}),
+                                          Table({Value: "Administrator"}, {Value: "Quality Manager"},
+                                              {Value: "Inspector"}, {Value: "Reader"}))
                                     OnChange: |-
-                                      =IfError(
+                                      =If(IsQMAccessMode() && !(drp_row_role.Selected.Value in ["Inspector", "Reader"]),
+                                          Notify("Quality Managers can set Inspector or Reader only.", NotificationType.Error),
+                                      IfError(
                                           Patch(sys_test_access, ThisItem,
                                               { Role: drp_row_role.Selected.Value }),
                                           Notify("Could not update role. " & FirstError.Message,
                                               NotificationType.Error)
                                       );
-                                      ClearCollect(col_access, Filter(sys_test_access, Active = true))
+                                      ClearCollect(col_access, Filter(sys_test_access, Active = true)))
                                     Width: =150
                               - tgl_row_active:
                                   Control: ModernToggle
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
                                     Default: =ThisItem.Active
+                                    FillPortions: =1
                                     Label: ="Active"
                                     OnCheck: |-
                                       =IfError(
@@ -496,189 +496,336 @@ Screens:
                                       );
                                       ClearCollect(col_access, Filter(sys_test_access, Active = true))
                                     Width: =90
-                  - lbl_add_header:
-                      Control: ModernText
-                      Properties:
-                        AlignInContainer: =AlignInContainer.Stretch
-                        Color: =TextPrimary
-                        FontWeight: =FontWeight.Bold
-                        PaddingBottom: =0
-                        PaddingLeft: =0
-                        PaddingRight: =0
-                        PaddingTop: =0
-                        Size: =18
-                        Text: ="Add Person"
-                        Wrap: =false
-                  - cnt_add_person:
+      - cnt_add_overlay:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Visible: =varShowAddPerson
+            Width: =Parent.Width
+          Children:
+            - rect_add_scrim:
+                Control: Rectangle
+                Properties:
+                  Fill: =RGBA(11, 11, 11, 0.55)
+                  Height: =Parent.Height
+                  Width: =Parent.Width
+            - btn_add_dismiss:
+                Control: Button
+                Properties:
+                  AccessibleLabel: ="Close add person"
+                  Appearance: ='ButtonCanvas.Appearance'.Transparent
+                  BorderThickness: =0
+                  Height: =Parent.Height
+                  OnSelect: =Set(varShowAddPerson, false)
+                  Text: =""
+                  Width: =Parent.Width
+            - cnt_add_person:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =CardBg
+                  Height: =Min(Parent.Height - 80, 600)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =12
+                  PaddingBottom: =20
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: =Min(Parent.Width - 64, 680)
+                  X: =(Parent.Width - Self.Width)/2
+                  Y: =(Parent.Height - Self.Height)/2
+                Children:
+                  - cnt_add_head:
                       Control: GroupContainer
                       Variant: AutoLayout
                       Properties:
-                        BorderColor: =CardBorder
-                        BorderThickness: =1
-                        Fill: =CardBg
                         FillPortions: =0
-                        Height: |-
-                          =28 + 8 + (gal_search.TemplateHeight * Max(CountRows(gal_search.AllItems), 1))
-                              + 8 + 48 + 24
-                        LayoutAlignItems: =LayoutAlignItems.Stretch
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =8
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
-                        PaddingBottom: =12
-                        PaddingLeft: =12
-                        PaddingRight: =12
-                        PaddingTop: =12
                       Children:
-                        - lbl_search_hint:
+                        - lbl_add_header:
                             Control: ModernText
                             Properties:
                               AlignInContainer: =AlignInContainer.Stretch
-                              Color: =TextMuted
+                              Color: =TextPrimary
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Bold
                               PaddingBottom: =0
                               PaddingLeft: =0
                               PaddingRight: =0
                               PaddingTop: =0
-                              Size: =12
-                              Text: |-
-                                =If(CountRows(col_search_results) = 0,
-                                    "Search the directory above to find someone to add.",
-                                    "Select a result, choose a plant and role, then Add.")
+                              Size: =18
+                              Text: ="Add person"
                               Wrap: =false
-                        - gal_search:
-                            Control: Gallery
-                            Variant: Vertical
+                        - ico_add_close:
+                            Control: Classic/Icon
                             Properties:
-                              FillPortions: =0
-                              Height: =Self.TemplateHeight * Max(CountRows(Self.AllItems), 1)
-                              Items: =col_search_results
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
-                              TemplateSize: =56
-                            Children:
-                              - cnt_search_row:
-                                  Control: GroupContainer
-                                  Variant: AutoLayout
-                                  Properties:
-                                    Fill: |-
-                                      =If(ThisItem.DisplayName = gal_search.Selected.DisplayName,
-                                          LightAqua, CardBg)
-                                    Height: =56
-                                    LayoutAlignItems: =LayoutAlignItems.Center
-                                    LayoutDirection: =LayoutDirection.Horizontal
-                                    LayoutGap: =12
-                                    PaddingLeft: =8
-                                    PaddingRight: =8
-                                  Children:
-                                    - av_search:
-                                        Control: Avatar
-                                        Properties:
-                                          AlignInContainer: =AlignInContainer.Center
-                                          Appearance: ='Avatar.Appearance'.Colorful
-                                          Height: =32
-                                          Name: =ThisItem.DisplayName
-                                          Shape: ='Avatar.Shape'.Circular
-                                          Width: =32
-                                    - cnt_search_info:
-                                        Control: GroupContainer
-                                        Variant: AutoLayout
-                                        Properties:
-                                          LayoutDirection: =LayoutDirection.Vertical
-                                          LayoutGap: =2
-                                          LayoutMinHeight: =0
-                                          LayoutMinWidth: =0
-                                        Children:
-                                          - lbl_search_name:
-                                              Control: ModernText
-                                              Properties:
-                                                AlignInContainer: =AlignInContainer.Stretch
-                                                Color: =TextPrimary
-                                                FontWeight: =FontWeight.Semibold
-                                                PaddingBottom: =0
-                                                PaddingLeft: =0
-                                                PaddingRight: =0
-                                                PaddingTop: =0
-                                                Size: =13
-                                                Text: =ThisItem.DisplayName
-                                                Wrap: =false
-                                          - lbl_search_email:
-                                              Control: ModernText
-                                              Properties:
-                                                AlignInContainer: =AlignInContainer.Stretch
-                                                Color: =TextMuted
-                                                PaddingBottom: =0
-                                                PaddingLeft: =0
-                                                PaddingRight: =0
-                                                PaddingTop: =0
-                                                Size: =11
-                                                Text: =ThisItem.Mail
-                                                Wrap: =false
-                        - cnt_add_controls:
+                              AccessibleLabel: ="Close"
+                              Color: =TextSecondary
+                              Height: =44
+                              HoverColor: =ChampionBlue
+                              Icon: =Icon.Cancel
+                              OnSelect: =Set(varShowAddPerson, false)
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              Tooltip: ="Close"
+                              Width: =44
+                  - cnt_add_search:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - txt_search:
+                            Control: ModernTextInput
+                            Properties:
+                              AccessibleLabel: ="Search the directory by name or email"
+                              AlignInContainer: =AlignInContainer.Center
+                              FillPortions: =1
+                              Placeholder: ="Search directory by name or email"
+                              Type: =TextInputType.Search
+                        - btn_search:
+                            Control: ModernButton
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              OnSelect: |-
+                                =IfError(
+                                    ClearCollect(col_search_results,
+                                        Office365Users.SearchUserV2({searchTerm: txt_search.Text}).value),
+                                    Notify("Could not search the directory. " & FirstError.Message,
+                                           NotificationType.Error)
+                                )
+                              Text: ="Search"
+                  - lbl_search_hint:
+                      Control: ModernText
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =TextMuted
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =If(CountRows(col_search_results) = 0,
+                              "Search the directory to find someone to add.",
+                              "Select a result, choose a plant and role, then Add.")
+                        Wrap: =false
+                  - gal_search:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        Items: =col_search_results
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        TemplateSize: =56
+                      Children:
+                        - cnt_search_row:
                             Control: GroupContainer
                             Variant: AutoLayout
                             Properties:
-                              FillPortions: =0
-                              Height: =48
+                              Fill: |-
+                                =If(ThisItem.DisplayName = gal_search.Selected.DisplayName,
+                                    LightAqua, CardBg)
+                              Height: =56
                               LayoutAlignItems: =LayoutAlignItems.Center
                               LayoutDirection: =LayoutDirection.Horizontal
                               LayoutGap: =12
-                              LayoutMinHeight: =0
-                              LayoutMinWidth: =0
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              Width: =Parent.Width-10
                             Children:
-                              - drp_new_plant:
-                                  Control: ModernDropdown
+                              - av_search:
+                                  Control: Avatar
                                   Properties:
                                     AlignInContainer: =AlignInContainer.Center
-                                    ItemDisplayText: =ThisItem.Plant_Name_Display
-                                    Items: =Filter(col_plant_filter_options, !IsBlank(Plant_ID_Value))
-                                    Width: =180
-                              - drp_new_role:
-                                  Control: ModernDropdown
+                                    Appearance: ='Avatar.Appearance'.Colorful
+                                    Height: =45
+                                    Image: |-
+                                      =// Directory photo for this search result. UserPhotoV2 errors for anyone
+                                      // without a photo - IfError falls back to Blank so the avatar shows
+                                      // initials from Name instead of a broken image.
+                                      IfError(Office365Users.UserPhotoV2(ThisItem.Id), Blank())
+                                    Name: =ThisItem.DisplayName
+                                    Shape: ='Avatar.Shape'.Circular
+                                    Width: =45
+                              - cnt_search_info:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
-                                    ItemDisplayText: =ThisItem.Value
-                                    Items: |-
-                                      =Table({Value: "Administrator"}, {Value: "Quality Manager"},
-                                          {Value: "Inspector"}, {Value: "Reader"})
-                                    Width: =180
-                              - btn_add_access:
-                                  Control: ModernButton
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =2
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =300
+                                  Children:
+                                    - lbl_search_name:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =TextPrimary
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =25
+                                          LayoutMinHeight: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: =ThisItem.DisplayName
+                                          Wrap: =false
+                                    - lbl_search_email:
+                                        Control: ModernText
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =TextMuted
+                                          Height: =20
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: =ThisItem.Mail
+                                          Wrap: =false
+                              - Label2:
+                                  Control: Label
                                   Properties:
-                                    AlignInContainer: =AlignInContainer.Center
-                                    OnSelect: |-
-                                      =If(
-                                          IsBlank(gal_search.Selected),
-                                          Notify("Select a person from the search results first.",
-                                              NotificationType.Error),
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =2
+                                    Color: =RGBA(50, 49, 48, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(161, 159, 157, 1)
+                                    FillPortions: =1
+                                    FocusedBorderThickness: =4
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    Size: =12
+                                    Text: =LookUp(col_plants, Plant_ID = Value(ThisItem.OfficeLocation), Plant_Names)
+                  - cnt_add_controls:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        FillPortions: =0
+                        Height: =48
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - drp_new_plant:
+                            Control: ModernDropdown
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Default: =If(IsQMAccessMode(), LookUp(col_plant_filter_options, Plant_ID_Value = varOwnPID))
+                              DisplayMode: =If(IsQMAccessMode(), DisplayMode.View, DisplayMode.Edit)
+                              ItemDisplayText: =ThisItem.Plant_Name_Display
+                              Items: |-
+                                =If(IsQMAccessMode(),
+                                    Filter(col_plant_filter_options, Plant_ID_Value = varOwnPID),
+                                    Filter(col_plant_filter_options, !IsBlank(Plant_ID_Value)))
+                              Width: =180
+                        - drp_new_role:
+                            Control: ModernDropdown
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Default: |-
+                                =If(IsQMAccessMode(), {Value: "Inspector"})
+                              DisplayMode: =If(IsQMAccessMode(), DisplayMode.View, DisplayMode.Edit)
+                              ItemDisplayText: =ThisItem.Value
+                              Items: |-
+                                =If(IsQMAccessMode(),
+                                    Table({Value: "Inspector"}),
+                                    Table({Value: "Administrator"}, {Value: "Quality Manager"},
+                                        {Value: "Inspector"}, {Value: "Reader"}))
+                              Width: =180
+                        - btn_add_cancel:
+                            Control: ModernButton
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              OnSelect: =Set(varShowAddPerson, false)
+                              Text: ="Cancel"
+                        - btn_add_access:
+                            Control: ModernButton
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              OnSelect: |-
+                                =If(
+                                    IsBlank(gal_search.Selected),
+                                    Notify("Select a person from the search results first.",
+                                        NotificationType.Error),
 
-                                          IsBlank(drp_new_plant.Selected),
-                                          Notify("Choose a plant for this person.",
-                                              NotificationType.Error),
+                                    IsBlank(drp_new_plant.Selected),
+                                    Notify("Choose a plant for this person.",
+                                        NotificationType.Error),
 
-                                          IsBlank(drp_new_role.Selected),
-                                          Notify("Choose a role for this person.",
-                                              NotificationType.Error),
+                                    IsBlank(drp_new_role.Selected),
+                                    Notify("Choose a role for this person.",
+                                        NotificationType.Error),
 
-                                          IfError(
-                                              Patch(sys_test_access, Defaults(sys_test_access), {
-                                                  Title: gal_search.Selected.DisplayName,
-                                                  Inspector_name: gal_search.Selected.DisplayName,
-                                                  Inspector_email:
-                                                      Lower(Trim(gal_search.Selected.Mail)),
-                                                  Plant_ID: drp_new_plant.Selected.Plant_ID_Value,
-                                                  Plant_name: drp_new_plant.Selected.Plant_Name_Display,
-                                                  Role: drp_new_role.Selected.Value,
-                                                  Active: true
-                                              }),
-                                              Notify("Could not add access. " & FirstError.Message,
-                                                  NotificationType.Error)
-                                          );
-                                          ClearCollect(col_access,
-                                              Filter(sys_test_access, Active = true));
-                                          Notify("Access added for " &
-                                              gal_search.Selected.DisplayName & ".",
-                                              NotificationType.Success);
-                                          Reset(txt_search);
-                                          Clear(col_search_results)
-                                      )
-                                    Text: ="+ Add"
+                                    // One active row per person - a second row would make App.OnStart's
+                                    // LookUp pick either one, e.g. silently demoting an admin.
+                                    !IsBlank(LookUp(col_access,
+                                        Lower(Trim(Inspector_email)) = Lower(Trim(gal_search.Selected.Mail)))),
+                                    Notify(gal_search.Selected.DisplayName & " already has access (" &
+                                        LookUp(col_access, Lower(Trim(Inspector_email)) = Lower(Trim(gal_search.Selected.Mail)), Role) &
+                                        ", " &
+                                        LookUp(col_access, Lower(Trim(Inspector_email)) = Lower(Trim(gal_search.Selected.Mail)), Plant_name) &
+                                        "). Change their existing row instead.", NotificationType.Warning),
+
+                                    IsQMAccessMode() &&
+                                        (drp_new_plant.Selected.Plant_ID_Value <> varOwnPID ||
+                                         drp_new_role.Selected.Value <> "Inspector"),
+                                    Notify("Quality Managers can add Inspectors to their own plant only.",
+                                        NotificationType.Error),
+
+                                    // Success message and closing the pop-up happen only when the save
+                                    // worked - a failed Patch keeps the pop-up open to retry.
+                                    IfError(
+                                        Patch(sys_test_access, Defaults(sys_test_access), {
+                                            Title: gal_search.Selected.DisplayName,
+                                            Inspector_name: gal_search.Selected.DisplayName,
+                                            Inspector_email:
+                                                Lower(Trim(gal_search.Selected.Mail)),
+                                            Plant_ID: drp_new_plant.Selected.Plant_ID_Value,
+                                            Plant_name: drp_new_plant.Selected.Plant_Name_Display,
+                                            Role: drp_new_role.Selected.Value,
+                                            Active: true
+                                        });
+                                        Notify("Access added for " &
+                                            gal_search.Selected.DisplayName & ".",
+                                            NotificationType.Success);
+                                        ClearCollect(col_access,
+                                            Filter(sys_test_access, Active = true));
+                                        Reset(txt_search);
+                                        Clear(col_search_results);
+                                        Set(varShowAddPerson, false); true,
+                                        Notify("Could not add access. " & FirstError.Message,
+                                            NotificationType.Error); false
+                                    )
+                                )
+                              Text: ="+ Add"

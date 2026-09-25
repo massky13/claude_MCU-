@@ -121,6 +121,7 @@ Screens:
                         - lbl_plant_db:
                             Control: ModernText
                             Properties:
+                              Align: =Align.Right
                               AlignInContainer: =AlignInContainer.Stretch
                               Color: =RGBA(255, 255, 255, 1)
                               FontWeight: =FontWeight.Bold
@@ -167,7 +168,7 @@ Screens:
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
                               // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
                               varIsQM && HasPlantCostScope(),
-                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}, {Value: "Access"}),
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38
@@ -186,34 +187,22 @@ Screens:
                       Properties:
                         AlignInContainer: =AlignInContainer.SetByContainer
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
                         Height: =Parent.Height
                         LayoutAlignItems: =VerticalAlign.Middle
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =12
                         LayoutJustifyContent: =LayoutJustifyContent.End
                         LayoutMinHeight: =0
-                        LayoutMinWidth: =0
+                        LayoutMinWidth: =300
                         PaddingBottom: =8
                         PaddingLeft: =16
                         PaddingRight: =16
                         PaddingTop: =8
+                        Width: =600
                         X: =40
                         Y: =40
                       Children:
-                        - drp_plant:
-                            Control: ModernDropdown
-                            Properties:
-                              AlignInContainer: =AlignInContainer.Stretch
-                              ItemDisplayText: =ThisItem.Plant_Label
-                              Items: |-
-                                =AddColumns(col_plant_picker As PP, Plant_Label,
-                                    LookUp(col_plants, Plant_ID = PP.Plant_ID_Value, Plant_Names))
-                              OnChange: |-
-                                =Set(varPID, drp_plant.Selected.Plant_ID_Value);
-                                Set(varFacility, 1);
-                                Select(btn_load_plant)
-                              Visible: =varIsAdmin
-                              Width: =200
                         - lbl_loaded_1:
                             Control: ModernText
                             Properties:
@@ -226,7 +215,7 @@ Screens:
                               PaddingTop: =0
                               Size: =11
                               Text: ="Facility:"
-                              Width: =130
+                              Width: =50
                               Wrap: =false
                         - drp_facility:
                             Control: ModernDropdown
@@ -239,9 +228,24 @@ Screens:
                                 =Set(varFacility, Value(drp_facility.Selected.Facility));
                                 Select(btn_load_plant)
                               Width: =60
+                        - tgl_show_cost:
+                            Control: ModernToggle
+                            Properties:
+                              AccessibleLabel: ="Show defect cost instead of defect counts"
+                              Default: =varShowCost
+                              Label: ="Cost"
+                              LabelPosition: =ToggleLabelPosition.Before
+                              OnCheck: |-
+                                =Set(varShowCost, true);
+                                ApplyCostMode()
+                              OnUncheck: |-
+                                =Set(varShowCost, false);
+                                ApplyCostMode()
+                              Width: =100
                         - lbl_loaded:
                             Control: ModernText
                             Properties:
+                              Align: =Align.Right
                               AlignInContainer: =AlignInContainer.Stretch
                               Color: =TextMuted
                               PaddingBottom: =0
@@ -250,7 +254,7 @@ Screens:
                               PaddingTop: =0
                               Size: =11
                               Text: =If(IsBlank(varLoadedAt), "Not loaded", "Loaded " & Text(varLoadedAt, "h:mm AM/PM"))
-                              Width: =130
+                              Width: =100
                               Wrap: =false
                         - ico_refresh:
                             Control: ModernIcon
@@ -358,7 +362,7 @@ Screens:
                                           BandStatusFTPR(varPastWeekFTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
-                                    X: =Parent.Width*1.2/2
+                                    X: =Parent.Width*1.4/2
                                     Y: =(Parent.Height-Self.Height)/2
                               - lbl_ftt_value:
                                   Control: ModernText
@@ -437,7 +441,7 @@ Screens:
                                           BandStatusFTPR(varPlantSummary.FTT_pct) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
-                                    X: =Parent.Width*1.2/2
+                                    X: =Parent.Width*1.4/2
                                     Y: =(Parent.Height-Self.Height)/2
                               - lbl_ttw_value:
                                   Control: ModernText
@@ -483,13 +487,15 @@ Screens:
                               RadiusBottomRight: =8
                               RadiusTopLeft: =8
                               RadiusTopRight: =8
+                              Visible: =!varShowCost
                               Width: =220
                             Children:
                               - rect_dph_accent:
                                   Control: Rectangle
                                   Properties:
                                     Fill: |-
-                                      =If((varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home) <= 0,
+                                      =If(IsBlank(varPastWeekDPF), StatusNoDataColor,
+                                          (varPastWeekDPF - varPriorWeekDPF) <= 0,
                                           StatusGoodColor, StatusSeriousColor)
                                     Height: =Parent.Height
                                     Width: =3
@@ -500,7 +506,7 @@ Screens:
                                     BorderThickness: =0
                                     Height: =71
                                     OnSelect: |-
-                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      =Set(varWeekKey, PastWeekKey);
                                       If(!IsForeignPlant(), Navigate(scr_WeekDetail, ScreenTransition.None))
                                     Text: =""
                                     Width: =220
@@ -508,17 +514,18 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =If((varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home) <= 0, "▼ ", "▲ ") &
-                                          Text(Abs(varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home), "0.0")
+                                      =If(IsBlank(varPastWeekDPF) || IsBlank(varPriorWeekDPF), "– ",
+                                          (varPastWeekDPF - varPriorWeekDPF) <= 0, "▼ ", "▲ ") &
+                                          Text(Abs(varPastWeekDPF - varPriorWeekDPF), "0.0")
                                     Height: =Parent.Height*0.6
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(IsBlank(varLatestWeek.Defects_per_home), 'BadgeCanvas.ThemeColor'.Subtle,
-                                          (varLatestWeek.Defects_per_home - varPriorWeek.Defects_per_home) <= 0,
+                                      =If(IsBlank(varPastWeekDPF) || IsBlank(varPriorWeekDPF), 'BadgeCanvas.ThemeColor'.Subtle,
+                                          (varPastWeekDPF - varPriorWeekDPF) <= 0,
                                               'BadgeCanvas.ThemeColor'.Success,
                                           'BadgeCanvas.ThemeColor'.Danger)
                                     Width: =80
-                                    X: =Parent.Width*1.2/2
+                                    X: =Parent.Width*1.4/2
                                     Y: =(Parent.Height-Self.Height)/2
                               - lbl_dph_value:
                                   Control: ModernText
@@ -531,7 +538,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =28
-                                    Text: =Text(varLatestWeek.Defects_per_home, "0.0")
+                                    Text: =If(IsBlank(varPastWeekDPF), "–", Text(varPastWeekDPF, "0.0"))
                                     Width: =107
                                     Wrap: =false
                                     X: =20
@@ -547,7 +554,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =11
-                                    Text: ="DEFECTS PER FLOOR"
+                                    Text: ="DEFECTS PER FLOOR (LAST WK)"
                                     Wrap: =false
                                     X: =20
                                     Y: =50
@@ -564,14 +571,15 @@ Screens:
                               RadiusBottomRight: =8
                               RadiusTopLeft: =8
                               RadiusTopRight: =8
-                              Visible: =false
+                              Visible: =varShowCost
                               Width: =220
                             Children:
                               - rect_cost_accent:
                                   Control: Rectangle
                                   Properties:
                                     Fill: |-
-                                      =If((varLatestWeek.Total_cost - varPriorWeek.Total_cost) <= 0,
+                                      =If(IsBlank(varPastWeekCPF), StatusNoDataColor,
+                                          (varPastWeekCPF - varPriorWeekCPF) <= 0,
                                           StatusGoodColor, StatusSeriousColor)
                                     Height: =Parent.Height
                                     Width: =3
@@ -582,7 +590,7 @@ Screens:
                                     BorderThickness: =0
                                     Height: =71
                                     OnSelect: |-
-                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      =Set(varWeekKey, PastWeekKey);
                                       If(!IsForeignPlant(), Navigate(scr_WeekDetail, ScreenTransition.None))
                                     Text: =""
                                     Width: =220
@@ -590,17 +598,18 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =If((varLatestWeek.Total_cost - varPriorWeek.Total_cost) <= 0, "▼ ", "▲ ") &
-                                          Text(Abs(varLatestWeek.Total_cost - varPriorWeek.Total_cost), "[$-en-US]$#,##0")
+                                      =If(IsBlank(varPastWeekCPF) || IsBlank(varPriorWeekCPF), "– ",
+                                          (varPastWeekCPF - varPriorWeekCPF) <= 0, "▼ ", "▲ ") &
+                                          Text(Abs(varPastWeekCPF - varPriorWeekCPF), "[$-en-US]$#,##0")
                                     Height: =Parent.Height*0.6
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
-                                      =If(IsBlank(varLatestWeek.Total_cost), 'BadgeCanvas.ThemeColor'.Subtle,
-                                          (varLatestWeek.Total_cost - varPriorWeek.Total_cost) <= 0,
+                                      =If(IsBlank(varPastWeekCPF) || IsBlank(varPriorWeekCPF), 'BadgeCanvas.ThemeColor'.Subtle,
+                                          (varPastWeekCPF - varPriorWeekCPF) <= 0,
                                               'BadgeCanvas.ThemeColor'.Success,
                                           'BadgeCanvas.ThemeColor'.Danger)
-                                    Width: =92
-                                    X: =Parent.Width*1.2/2
+                                    Width: =80
+                                    X: =Parent.Width*1.4/2
                                     Y: =(Parent.Height-Self.Height)/2
                               - lbl_cost_value:
                                   Control: ModernText
@@ -613,7 +622,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =28
-                                    Text: =Text(varLatestWeek.Total_cost, "[$-en-US]$#,##0")
+                                    Text: =If(IsBlank(varPastWeekCPF), "–", Text(varPastWeekCPF, "[$-en-US]$#,##0"))
                                     Width: =107
                                     Wrap: =false
                                     X: =20
@@ -629,7 +638,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =11
-                                    Text: ="COST OF POOR QUALITY"
+                                    Text: ="COST PER FLOOR (LAST WK)"
                                     Wrap: =false
                                     X: =20
                                     Y: =50
@@ -661,7 +670,7 @@ Screens:
                                     BorderThickness: =0
                                     Height: =71
                                     OnSelect: |-
-                                      =Set(varWeekKey, varLatestWeek.Week_key);
+                                      =Set(varWeekKey, PastWeekKey);
                                       If(!IsForeignPlant(), Navigate(scr_WeekDetail, ScreenTransition.None))
                                     Text: =""
                                     Width: =220
@@ -669,14 +678,15 @@ Screens:
                                   Control: Badge
                                   Properties:
                                     Content: |-
-                                      =If((varLatestWeek.Floors_tested - varPriorWeek.Floors_tested) > 0, "▲ ",
-                                          (varLatestWeek.Floors_tested - varPriorWeek.Floors_tested) < 0, "▼ ", "- ") &
-                                          Text(Abs(varLatestWeek.Floors_tested - varPriorWeek.Floors_tested), "0")
+                                      =If(IsBlank(varPastWeekFloors) || IsBlank(varPriorWeekFloors), "– ",
+                                          (varPastWeekFloors - varPriorWeekFloors) > 0, "▲ ",
+                                          (varPastWeekFloors - varPriorWeekFloors) < 0, "▼ ", "– ") &
+                                          Text(Abs(varPastWeekFloors - varPriorWeekFloors), "0")
                                     Height: =Parent.Height*0.6
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: ='BadgeCanvas.ThemeColor'.Informative
                                     Width: =80
-                                    X: =Parent.Width*1.2/2
+                                    X: =Parent.Width*1.4/2
                                     Y: =(Parent.Height-Self.Height)/2
                               - lbl_homes_value:
                                   Control: ModernText
@@ -689,7 +699,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =28
-                                    Text: =Text(varLatestWeek.Floors_tested, "0")
+                                    Text: =If(IsBlank(varPastWeekFloors), "–", Text(varPastWeekFloors, "0"))
                                     Width: =107
                                     Wrap: =false
                                     X: =20
@@ -705,7 +715,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =11
-                                    Text: ="FLOORS TESTED"
+                                    Text: ="FLOORS TESTED (LAST WK)"
                                     Wrap: =false
                                     X: =20
                                     Y: =50
@@ -851,7 +861,7 @@ Screens:
                                     LayoutMinWidth: =0
                                     ShowScrollbar: =false
                                     TemplatePadding: =0
-                                    TemplateSize: =(Parent.Height-Self.Y-2)/3
+                                    TemplateSize: =(Parent.Height-Self.Y-4)/3
                                     Width: =Parent.Width
                                   Children:
                                     - cnt_qmatrix_row:
@@ -1143,7 +1153,22 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =20
-                                          Text: ="Defect Pareto"
+                                          Text: =If(varShowCost, "Defect Cost Pareto", "Defect Pareto")
+                                          Width: =180
+                                          Wrap: =false
+                                    - lbl_pareto_title_1:
+                                        Control: ModernText
+                                        Properties:
+                                          Color: =TextPrimary
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          LayoutMinWidth: =80
+                                          PaddingBottom: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =10
+                                          Text: ="(last 12 weeks)"
+                                          Width: =180
                                           Wrap: =false
                                     - tabs_pareto_level:
                                         Control: ModernTabList
@@ -1152,9 +1177,11 @@ Screens:
                                             ={Value: "By defect"}
                                           Items: |-
                                             =Table({Value: "By defect"}, {Value: "By type"})
+                                          LayoutMinWidth: =100
                                           OnChange: |-
                                             =Set(varParetoLevel, If(tabs_pareto_level.Selected.Value = "By defect", "defect", "type"));
                                             Select(btn_build_pareto)
+                                          Width: =200
                                     - tabs_pareto_view:
                                         Control: ModernTabList
                                         Properties:
@@ -1162,6 +1189,8 @@ Screens:
                                             ={Value: "Chart"}
                                           Items: |-
                                             =Table({Value: "Chart"}, {Value: "Table"})
+                                          LayoutMinWidth: =150
+                                          Width: =140
                               - cnt_pareto_chart_wrap:
                                   Control: GroupContainer
                                   Variant: ManualLayout
@@ -1240,7 +1269,7 @@ Screens:
                                                 PaddingRight: =4
                                                 PaddingTop: =0
                                                 Size: =9
-                                                Text: =Text(varParetoAxisMax, "0.0")
+                                                Text: =If(varShowCost, CompactMoney(varParetoAxisMax), Text(varParetoAxisMax, "0.0"))
                                                 Width: =34
                                                 Wrap: =false
                                           - lbl_pareto_axis_75:
@@ -1254,7 +1283,7 @@ Screens:
                                                 PaddingRight: =4
                                                 PaddingTop: =0
                                                 Size: =9
-                                                Text: =Text(varParetoAxisMax * 0.75, "0.0")
+                                                Text: =If(varShowCost, CompactMoney(varParetoAxisMax * 0.75), Text(varParetoAxisMax * 0.75, "0.0"))
                                                 Width: =34
                                                 Wrap: =false
                                                 Y: =46
@@ -1269,7 +1298,7 @@ Screens:
                                                 PaddingRight: =4
                                                 PaddingTop: =0
                                                 Size: =9
-                                                Text: =Text(varParetoAxisMax * 0.5, "0.0")
+                                                Text: =If(varShowCost, CompactMoney(varParetoAxisMax * 0.5), Text(varParetoAxisMax * 0.5, "0.0"))
                                                 Width: =34
                                                 Wrap: =false
                                                 Y: =98
@@ -1284,7 +1313,7 @@ Screens:
                                                 PaddingRight: =4
                                                 PaddingTop: =0
                                                 Size: =9
-                                                Text: =Text(varParetoAxisMax * 0.25, "0.0")
+                                                Text: =If(varShowCost, CompactMoney(varParetoAxisMax * 0.25), Text(varParetoAxisMax * 0.25, "0.0"))
                                                 Width: =34
                                                 Wrap: =false
                                                 Y: =151
@@ -1299,7 +1328,7 @@ Screens:
                                                 PaddingRight: =4
                                                 PaddingTop: =0
                                                 Size: =9
-                                                Text: ="0.0"
+                                                Text: =If(varShowCost, "$0", "0.0")
                                                 Width: =34
                                                 Wrap: =false
                                                 Y: =203
@@ -1334,18 +1363,18 @@ Screens:
                                                             PaddingRight: =0
                                                             PaddingTop: =0
                                                             Size: =11
-                                                            Text: =Text(ThisItem.Share_pct, "0.0") & "%"
+                                                            Text: =If(varShowCost, Text(ThisItem.Metric, "[$-en-US]$#,##0"), Text(ThisItem.Share_pct, "0.0") & "%")
                                                             Width: =Parent.Width
                                                             Wrap: =false
-                                                            Y: =210 - 210 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1)) - 18
+                                                            Y: =210 - 210 * (If(varShowCost, ThisItem.Metric, ThisItem.Share_pct)/Max(varParetoAxisMax, 1)) - 18
                                                       - rect_pareto_bar:
                                                           Control: Rectangle
                                                           Properties:
                                                             Fill: =AlertRed
-                                                            Height: =210 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1))
+                                                            Height: =210 * (If(varShowCost, ThisItem.Metric, ThisItem.Share_pct)/Max(varParetoAxisMax, 1))
                                                             Width: =Parent.Width*0.6
                                                             X: =Parent.Width*0.2
-                                                            Y: =210 - 210 * (ThisItem.Share_pct/Max(varParetoAxisMax, 1))
+                                                            Y: =210 - 210 * (If(varShowCost, ThisItem.Metric, ThisItem.Share_pct)/Max(varParetoAxisMax, 1))
                                                       - lbl_pareto_bar_name:
                                                           Control: ModernText
                                                           Properties:
@@ -1427,7 +1456,7 @@ Screens:
                                           Height: =16
                                           PaddingLeft: =10
                                           Size: =10
-                                          Text: ="Qty"
+                                          Text: =If(varShowCost, "Cost", "Qty")
                                           Width: =60
                                     - Label1_2:
                                         Control: Label
@@ -1470,7 +1499,6 @@ Screens:
                                     Height: =CountRows(Self.AllItems) * Self.TemplateHeight
                                     Items: =FirstN(SortByColumns(col_pareto, "Share_pct", SortOrder.Descending), 10)
                                     LayoutMinHeight: =0
-                                    ShowScrollbar: =false
                                     TemplateSize: =25
                                     Visible: =tabs_pareto_view.Selected.Value = "Table"
                                     Width: =Parent.Width
@@ -1509,7 +1537,7 @@ Screens:
                                                 PaddingRight: =0
                                                 PaddingTop: =0
                                                 Size: =12
-                                                Text: =Text(ThisItem.Qty_Sum, "0")
+                                                Text: =If(varShowCost, Text(ThisItem.Cost_Sum, "[$-en-US]$#,##0"), Text(ThisItem.Qty_Sum, "0"))
                                                 Width: =60
                                                 Wrap: =false
                                           - lbl_pt_share:
@@ -1577,7 +1605,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =20
-                                    Text: ="Last week's Cost of Poor Quality by Test"
+                                    Text: =If(varShowCost, "Last week's Cost of Poor Quality by Test", "Last week's Defects by Test")
                                     Wrap: =false
                               - cnt_bytest_plot:
                                   Control: GroupContainer
@@ -1628,7 +1656,7 @@ Screens:
                                           PaddingRight: =4
                                           PaddingTop: =0
                                           Size: =9
-                                          Text: =Text(varByTestAxisMax, "[$-en-US]$#,##0")
+                                          Text: =If(varShowCost, Text(varByTestAxisMax, "[$-en-US]$#,##0"), Text(varByTestAxisMax, "0"))
                                           Width: =34
                                           Wrap: =false
                                     - lbl_bytest_axis_75:
@@ -1642,7 +1670,7 @@ Screens:
                                           PaddingRight: =4
                                           PaddingTop: =0
                                           Size: =9
-                                          Text: =Text(varByTestAxisMax * 0.75, "[$-en-US]$#,##0")
+                                          Text: =If(varShowCost, Text(varByTestAxisMax * 0.75, "[$-en-US]$#,##0"), Text(varByTestAxisMax * 0.75, "0"))
                                           Width: =34
                                           Wrap: =false
                                           Y: =38
@@ -1657,7 +1685,7 @@ Screens:
                                           PaddingRight: =4
                                           PaddingTop: =0
                                           Size: =9
-                                          Text: =Text(varByTestAxisMax * 0.5, "[$-en-US]$#,##0")
+                                          Text: =If(varShowCost, Text(varByTestAxisMax * 0.5, "[$-en-US]$#,##0"), Text(varByTestAxisMax * 0.5, "0"))
                                           Width: =34
                                           Wrap: =false
                                           Y: =83
@@ -1672,7 +1700,7 @@ Screens:
                                           PaddingRight: =4
                                           PaddingTop: =0
                                           Size: =9
-                                          Text: =Text(varByTestAxisMax * 0.25, "[$-en-US]$#,##0")
+                                          Text: =If(varShowCost, Text(varByTestAxisMax * 0.25, "[$-en-US]$#,##0"), Text(varByTestAxisMax * 0.25, "0"))
                                           Width: =34
                                           Wrap: =false
                                           Y: =128
@@ -1691,6 +1719,21 @@ Screens:
                                           Width: =34
                                           Wrap: =false
                                           Y: =173
+                                    - rect_bytest_grid_100:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                    - rect_bytest_grid_75:
+                                        Control: Rectangle
+                                        Properties:
+                                          Fill: =GridLine
+                                          Height: =1
+                                          Width: =Parent.Width-40
+                                          X: =40
+                                          Y: =45
                                     - gal_bytest_bars:
                                         Control: Gallery
                                         Variant: Horizontal
@@ -1714,13 +1757,14 @@ Screens:
                                                     Control: ModernText
                                                     Properties:
                                                       Align: =Align.Center
-                                                      Color: =TextMuted
-                                                      Height: =15
+                                                      Color: =RGBA(0, 0, 0, 1)
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =20
                                                       PaddingBottom: =0
                                                       PaddingLeft: =2
                                                       PaddingRight: =2
                                                       PaddingTop: =2
-                                                      Size: =9
+                                                      Size: =12
                                                       Text: =ThisItem.Test_name
                                                       VerticalAlign: =VerticalAlign.Top
                                                       Width: =Parent.Width
@@ -1737,34 +1781,19 @@ Screens:
                                                       PaddingRight: =0
                                                       PaddingTop: =0
                                                       Size: =11
-                                                      Text: =Text(ThisItem.Weighted, "[$-en-US]$#,##0")
+                                                      Text: =If(varShowCost, Text(ThisItem.Weighted, "[$-en-US]$#,##0"), Text(ThisItem.Qty, "0"))
                                                       VerticalAlign: =VerticalAlign.Bottom
                                                       Width: =Parent.Width
                                                       Wrap: =false
-                                                      Y: =180 - 180 * (ThisItem.Weighted/Max(varByTestAxisMax, 1)) - 18
+                                                      Y: =180 - 180 * (If(varShowCost, ThisItem.Weighted, ThisItem.Qty)/Max(varByTestAxisMax, 1)) - 18
                                                 - rect_bytest_bar:
                                                     Control: Rectangle
                                                     Properties:
                                                       Fill: =TestColorOf(ThisItem.Test_ID)
-                                                      Height: =180 * (ThisItem.Weighted/Max(varByTestAxisMax, 1))
+                                                      Height: =180 * (If(varShowCost, ThisItem.Weighted, ThisItem.Qty)/Max(varByTestAxisMax, 1))
                                                       Width: =Parent.Width*0.6
                                                       X: =Parent.Width*0.2
-                                                      Y: =180 - 180 * (ThisItem.Weighted/Max(varByTestAxisMax, 1))
-                                    - rect_bytest_grid_100:
-                                        Control: Rectangle
-                                        Properties:
-                                          Fill: =GridLine
-                                          Height: =1
-                                          Width: =Parent.Width-40
-                                          X: =40
-                                    - rect_bytest_grid_75:
-                                        Control: Rectangle
-                                        Properties:
-                                          Fill: =GridLine
-                                          Height: =1
-                                          Width: =Parent.Width-40
-                                          X: =40
-                                          Y: =45
+                                                      Y: =180 - 180 * (If(varShowCost, ThisItem.Weighted, ThisItem.Qty)/Max(varByTestAxisMax, 1))
       - cnt_drill_overlay:
           Control: GroupContainer
           Variant: ManualLayout
@@ -1822,10 +1851,11 @@ Screens:
                         Size: =12
                         Text: |-
                           =If(varDrillLevel = "type", "Type of test", "Defect") & " - " &
-                          Text(varDrillTotal, "0") & " defects across the " &
+                          If(varShowCost, Text(varDrillTotal, "[$-en-US]$#,##0") & " defect cost",
+                              Text(varDrillTotal, "0") & " defects") & " across the " &
                           Text(CountRows(col_drill_trend), "0") & " weeks shown - " &
-                          Text(varDrillShare, "0.0") & "% of all defects in the full " &
-                          Text(varWindowMonths, "0") & "-month window"
+                          Text(varDrillShare, "0.0") & If(varShowCost, "% of all defect cost", "% of all defects") & " in the " &
+                          "last 12 weeks"
                         Width: =Parent.Width - 48
                         Wrap: =false
                         X: =24
@@ -1847,7 +1877,7 @@ Screens:
                                 "' stroke='#e1e0d9' stroke-width='1'/>" &
                                 "<text x='45' y='" & Text(250 - g.Value*220 + 4, "[$-en-US]0.0") &
                                 "' font-size='11' fill='#898781' text-anchor='end'>" &
-                                Text(varDrillMax * g.Value, "[$-en-US]0") & "</text>") &
+                                If(varShowCost, Text(varDrillMax * g.Value, "[$-en-US]$#,##0"), Text(varDrillMax * g.Value, "[$-en-US]0")) & "</text>") &
                             "<line x1='52' x2='820' y1='250' y2='250' stroke='#c3c2b7' stroke-width='1'/>" &
                             "<polyline points='" &
                             Concat(col_drill_trend,
@@ -1863,13 +1893,13 @@ Screens:
                                 Text(52 + (idx-1)/If(CountRows(col_drill_trend)>1, CountRows(col_drill_trend)-1, 1)*768, "[$-en-US]0.0") &
                                 "' y='" & Text(250 - qty/Max(varDrillMax, 1)*220 - 11, "[$-en-US]0.0") &
                                 "' font-size='11' font-weight='700' fill='#0b0b0b' text-anchor='middle'>" &
-                                Text(qty, "0") & "</text>") &
+                                If(varShowCost, Text(qty, "[$-en-US]$#,##0"), Text(qty, "0")) & "</text>") &
                             Concat(col_drill_trend,
                                 "<text x='" &
                                 Text(52 + (idx-1)/If(CountRows(col_drill_trend)>1, CountRows(col_drill_trend)-1, 1)*768, "[$-en-US]0.0") &
                                 "' y='272' font-size='10' fill='#898781' text-anchor='middle'>" &
                                 lbl & "</text>") &
-                            "<text x='16' y='150' font-size='11' fill='#898781' text-anchor='middle' transform='rotate(-90 16 150)'>Defects (Qty)</text>" &
+                            "<text x='16' y='150' font-size='11' fill='#898781' text-anchor='middle' transform='rotate(-90 16 150)'>" & If(varShowCost, "Cost ($)", "Defects (Qty)") & "</text>" &
                             "</svg>")
                         Width: =Parent.Width - 24
                         X: =12

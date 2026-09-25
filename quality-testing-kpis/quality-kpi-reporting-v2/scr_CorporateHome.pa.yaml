@@ -5,7 +5,8 @@ Screens:
       OnVisible: |-
         =// Refresh when returning from a plant. On the very first visit App.OnStart may still
         // be running (col_plants empty) - skip, OnStart ends by calling LoadCorporateHome().
-        If(!IsEmpty(col_plants), LoadCorporateHome())
+        If(!IsEmpty(col_plants), LoadCorporateHome());
+        Set(varShowInfo, false)
     Children:
       - cnt_root_corp:
           Control: GroupContainer
@@ -103,6 +104,40 @@ Screens:
                               Size: =11
                               Text: =User().FullName & ", " & varRole & ". " & If(IsBlank(varCorpLoadedAt), "Loading...", "Loaded " & Text(varCorpLoadedAt, "h:mm AM/PM"))
                               Wrap: =false
+                        - icon_header_info:
+                            Control: Classic/Icon
+                            Properties:
+                              AccessibleLabel: ="About First Time Pass Rate"
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =RGBA(245, 245, 245, 1)
+                              DisabledColor: =RGBA(225, 223, 221, 1)
+                              DisabledFill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =4
+                              Height: =Parent.Height*2/3
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(16, 110, 190, 1)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              Icon: =Icon.Information
+                              LayoutMaxHeight: =50
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: =Set(varShowInfo, true)
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(16, 110, 190, 1)
+                              PressedFill: =RGBA(0, 0, 0, 0)
+                              Tooltip: ="About First Time Pass Rate"
+                        - ico_admin_corp:
+                            Control: ModernIcon
+                            Properties:
+                              AccessibleLabel: ="Access Admin"
+                              AlignInContainer: =AlignInContainer.Center
+                              Icon: ="Settings"
+                              IconColor: =RGBA(255, 255, 255, 1)
+                              OnSelect: =Navigate(scr_AccessAdmin, ScreenTransition.None)
+                              Tooltip: ="Access Admin"
+                              Visible: =varIsAdmin
             - cnt_corp_main:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -168,10 +203,12 @@ Screens:
                               - badge_region_metric:
                                   Control: Badge
                                   Properties:
+                                    AlignInContainer: =AlignInContainer.Center
                                     Content: |-
                                       =StatusGlyphOf(BandStatusFTPR(ThisItem.Region_FTT)) & " " &
-                                          Text(ThisItem.Region_FTT, "0.0") & "% First Time Pass Rate (last wk)"
+                                          Text(ThisItem.Region_FTT, "0.0") //& "% First Time Pass Rate (last wk)"
                                     Height: =28
+                                    LayoutMaxWidth: =50
                                     LayoutMinHeight: =0
                                     Shape: ='BadgeCanvas.Shape'.Rounded
                                     ThemeColor: |-
@@ -179,7 +216,7 @@ Screens:
                                           BandStatusFTPR(ThisItem.Region_FTT) = "warning", 'BadgeCanvas.ThemeColor'.Warning,
                                           BandStatusFTPR(ThisItem.Region_FTT) = "nodata", 'BadgeCanvas.ThemeColor'.Subtle,
                                           'BadgeCanvas.ThemeColor'.Danger)
-                                    Width: =270
+                                    Width: =100
                               - rect_region_sep:
                                   Control: Rectangle
                                   Properties:
@@ -299,3 +336,120 @@ Screens:
                                                 Text: =""
                                                 Tooltip: =If(ThisItem.Plant_ID = varOwnPID || varIsAdmin, "Open plant dashboard", "View plant dashboard (view only)")
                                                 Width: =Parent.Width
+      - cnt_info_overlay:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            Visible: =varShowInfo
+            Width: =Parent.Width
+          Children:
+            - rect_info_scrim:
+                Control: Rectangle
+                Properties:
+                  Fill: =RGBA(11, 11, 11, 0.55)
+                  Height: =Parent.Height
+                  Width: =Parent.Width
+            - btn_info_dismiss:
+                Control: Button
+                Properties:
+                  AccessibleLabel: ="Close information"
+                  Appearance: ='ButtonCanvas.Appearance'.Transparent
+                  BorderThickness: =0
+                  Height: =Parent.Height
+                  OnSelect: =Set(varShowInfo, false)
+                  Text: =""
+                  Width: =Parent.Width
+            - cnt_info_card:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  Fill: =CardBg
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Width: =Min(Parent.Width - 64, 520)
+                  X: =(Parent.Width - Self.Width)/2
+                  Y: =(Parent.Height - Self.Height)/2
+                Children:
+                  - lbl_info_title:
+                      Control: ModernText
+                      Properties:
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="About the Company Home Screen"
+                        Width: =Parent.Width - 88
+                        Wrap: =false
+                        X: =24
+                        Y: =112
+                  - lbl_info_body:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        Height: =60
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: ="FPR for the regions is shown for last week. Plants that have not reported it will show the date of the last week they reported"
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =Parent.Width - 48
+                        X: =24
+                        Y: =140
+                  - ico_info_close:
+                      Control: Classic/Icon
+                      Properties:
+                        AccessibleLabel: ="Close"
+                        Color: =TextSecondary
+                        Height: =44
+                        HoverColor: =ChampionBlue
+                        Icon: =Icon.Cancel
+                        OnSelect: =Set(varShowInfo, false)
+                        PaddingBottom: =12
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Tooltip: ="Close"
+                        Width: =44
+                        X: =Parent.Width - Self.Width - 8
+                        Y: =8
+                  - lbl_info_title_1:
+                      Control: ModernText
+                      Properties:
+                        Color: =ChampionBlue
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Key Performance Indicators"
+                        Width: =Parent.Width - 88
+                        Wrap: =false
+                        X: =24
+                        Y: =24
+                  - lbl_info_body_1:
+                      Control: ModernText
+                      Properties:
+                        Color: =TextPrimary
+                        Height: =60
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: ="First time pass rate (FPR) is calculated by the amount of floors that passed all testing divided by the total number of floors that were tested."
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =Parent.Width - 48
+                        X: =24
+                        Y: =52

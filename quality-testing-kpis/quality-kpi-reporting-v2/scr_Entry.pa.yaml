@@ -179,7 +179,7 @@ Screens:
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}),
                               // Plant QMs get the cost-only view of scr_TaxonomyAdmin (IsCostOnlyMode).
                               varIsQM && HasPlantCostScope(),
-                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}),
+                              Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"}, {Value: "Defect Costs"}, {Value: "Access"}),
                               Table({Value: "Corporate Home"}, {Value: "Dashboard"}, {Value: "Data Entry"}, {Value: "Week Detail"}, {Value: "History"})
                           )
                         LayoutMinHeight: =38
