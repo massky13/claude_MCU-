@@ -26,8 +26,17 @@ Screens:
             )
         );
 
-        // One query per visit: 4 months of detail rows cached locally. Week switching
-        // then filters this collection instead of hitting SharePoint again.
+        Set(
+            var_week_sel,
+            Coalesce(
+                First(Sort(col_roofs_week_cycles, W_Date, SortOrder.Descending)).W_Date,
+                Today() - Weekday(Today(), 3)
+            )
+        );
+
+        // Load only the selected week's detail rows. Collecting the whole 4-month
+        // window hit the data row limit and dropped rows; the week gallery
+        // (roofs_alldetails_gallery_2) reloads this collection on each week click.
         ClearCollect(
             col_roofs_week_details,
             AddColumns(
@@ -38,7 +47,7 @@ Screens:
                             PlantID = PID,
                             Facility = VAR_facility,
                             pump_name = VAR_pump_name,
-                            W_Date >= var_week_first
+                            W_Date = var_week_sel
                         ),
                         ID,
                         Title,
@@ -66,14 +75,6 @@ Screens:
         );
 
         ClearCollect(col_pumps, Distinct(Filter('plant-pumps',Plant_ID=PID,Facility=VAR_facility),pump_name));
-
-        Set(
-            var_week_sel,
-            Coalesce(
-                First(Sort(col_roofs_week_cycles, W_Date, SortOrder.Descending)).W_Date,
-                Today() - Weekday(Today(), 3)
-            )
-        );
     Children:
       - RectQuickActionBar3_5:
           Control: Rectangle
@@ -444,7 +445,45 @@ Screens:
                       Properties:
                         Height: =20*15
                         Items: =Sort( col_roofs_week_cycles, W_Date,SortOrder.Descending)
-                        OnSelect: =Set(var_week_sel, ThisItem.W_Date)
+                        OnSelect: |
+                          =Set(var_week_sel, ThisItem.W_Date);
+                          // Reload the detail collection for this single week only.
+                          ClearCollect(
+                              col_roofs_week_details,
+                              AddColumns(
+                                  SortByColumns(
+                                      ShowColumns(
+                                          Filter(
+                                              roofs_alldetails,
+                                              PlantID = PID,
+                                              Facility = VAR_facility,
+                                              pump_name = VAR_pump_name,
+                                              W_Date = var_week_sel
+                                          ),
+                                          ID,
+                                          Title,
+                                          Production,
+                                          Serial,
+                                          Sections,
+                                          Truss_spacing,
+                                          Cycle1_end,
+                                          Bead_TopBot,
+                                          'Date',
+                                          W_Date,
+                                          extra_cost,
+                                          LFT_LB,
+                                          Missing,
+                                          pump_name
+                                      ),
+                                      "ID",
+                                      SortOrder.Ascending
+                                  ),
+                                  _dirty,
+                                  false,
+                                  ToDelete,
+                                  false
+                              )
+                          )
                         TemplateFill: =If(    ThisItem.IsSelected,    Color.LightCoral,    Color.White)
                         TemplateSize: |
                           =20
@@ -618,7 +657,7 @@ Screens:
                           );
                           Notify("Weekly data applied successfully.", NotificationType.Success);
                           // Refresh only the selected week from SharePoint so the server-calculated
-                          // columns (extra_cost, LFT_LB) are current. The other 11 weeks stay cached.
+                          // columns (extra_cost, LFT_LB) are current.
                           RemoveIf(col_roofs_week_details, W_Date = var_week_sel);
                           Collect(
                               col_roofs_week_details,
