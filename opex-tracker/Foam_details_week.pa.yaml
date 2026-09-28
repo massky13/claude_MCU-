@@ -46,7 +46,7 @@ Screens:
                             roofs_alldetails,
                             PlantID = PID,
                             Facility = VAR_facility,
-                            pump_name = VAR_pump_name,
+                            (pump_name = VAR_pump_name || pump_name = Blank()),
                             W_Date = var_week_sel
                         ),
                         ID,
@@ -457,7 +457,7 @@ Screens:
                                               roofs_alldetails,
                                               PlantID = PID,
                                               Facility = VAR_facility,
-                                              pump_name = VAR_pump_name,
+                                              (pump_name = VAR_pump_name || pump_name = Blank()),
                                               W_Date = var_week_sel
                                           ),
                                           ID,
@@ -667,7 +667,7 @@ Screens:
                                               roofs_alldetails,
                                               PlantID = PID,
                                               Facility = VAR_facility,
-                                              pump_name = VAR_pump_name,
+                                              (pump_name = VAR_pump_name || pump_name = Blank()),
                                               W_Date = var_week_sel
                                           ),
                                           ID,
