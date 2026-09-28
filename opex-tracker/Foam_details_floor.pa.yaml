@@ -846,7 +846,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
@@ -863,7 +862,6 @@ Screens:
                               Default: =ThisItem.Production & " / " &ThisItem.Serial
                               DisplayMode: =DisplayMode.View
                               Height: =30
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               PaddingRight: =0
                               Size: =10
@@ -889,7 +887,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               SelectionFill: =RGBA(2, 66, 109, 1)
                               Size: =10
                               TabIndex: =1
@@ -914,7 +911,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               SelectionFill: =RGBA(2, 66, 109, 1)
                               Size: =10
                               TabIndex: =2
@@ -938,7 +934,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
@@ -960,7 +955,6 @@ Screens:
                                     LookUp(colFoamFloorDetails, ID = ThisItem.ID),
                                     {ToDelete: true}
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               OnUncheck: |
                                 =Patch(
                                     colFoamFloorDetails,
@@ -1000,7 +994,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
@@ -1028,7 +1021,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
@@ -1065,7 +1057,6 @@ Screens:
                                         _dirty: true
                                     }
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
@@ -1081,7 +1072,6 @@ Screens:
                               Color: =RGBA(54, 176, 75, 1)
                               Height: =30
                               Icon: =Icon.Edit
-                              OnSelect: =Select(btn_floor_select)
                               Visible: |-
                                 =//Value(extra_lft.Text)<>ThisItem.ExtraLFT ||
                                 //Value(cstart.Text)<>ThisItem.Cycle1_start ||Value(cend.Text) <> ThisItem.Cycle1_end ||
@@ -1126,7 +1116,6 @@ Screens:
                                         {_dirty: false}
                                     )
                                 )
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =5
                               PaddingTop: =5
                               Size: =10
@@ -1137,7 +1126,6 @@ Screens:
                             Properties:
                               Align: =Align.Center
                               Height: =30
-                              OnSelect: =Select(btn_floor_select)
                               Size: =10
                               Text: |-
                                 =If(
@@ -1157,7 +1145,6 @@ Screens:
                             Properties:
                               Align: =Align.Center
                               Height: =30
-                              OnSelect: =Select(btn_floor_select)
                               Size: =10
                               Text: =If(Value(lbl_cycle_lbs.Text)>0, Round(Value(lbl_total_lft.Text)/Value(lbl_cycle_lbs.Text),1), Blank())
                               Width: =50
@@ -1175,7 +1162,6 @@ Screens:
                               HandleFill: =RGBA(102, 182, 227, 1)
                               Height: =29
                               OnChange: =
-                              OnSelect: =Select(btn_floor_select)
                               Size: =10
                               TrueText: ="-"
                               Visible: =ThisItem._dirty
@@ -1186,7 +1172,6 @@ Screens:
                             Properties:
                               FontWeight: =FontWeight.Lighter
                               Height: =30
-                              OnSelect: =Select(btn_floor_select)
                               Size: =7
                               Text: |
                                 =(
@@ -1265,7 +1250,6 @@ Screens:
                             Properties:
                               FontWeight: =FontWeight.Lighter
                               Height: =30
-                              OnSelect: =Select(btn_floor_select)
                               Size: =7
                               Text: |
                                 =If(
@@ -1290,7 +1274,6 @@ Screens:
                               DisplayMode: =DisplayMode.View
                               Fill: =RGBA(0, 0, 0, 0)
                               Height: =30
-                              OnSelect: =Select(btn_floor_select)
                               PaddingLeft: =0
                               PaddingRight: =0
                               RadiusBottomLeft: =0
@@ -1323,10 +1306,4 @@ Screens:
                   )
               )
             Text: ="reload"
-            Visible: =false
-      - btn_floor_select:
-          Control: Classic/Button
-          Properties:
-            OnSelect: =
-            Text: ="."
             Visible: =false
