@@ -572,8 +572,7 @@ Screens:
                               Height: =20
                               Icon: =Icon.Trash
                               OnSelect: |-
-                                =Select(btn_foam_week_select);
-                                RemoveIf(roofs_week_cycles,ID=ThisItem.ID);
+                                =RemoveIf(roofs_week_cycles,ID=ThisItem.ID);
                                 RemoveIf(col_roofs_week_cycles,ID = ThisItem.ID);
                                 Notify("Week data removed successfully",NotificationType.Success);
                                 Refresh(roofs_week_cycles);
@@ -822,7 +821,6 @@ Screens:
                               Default: =ThisItem.Production & " / " &ThisItem.Serial
                               DisplayMode: =DisplayMode.View
                               Height: =30
-                              OnSelect: =Select(btn_foam_week_select)
                               PaddingLeft: =5
                               PaddingRight: =0
                               Size: =10
@@ -874,7 +872,6 @@ Screens:
                                         {_dirty: false}
                                     )
                                 )
-                              OnSelect: =Select(btn_foam_week_select)
                               PaddingBottom: =0
                               PaddingLeft: =3
                               PaddingRight: =0
@@ -925,7 +922,6 @@ Screens:
                                         {_dirty: false}
                                     )
                                 )
-                              OnSelect: =Select(btn_foam_week_select)
                               PaddingBottom: =0
                               PaddingLeft: =3
                               PaddingRight: =0
@@ -941,7 +937,6 @@ Screens:
                             Properties:
                               Fill: =App.Theme.Colors.Darker30
                               Height: =1
-                              OnSelect: =Select(btn_foam_week_select)
                               Width: =Parent.TemplateWidth
                               Y: =Parent.TemplateHeight - 1
                         - Label31:
@@ -950,7 +945,6 @@ Screens:
                               Color: =RGBA(0, 0, 0, 0)
                               Fill: =If(ThisItem.Cycle1_end>0,RGBA(54, 176, 75, 1),Color.Red)
                               Height: =24
-                              OnSelect: =Select(btn_foam_week_select)
                               Size: =10
                               Text: =ThisItem.Bead_TopBot
                               Width: =24
@@ -997,7 +991,6 @@ Screens:
                                         {_dirty: false}
                                     )
                                 )
-                              OnSelect: =Select(btn_foam_week_select)
                               PaddingBottom: =0
                               PaddingLeft: =5
                               PaddingRight: =0
@@ -1037,7 +1030,6 @@ Screens:
                                         {_dirty: false}
                                     )
                                 )
-                              OnSelect: =Select(btn_foam_week_select)
                               PaddingBottom: =0
                               PaddingLeft: =3
                               PaddingRight: =0
@@ -1052,7 +1044,6 @@ Screens:
                             Control: ModernText
                             Properties:
                               Height: =30
-                              OnSelect: =Select(btn_foam_week_select)
                               Size: =8
                               Text: =ThisItem.ID
                               Visible: =false
@@ -1305,9 +1296,3 @@ Screens:
                         Width: =150
                         X: =56
                         Y: =456
-      - btn_foam_week_select:
-          Control: Classic/Button
-          Properties:
-            OnSelect: =
-            Text: ="."
-            Visible: =false
