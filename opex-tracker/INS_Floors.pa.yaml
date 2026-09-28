@@ -1,0 +1,860 @@
+Screens:
+  INS_Floors:
+    Properties:
+      OnVisible: =depth_txt_1.Text=""
+    Children:
+      - NewDataGallery_3:
+          Control: Gallery
+          Variant: BrowseLayout_Vertical_TwoTextVariant_ver4.0
+          Properties:
+            Height: =650
+            Items: |-
+              =//Filter(    Insulation_Floors,    Plant_ID=PID,    Edited="No"    )
+              SortByColumns(
+                  Filter(
+                      Insulation_Floors,
+                      Plant_ID = PID,
+                      facilityID = Dropdown1_6.SelectedText.Value,
+                      W_Date=DatePicker4_4.SelectedDate
+                  ),
+                  "Title",
+                  SortOrder.Ascending
+              )
+            LoadingSpinner: =LoadingSpinner.Data
+            OnSelect: =
+            TemplateSize: =30
+            Width: =1147
+            X: =219
+            Y: =118
+          Children:
+            - bags_req_txt_1:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  Default: |-
+                    =If (
+                        var_insulation_name = "OC Propink 77",
+                        If(
+                            rvalue_txt_1.Text = "",
+                            "",
+                            RoundUp(
+                                (1 + ThisItem.SQFeet - If(
+                                    duct_check.Value = true,
+                                    ThisItem.Length * 0.8 * LookUp(
+                                        Plant_Settings,
+                                        facility_lookup = var_plantfacility,
+                                        Duct_width
+                                    ) / 12,
+                                    0
+                                ) - (ThisItem.PLength*ThisItem.PWidth)) / (1000 / (0.0012 * Value(rvalue_txt_1.Text) ^ 2 + 0.3918 * Value(rvalue_txt_1.Text) + 0.1448)),
+                                0
+                            )
+                        ),
+                    If (
+                        var_insulation_name = "Sanctuary",
+                        If(
+                            rvalue_txt_1.Text = "",
+                            "",
+                            RoundUp(
+                                (1 + ThisItem.SQFeet - If(
+                                    duct_check.Value = true,
+                                    ThisItem.Length * 0.8 * LookUp(
+                                        Plant_Settings,
+                                        facility_lookup = var_plantfacility,
+                                        Duct_width
+                                    ) / 12,
+                                    0
+                                ) - (ThisItem.PLength*ThisItem.PWidth)) / (1426.01602 * Value(rvalue_txt_1.Text) ^ -1.187636),
+                                0
+                            )
+                        ),
+                        If(
+                            rvalue_txt_1.Text = "",
+                            "",
+                            RoundUp(
+                                (1 + ThisItem.SQFeet - If(
+                                    duct_check.Value = true,
+                                    ThisItem.Length * 0.8 * LookUp(
+                                        Plant_Settings,
+                                        facility_lookup = var_plantfacility,
+                                        Duct_width
+                                    ) / 12,
+                                    0
+                                ) - (ThisItem.PLength*ThisItem.PWidth)) / (1426.01602 * Value(rvalue_txt_1.Text) ^ -1.187636),
+                                0
+                            )
+                        )
+                    ))
+                  DelayOutput: =true
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =30
+                  LineHeight: =1
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =63
+                  X: =601
+            - bags_actual_txt_1:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.BagsActual
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =30
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =3
+                  Width: =60
+                  X: =710
+            - moisture_txt_1:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.Moisture
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =30
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =4
+                  Width: =58
+                  X: =774
+            - depth_txt_1:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  Default: |-
+                    =If(
+                        var_insulation_name = "OC Propink 77",
+                        If(
+                            rvalue_txt_1.Text = "",
+                            "",
+                            RoundUp(
+                                -0.0007 * Value(rvalue_txt_1.Text) ^ 2 + 0.3995 * Value(rvalue_txt_1.Text) + 0.0217,
+                                0
+                            ) * 1
+                        ),
+                    If(
+                        var_insulation_name = "Sanctuary",    
+                        If(
+                            rvalue_txt_1.Text = "",
+                            "",
+                            RoundUp(
+                                0.2868 * rvalue_txt_1.Text + 0.2466,
+                                1
+                            ) * 1,
+                        If(
+                            rvalue_txt_1.Text = "",
+                            "",
+                            RoundUp(
+                                0.2868 * rvalue_txt_1.Text + 0.2466,
+                                1
+                            ) * 1
+                        )
+                    )))
+                  DelayOutput: =true
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =30
+                  OnChange: =Toggle4_1.Value=true
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Reset: =true
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =60
+                  X: =541
+            - TextInput2_3:
+                Control: Classic/TextInput
+                Properties:
+                  Default: =ThisItem.Production
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =93
+                  X: =113
+            - Label3_1:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  FontWeight: =FontWeight.Bold
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =If(rvalue_txt_1.Text="" || bags_actual_txt_1.Text="","",Value(bags_actual_txt_1.Text)-Value(bags_req_txt_1.Text))
+                  Width: =47
+                  X: =848
+            - Toggle4_1:
+                Control: Classic/Toggle
+                Properties:
+                  Default: =ThisItem.BagsActual<>Value(bags_actual_txt_1.Text) ||  delete_check_1.Value=true
+                  Height: =39
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  ShowLabel: =false
+                  Visible: =false
+                  Width: =57
+                  X: =1039
+            - delete_check_1:
+                Control: Classic/CheckBox
+                Properties:
+                  CheckboxSize: =30
+                  Default: =If(select_all_chk_2.Value=true,true,false)
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =9
+                  TabIndex: =5
+                  Text: ="Check"
+                  Width: =112
+                  X: =911
+            - TextInput2_14:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =TextPosition.Left
+                  Default: =ThisItem.Serial
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =68
+                  X: =206
+            - TextInput2_15:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  Default: =RoundUp(ThisItem.Width,1) & " x " & RoundUp(ThisItem.Length,1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =81
+                  X: =274
+            - duct_check:
+                Control: Classic/CheckBox
+                Properties:
+                  CheckboxBackgroundFill: =RGBA(238, 204, 204, 0.5)
+                  CheckboxSize: =30
+                  Default: =If(ThisItem.Duct="No",false,true)
+                  Height: =30
+                  OnCheck: =//Set(var_duct,ThisItem.Length * 0.8 * 1.5)
+                  OnSelect: =Select(Parent)
+                  OnUncheck: =Set(var_duct,0)
+                  Size: =10
+                  TabIndex: =2
+                  Text: =
+                  Width: =35
+                  X: =418
+            - rvalue_txt_1:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =If(ThisItem.RValue>1,ThisItem.RValue,Value(rvalue_fill.Text))
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Format: =TextFormat.Number
+                  Height: =30
+                  OnChange: "=//Patch(Insulation_Floors,\r\n//       NewDataGallery_3.Selected,\r\n       //{\r\n         //  RValue:Value(rvalue_txt_1.Text),\r\n           //Depth:Value(depth_txt_1.Text),\r\n           //BagsReq:Value(bags_req_txt_1.Text)\r\n           \r\n           //}\r\n//)"
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =9
+                  TabIndex: =1
+                  Width: =47
+                  X: =355
+            - TextInput2_16:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  Default: =RoundUp(ThisItem.PWidth,1) & " x " & RoundUp(ThisItem.PLength,1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =81
+                  X: =460
+            - Icon4_3:
+                Control: Classic/Icon
+                Properties:
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =1
+                  Height: =30
+                  Icon: =Icon.VerticalLine
+                  OnSelect: =
+                  Width: =40
+                  X: =660
+            - Separator5_6:
+                Control: Rectangle
+                Properties:
+                  Fill: =App.Theme.Colors.Darker30
+                  Height: =1
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  Y: =Parent.TemplateHeight - 1
+            - DatePicker4_5:
+                Control: Classic/DatePicker
+                Properties:
+                  DefaultDate: =ThisItem.Date
+                  Height: =30
+                  OnChange: |-
+                    =Select(Parent);
+                    Patch(
+                        Insulation_Floors,
+                        NewDataGallery_3.Selected,
+                        {Date: DatePicker4_5.SelectedDate},
+                        {W_Date:DatePicker4_5.SelectedDate-Weekday(DateValue(DatePicker4_5.SelectedDate),3)}
+                    )
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  PaddingTop: =5
+                  Size: =10
+                  StartOfWeek: =StartOfWeek.Monday
+                  StartYear: =2020
+                  Width: =113
+            - extra_cost_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  Default: =If(Value(ThisItem.Bags_Diff)^2>0,"$"&RoundUp(ThisItem.extra_cost,1),"")//"$"& RoundUp(ThisItem.extra_cost,1)
+                  DelayOutput: =true
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =30
+                  OnChange: =Toggle4_1.Value=true
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Reset: =true
+                  Size: =9
+                  TabIndex: =-1
+                  Width: =60
+                  X: =1036
+      - RectQuickActionBar3_8:
+          Control: Rectangle
+          Properties:
+            Height: =64
+            Width: =Parent.Width
+      - Title2_8:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="Floors Insulation Bags"
+            Width: =Parent.Width
+      - Subtitle5_71:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Production"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =80
+            X: =335
+            Y: =87
+      - Icon1_12:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Subtitle5_70:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Bags Req"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =62
+            X: =820
+            Y: =87
+      - Subtitle5_75:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: |-
+              ="Bags
+              Actual"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =59
+            X: =932
+            Y: =87
+      - Subtitle5_76:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="M%"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =60
+            X: =991
+            Y: =87
+      - Subtitle5_73:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Depth"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =65
+            X: =757
+            Y: =87
+      - Subtitle5_74:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Floor RValue"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =55
+            X: =572
+            Y: =87
+      - Subtitle5_77:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Δ"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =46
+            X: =1068
+            Y: =87
+      - Subtitle5_69:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Date"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =61
+            X: =219
+            Y: =87
+      - Subtitle5_72:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Serial"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =56
+            X: =430
+            Y: =87
+      - Label10_2:
+          Control: Label
+          Properties:
+            Height: =206
+            Size: =10
+            Text: |-
+              ="Instructions: 
+
+              Enter the RVALUE per floor.
+
+              Print this screen using the icon on the top right.
+
+              When you are done with the items listed on this table please click on the Submit button below.
+              "
+            VerticalAlign: =VerticalAlign.Top
+            Width: =204
+            Y: =64
+      - Subtitle5_78:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Size"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =45
+            X: =512
+            Y: =87
+      - Subtitle5_79:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Duct"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =55
+            X: =625
+            Y: =87
+      - Subtitle5_80:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Porch Size"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =70
+            X: =686
+            Y: =87
+      - Icon2_7:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Icon3:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Print
+            OnSelect: |-
+              =ForAll(NewDataGallery_3.AllItems,
+
+              Patch(Insulation_Floors,
+                     ThisRecord,
+                     {
+                         //Date:date_txt.Text,
+                         User_Name:User().FullName,
+                         Duct: If(duct_check.Value=true,"Yes","No"),
+                         RValue:Value(rvalue_txt_1.Text),
+                         Depth:Value(depth_txt_1.Text),
+                         Moisture:Value(moisture_txt_1.Text),
+                         BagsReq:Value(bags_req_txt_1.Text),
+                         BagsActual:Value(bags_actual_txt_1.Text),
+                         insulation_product:var_insulation_name,
+                         bag_cost:var_bag_cost
+                     }
+              ))
+              ;
+
+
+              Navigate(INS_Print_Floors,ScreenTransition.None)
+              //Print()
+            X: =1126
+      - Button3_8:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |
+              =ForAll(NewDataGallery_3.AllItems,
+
+              Patch(Insulation_Floors,
+                     ThisRecord,
+                     {
+                         //Date:date_txt.Text,
+                         User_Name:User().FullName,
+                         Duct: If(duct_check.Value=true,"Yes","No"),
+                         RValue:Value(rvalue_txt_1.Text),
+                         Depth:Value(depth_txt_1.Text),
+                         Moisture:Value(moisture_txt_1.Text),
+                         BagsReq:Value(bags_req_txt_1.Text),
+                         BagsActual:Value(bags_actual_txt_1.Text),
+                         insulation_product:var_insulation_name,
+                         bag_cost:var_bag_cost,
+                         Edited:If(Toggle4_1.Value=true,"Yes","No")
+                     }
+              ))
+            TabIndex: =1
+            Text: ="Submit"
+            X: =32
+            Y: =690
+      - Icon4_2:
+          Control: Classic/Icon
+          Properties:
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =1
+            Height: =30
+            Icon: =Icon.VerticalLine
+            OnSelect: =
+            Width: =40
+            X: =879
+            Y: =89
+      - Subtitle5_93:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Blanket-fill Options:"
+            Width: =132
+            X: =27
+            Y: =438
+      - Subtitle5_94:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="R Value"
+            Width: =73
+            X: =24
+            Y: =464
+      - rvalue_fill:
+          Control: Classic/TextInput
+          Properties:
+            Align: =Align.Center
+            BorderThickness: =1
+            Default: =
+            DelayOutput: =true
+            Format: =TextFormat.Number
+            Height: =30
+            PaddingLeft: =5
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =9
+            TabIndex: =2
+            Width: =47
+            X: =97
+            Y: =465
+      - Dropdown1_6:
+          Control: Classic/DropDown
+          Properties:
+            Default: ="facilityID"
+            Height: =30
+            Items: =Filter(Plant_List, Plant_ID = PID)
+            Items.Value: =Facility
+            Size: =10
+            Width: =69
+            X: =111
+            Y: =288
+      - Label13_6:
+          Control: Label
+          Properties:
+            Text: ="Facility:"
+            Width: =106
+            X: =35
+            Y: =283
+      - DatePicker4_4:
+          Control: Classic/DatePicker
+          Properties:
+            BorderThickness: =1
+            DefaultDate: =(Today()-Weekday(DateValue(Today()),3))
+            Height: =30
+            OnChange: =
+            OnSelect: =
+            PaddingLeft: =5
+            PaddingTop: =5
+            Size: =10
+            StartOfWeek: =StartOfWeek.Monday
+            StartYear: =2020
+            Width: =129
+            X: =75
+            Y: =395
+      - Label13_11:
+          Control: Label
+          Properties:
+            Height: =30
+            Size: =10
+            Text: ="Week:"
+            Width: =110
+            X: =21
+            Y: =395
+      - Label41_4:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            Text: ="Week Filter:"
+            X: =30
+            Y: =335
+      - Label41_5:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            Size: =9
+            Text: ="Week starting Monday"
+            X: =30
+            Y: =351
+      - Button9_6:
+          Control: Classic/Button
+          Properties:
+            Height: =28
+            OnSelect: |-
+              =ForAll(Filter(NewDataGallery_3.AllItems, delete_check_1.Value=true),
+
+                  Remove(Insulation_Floors,ThisRecord))
+
+              //If(ThisRecord.delete_check.Value=true,
+            Size: =10
+            Text: ="Delete Selected"
+            Width: =114
+            X: =48
+            Y: =541
+      - select_all_chk_2:
+          Control: Classic/CheckBox
+          Properties:
+            CheckboxSize: =30
+            Height: =39
+            Size: =9
+            Text: ="Check All"
+            Width: =168
+            X: =32
+            Y: =491
+      - Subtitle5_96:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =31
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Extra $"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =60
+            X: =1254
+            Y: =87
+      - Label22_7:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =30
+            Size: =12
+            Text: ="Extra $"&Sum(NewDataGallery_3.AllItems,Value(extra_cost_txt.Text))
+            Width: =168
+            X: =28
+            Y: =644

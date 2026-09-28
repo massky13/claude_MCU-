@@ -1,0 +1,695 @@
+Screens:
+  Foam_settings:
+    Properties:
+      OnVisible: =UpdateContext({var_selected_pump:First(Filter('plant-pumps',Plant_ID=PID,Facility=facility_drop_1.SelectedText.Value))})
+    Children:
+      - Label11_6:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            Height: =408
+            OnSelect: =
+            Text: =""
+            Width: =622
+            X: =420
+            Y: =80
+      - RectQuickActionBar3_3:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =64
+            Width: =Parent.Width
+      - Title2_3:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="2-PART FOAM SETTINGS"
+            Width: =1208
+            X: =158
+      - Icon1_7:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+            X: =1302
+      - Button1_19:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =RGBA(2, 66, 109, 1)
+            DisplayMode: =If(IsBlank(var_selected_pump),DisplayMode.Disabled,DisplayMode.Edit)
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =150
+            OnSelect: |-
+              =Set(VAR_plant_ID,PID);
+              Set(VAR_facility,facility_drop_1.SelectedText.Value);
+              Set(VAR_ToverEW,Value(
+                       If(ToverEW_drop.SelectedText.Value="Foaming",1,
+                       If(ToverEW_drop.SelectedText.Value="Stitching",2,
+                       3))));
+
+              Set(VAR_EBoverSW,
+                       If(EBoverSW_drop.SelectedText.Value="Yes",true,false));
+              Set(VAR_cyclesPP,var_selected_pump.cycles_PP);
+              Set(VAR_dollarsPP,var_selected_pump.foam_cost);
+              Set(VAR_targetFPP,var_selected_pump.target_lfpp);
+              Set(VAR_foam_name,var_selected_pump.foam_name);
+              Set(VAR_foam_cost,var_selected_pump.foam_cost);
+              Set(VAR_pump_name,var_selected_pump.pump_name);
+
+              Navigate(Foam_details_week,ScreenTransition.Fade)
+            Text: =If(IsBlank(var_selected_pump),"Please select a pump first","Weekly Foam Data")
+            Width: =250
+            X: =445
+            Y: =577
+      - Label1_10:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Height: =33
+            Size: =20
+            Text: ="Roofs"
+            Width: =149
+            X: =158
+            Y: =527
+      - Button1_20:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =RGBA(2, 66, 109, 1)
+            DisplayMode: =If(IsBlank(var_selected_pump),DisplayMode.Disabled,DisplayMode.Edit)
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =150
+            OnSelect: |-
+              =Set(VAR_plant_ID,PID);
+              Set(VAR_facility,facility_drop_1.SelectedText.Value);
+
+              Set(VAR_ToverEW,Value(
+                       If(ToverEW_drop.SelectedText.Value="Foaming",1,
+                       If(ToverEW_drop.SelectedText.Value="Stitching",2,
+                       3))));
+
+              Set(VAR_EBoverSW,
+                       If(EBoverSW_drop.SelectedText.Value="Yes",true,false));
+              Set(VAR_cyclesPP,var_selected_pump.cycles_PP);
+              Set(VAR_dollarsPP,var_selected_pump.foam_cost);
+              Set(VAR_targetFPP,var_selected_pump.target_lfpp);
+              Set(VAR_foam_name,var_selected_pump.foam_name);
+              Set(VAR_foam_cost,var_selected_pump.foam_cost);
+              Set(VAR_pump_name,var_selected_pump.pump_name);
+
+              Navigate(Foam_details_floor,ScreenTransition.Fade)
+            Text: =If(IsBlank(var_selected_pump),"Please select a pump first","All details by Floor")
+            Width: =250
+            X: =158
+            Y: =577
+      - Label5_15:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            Height: =30
+            Size: =10
+            Text: ="trusses over endwalls"
+            Width: =212
+            X: =171
+            Y: =354
+      - ToverEW_drop:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Default: =LookUp(Plant_Settings,plant_drop_1.Text &" - "&facility_drop_1.SelectedText.Value=facility_lookup,T_over_end)
+            Height: =27
+            Items: =["Foaming","Stitching", "Not foaming"]
+            Items.Value: =Value
+            OnChange: =Set(ToverEW,ToverEW_drop.SelectedText.Value)
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =125
+            X: =45
+            Y: =356
+      - Label5_19:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            Height: =30
+            Size: =10
+            Text: |-
+              ="foaming edge beams over sidewalls
+              "
+            Width: =249
+            X: =134
+            Y: =389
+      - EBoverSW_drop:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Default: =LookUp(Plant_Settings,plant_drop_1.Text &" - "&facility_drop_1.SelectedText.Value=facility_lookup,Foam_edge_overSW)
+            Height: =30
+            Items: =["Yes","No"]
+            Items.Value: =Value
+            OnChange: =Set(EBoverSW,EBoverSW_drop.SelectedText.Value)
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =88
+            X: =45
+            Y: =390
+      - Image2_4:
+          Control: Image
+          Properties:
+            Height: =89
+            Image: ='Miracle-Foamseal-F2100A-Resin-52g-Drum-2016-03-08-3D-MOCKUP-400x588'
+            Width: =70
+            X: =113
+            Y: =245
+      - Image2_5:
+          Control: Image
+          Properties:
+            Height: =89
+            Image: ='Miracle-Foamseal-F2100-Resin-52g-Drum-2016-04-08-3D-MOCKUP-400x584'
+            Width: =59
+            X: =194
+            Y: =245
+      - Button5_2:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =ColorFade(Self.Fill, -35%)
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(136, 160, 209, 1)
+            Height: =60
+            OnSelect: =Launch("https://championhomebuilders.sharepoint.com/:b:/s/OpExResources/Eb_KRYvOY4BLlXrWPBuoJIUBy8RNLFLy5jtg-wr4ncHCVw?e=q7AJI8")
+            Size: =10
+            Text: ="Bead Guide"
+            Width: =90
+            X: =1000
+            Y: =577
+      - Icon2_10:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+            X: =14
+      - Icon6:
+          Control: Classic/Icon
+          Properties:
+            Height: =33
+            Icon: =Icon.Save
+            OnSelect: "=Patch(\r\n    Plant_Settings,\r\n    First(\r\n        Filter(\r\n            Plant_Settings,\r\n            Plant_Names = plant_drop_1.Text,\r\n            Facility_name = facility_drop_1.SelectedText.Value\r\n        )\r\n    ),\r\n    {\r\n        T_over_end:ToverEW_drop.SelectedText.Value,\r\n        Foam_edge_overSW:EBoverSW_drop.SelectedText.Value\r\n        \r\n    }\r\n)"
+            Width: =33
+            X: =45
+            Y: =435
+      - Label5_33:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            Height: =30
+            Size: =10
+            Text: ="Save Settings"
+            Width: =121
+            X: =93
+            Y: =435
+      - Label1_17:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Size: =14
+            Text: ="Plant"
+            X: =111
+            Y: =83
+      - Label1_18:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Size: =14
+            Text: ="Facility"
+            X: =111
+            Y: =140
+      - facility_drop_1:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Items: =Filter(Plant_List, Plant_Names = plant_drop_1.Text)
+            Items.Value: =Facility
+            OnChange: =UpdateContext({var_selected_pump:First(Filter('plant-pumps',Plant_ID=PID,Facility=Self.SelectedText.Value))})
+            Reset: =true
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =14
+            Width: =168
+            X: =115
+            Y: =172
+      - Label1_19:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Size: =10
+            Text: =plant_drop_1.Text & " - " &facility_drop_1.SelectedText.Value
+            Visible: =false
+            Width: =243
+            X: =51
+            Y: =195
+      - Label12_1:
+          Control: Label
+          Properties:
+            Height: =76
+            Size: =10
+            Text: |-
+              ="Alpha 5200 - $2.11 to $1.8
+              Dow Voramer - $1.88
+              ITW Foamseal - $1.97
+              FSI FoamNail - $2.00
+              "
+            VerticalAlign: =VerticalAlign.Top
+            Width: =191
+            X: =1098
+            Y: =237
+      - Label5_30:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            FontWeight: =FontWeight.Semibold
+            Size: =10
+            Text: ="Estimated cost per pound:"
+            Width: =220
+            X: =1098
+            Y: =205
+      - Icon2_18:
+          Control: Classic/Icon
+          Properties:
+            Height: =54
+            Icon: =Icon.ListScrollWatchlist
+            OnSelect: =Navigate(Foam_details_floor_HIS,ScreenTransition.CoverRight)
+            Width: =60
+            X: =71
+            Y: =578
+      - plant_drop_1:
+          Control: Label
+          Properties:
+            Size: =14
+            Text: =LookUp(Plant_List,PID=Plant_ID,Plant_Names)
+            Width: =255
+            X: =115
+            Y: =109
+      - Button1_32:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =ColorFade(Self.Fill, -35%)
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(136, 160, 209, 1)
+            Height: =60
+            OnSelect: =Launch("https://apps.powerapps.com/play/a6b58962-e306-47d5-80cc-01eeb9cced08?tenantId=906f2348-17ef-4fb9-943a-f0a55a301f94")
+            Size: =10
+            Text: |-
+              ="Pull Test
+              Data Entry"
+            Width: =90
+            X: =899
+            Y: =577
+      - Label5_31:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            FontWeight: =FontWeight.Semibold
+            Size: =10
+            Text: ="Cycles per pound by pump type:"
+            Width: =220
+            X: =1098
+            Y: =86
+      - Label12_2:
+          Control: Label
+          Properties:
+            Height: =83
+            Size: =10
+            Text: |-
+              ="4.20 for the A-25 Graco
+              3.75 for the A-20 Graco 
+              3.37 for the Gussmer
+              2.84 for the New PH-2
+              5.90 for the PK-25"
+            Width: =220
+            X: =1098
+            Y: =121
+      - Button1_34:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =RGBA(2, 66, 109, 1)
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =30
+            OnSelect: "=//First(        Filter(            'plant-pumps',            Plant_ID = PID,            Facility = facility_drop_1.SelectedText.Value            )),\n\nPatch('plant-pumps',\n    Defaults('plant-pumps'),\n    {\n        Plant_ID:PID,\n        Plant_Region: LookUp(Plant_List,PID=Plant_ID,Plant_Region),\n        Plant_Names: LookUp(Plant_List,PID=Plant_ID,Plant_Names),\n        Facility:facility_drop_1.SelectedText.Value,\n        Name_Facility: LookUp(Plant_List,PID=Plant_ID,Plant_Names) & \" - \" &facility_drop_1.SelectedText.Value,\n        Plant_Facility:PID & \" - \" &facility_drop_1.SelectedText.Value,\n        pump_name: add_pump_txt.Text,\n        foam_name: foam_name_drop_1.SelectedText.Value,\n        foam_cost:Value(foam_cost_txt.Text),\n        cycles_PP:Value(cycles_PP_txt.Text),\n        target_lfpp:Value(target_lftpp_txt.Text)\n        \n        \n        \n    }\n);\n\nReset(add_pump_txt)\n\n//SubmitForm(Form1)"
+            Size: =10
+            Text: ="Add Pump"
+            Width: =166
+            X: =647
+            Y: =450
+      - DataCardKey8_1:
+          Control: Label
+          Properties:
+            AutoHeight: =true
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.Darker30
+            Height: =28
+            Size: =10
+            Text: ="New pump:"
+            Width: =84
+            Wrap: =false
+            X: =433
+            Y: =409
+      - add_pump_txt:
+          Control: Classic/TextInput
+          Properties:
+            BorderColor: =
+            BorderThickness: =1
+            Default: =
+            DelayOutput: =true
+            Height: =30
+            PaddingLeft: =5
+            Size: =10
+            Tooltip: =
+            Width: =102
+            X: =521
+            Y: =408
+      - DataCardKey8_2:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.Darker30
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =10
+            Text: ="Select the pump you are reporting for:"
+            Width: =312
+            Wrap: =false
+            X: =421
+            Y: =80
+      - Gallery5:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            DelayItemLoading: =false
+            Height: =259
+            Items: =Filter('plant-pumps',Plant_ID=PID,Facility=facility_drop_1.SelectedText.Value)
+            LoadingSpinner: =LoadingSpinner.None
+            OnSelect: |-
+              =UpdateContext({var_selected_pump: ThisItem})
+            TemplateFill: =If(    ThisItem.pump_name=var_selected_pump.pump_name,    Color.LightCoral,    Color.White)
+            TemplateSize: =30
+            Width: =562
+            X: =449
+            Y: =149
+          Children:
+            - Label36:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: |-
+                    ="Facility: " & ThisItem.Facility
+                  Width: =80
+            - Label39:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: |-
+                    ="Pump: "&ThisItem.pump_name & " using " & ThisItem.foam_name
+                  Width: =264
+                  X: =72
+            - Icon9:
+                Control: Classic/Icon
+                Properties:
+                  Height: =30
+                  Icon: =Icon.Trash
+                  OnSelect: |-
+                    =Select(Parent);
+                    Remove('plant-pumps',Gallery5.Selected)
+                  Width: =24
+                  X: =520
+            - Label42:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.cycles_PP
+                  Width: =50
+                  X: =396
+            - Label42_1:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: ="$" & ThisItem.foam_cost
+                  Width: =60
+                  X: =336
+            - Label42_2:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.target_lfpp
+                  Width: =50
+                  X: =446
+      - foam_cost_txt:
+          Control: Classic/TextInput
+          Properties:
+            BorderColor: =
+            BorderThickness: =1
+            Default: =
+            DelayOutput: =true
+            Height: =30
+            PaddingLeft: =5
+            Size: =10
+            Tooltip: =
+            Width: =63
+            X: =776
+            Y: =408
+      - foam_name_drop_1:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Default: =""
+            Height: =30
+            Items: =["FoamSeal","FoamNail", "DOW Voramer","Alpha"]
+            Items.Value: =Value
+            OnChange: =Set(ToverEW,foam_name_drop_1.SelectedText.Value)
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =111
+            X: =633
+            Y: =408
+      - Label40:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =25
+            Size: =10
+            Text: ="Name"
+            Width: =102
+            X: =521
+            Y: =382
+      - Label40_1:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =25
+            Size: =10
+            Text: ="Foam"
+            Width: =111
+            X: =633
+            Y: =383
+      - Label40_2:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =25
+            Size: =10
+            Text: ="Cost / lb"
+            Width: =87
+            X: =759
+            Y: =383
+      - Label40_3:
+          Control: Label
+          Properties:
+            Align: =Align.Right
+            Height: =30
+            Size: =10
+            Text: ="$"
+            Width: =22
+            X: =753
+            Y: =408
+      - cycles_PP_txt:
+          Control: Classic/TextInput
+          Properties:
+            BorderColor: =
+            BorderThickness: =1
+            Default: =
+            DelayOutput: =true
+            Height: =30
+            PaddingLeft: =5
+            Size: =10
+            Tooltip: =
+            Width: =63
+            X: =858
+            Y: =408
+      - Label40_4:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =25
+            Size: =10
+            Text: ="Cycles  / Lb"
+            Width: =81
+            X: =849
+            Y: =383
+      - target_lftpp_txt:
+          Control: Classic/TextInput
+          Properties:
+            BorderColor: =
+            BorderThickness: =1
+            Default: =
+            DelayOutput: =true
+            Height: =30
+            PaddingLeft: =5
+            Size: =10
+            Tooltip: =
+            Width: =63
+            X: =948
+            Y: =408
+      - Label40_5:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =25
+            Size: =10
+            Text: ="Target ft / lb"
+            Width: =92
+            X: =933
+            Y: =383
+      - Label12_6:
+          Control: Label
+          Properties:
+            Height: =76
+            Size: =10
+            Text: |-
+              ="Alpha 5200 - 33
+              Dow Voramer - 25
+              ITW Foamseal - 30
+              FSI FoamNail - 14
+              "
+            VerticalAlign: =VerticalAlign.Top
+            Width: =191
+            X: =1098
+            Y: =346
+      - Label5_32:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            FontWeight: =FontWeight.Semibold
+            Size: =10
+            Text: ="Suggested ft / lb targets:"
+            Width: =220
+            X: =1098
+            Y: =314
+      - Button5_4:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =ColorFade(Self.Fill, -35%)
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(136, 160, 209, 1)
+            Height: =60
+            OnSelect: =Launch("https://championhomebuilders.sharepoint.com/:b:/s/OperationalExcellence/EcLd0-brvBpDuxeb3jl4bE8BirfbRoBLsrY4Gs_6teQY4Q?e=F0eiVT")
+            Size: =10
+            Text: ="Gauges Order Form"
+            Width: =90
+            X: =1100
+            Y: =577
+      - Label40_6:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =25
+            Size: =8
+            Text: ="Cost / lb"
+            Width: =64
+            X: =788
+            Y: =128
+      - Label40_7:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =32
+            Size: =8
+            Text: ="Cycles/ lb"
+            Width: =50
+            X: =849
+            Y: =121
+      - Label40_8:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =32
+            Size: =8
+            Text: ="Target ft/lb"
+            Width: =49
+            X: =899
+            Y: =121
+      - Button1_38:
+          Control: Classic/Button
+          Properties:
+            BorderColor: =ColorFade(Self.Fill, -35%)
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(136, 160, 209, 1)
+            Height: =77
+            OnSelect: =Launch("https://championhomebuilders.sharepoint.com/sites/OperationalExcellence/SitePages/2-Part%20Foam%20Plan.aspx")
+            Size: =10
+            Text: |-
+              ="2-Part Foam
+              Sharepoint Site"
+            Width: =291
+            X: =899
+            Y: =650
+      - Text2:
+          Control: ModernText
+          Properties:
+            Size: =12
+            Text: |-
+              ="Selected pump: " & var_selected_pump.pump_name
+            Width: =299
+            X: =420
+            Y: =486
+      - Text3:
+          Control: ModernText
+          Properties:
+            Align: =Align.Center
+            Text: ="or "
+            Width: =37
+            X: =408
+            Y: =695
+      - Text3_1:
+          Control: ModernText
+          Properties:
+            Align: =Align.Center
+            Text: ="(choose one)"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =119
+            X: =221
+            Y: =532

@@ -1,0 +1,441 @@
+Screens:
+  INS_Splash:
+    Properties:
+      Fill: =
+    Children:
+      - Label34:
+          Control: Label
+          Properties:
+            Text: '="6.2"   '
+            Visible: =false
+            X: =805
+            Y: =494
+      - Label35:
+          Control: Label
+          Properties:
+            Text: =Round(Label34.Text/0.25,0)*0.25
+            Visible: =false
+            X: =1079
+            Y: =474
+      - Label35_1:
+          Control: Label
+          Properties:
+            Text: =Round(Mod(TextInput3.Text,Trunc(TextInput3.Text))/0.25,0)*0.25
+            Visible: =false
+            Width: =73
+            X: =1079
+            Y: =717
+      - TextInput3:
+          Control: Classic/TextInput
+          Properties:
+            Visible: =false
+            Width: =125
+            X: =805
+            Y: =555
+      - Label35_2:
+          Control: Label
+          Properties:
+            Text: =RoundUp(TextInput3.Text,1)
+            Visible: =false
+            Width: =73
+            X: =1079
+            Y: =677
+      - Container23:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =App.Height
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Vertical
+            Width: =App.Width
+          Children:
+            - cnt_header:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(2, 66, 109, 1)
+                  FillPortions: =0
+                  Height: =75
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMaxHeight: =75
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                  Width: =App.Width
+                Children:
+                  - Icon2_6:
+                      Control: Classic/Icon
+                      Properties:
+                        Color: =RGBA(255, 255, 255, 1)
+                        Icon: =Icon.Home
+                        OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+                  - Title2_9:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.PrimaryForeground
+                        FillPortions: =1
+                        FontWeight: =FontWeight.Bold
+                        Height: =64
+                        PaddingRight: =10
+                        Size: =18
+                        Text: ="Insulation Main Screen"
+                        Width: =1282
+                        X: =84
+                  - Icon1_13:
+                      Control: Classic/Icon
+                      Properties:
+                        Color: =RGBA(255, 255, 255, 1)
+                        Icon: =Icon.ChevronLeft
+                        OnSelect: =Back()
+                        X: =1302
+            - Container19:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =700
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                  Width: =1261
+                  X: =40
+                  Y: =40
+                Children:
+                  - Container20:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - Container25:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - Label10_3:
+                                  Control: Label
+                                  Properties:
+                                    Height: =38
+                                    Text: ="Set your plant's common variables:"
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =348
+                                    X: =36
+                                    Y: =128
+                              - Label1_14:
+                                  Control: Label
+                                  Properties:
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Plant " & PID
+                                    X: =48
+                                    Y: =182
+                              - AHDS:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderThickness: =1
+                                    Default: =LookUp(Plant_Settings,facility_lookup=Text(Label1_16.Text),Duct_width)
+                                    FontWeight: =FontWeight.Bold
+                                    Format: =TextFormat.Number
+                                    RadiusBottomLeft: =1
+                                    RadiusBottomRight: =1
+                                    RadiusTopLeft: =1
+                                    RadiusTopRight: =1
+                                    Size: =10
+                                    Width: =53
+                                    X: =302
+                                    Y: =335
+                              - Label1_32:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Right
+                                    FontWeight: =FontWeight.Semibold
+                                    Size: =9
+                                    Text: ="Average Heat Duct Width"
+                                    Width: =158
+                                    X: =144
+                                    Y: =335
+                              - Label1_15:
+                                  Control: Label
+                                  Properties:
+                                    FontWeight: =FontWeight.Bold
+                                    Text: ="Facility"
+                                    X: =202
+                                    Y: =182
+                              - facility_drop:
+                                  Control: Classic/DropDown
+                                  Properties:
+                                    BorderThickness: =1
+                                    ChevronBackground: =RGBA(2, 66, 109, 1)
+                                    FontWeight: =FontWeight.Bold
+                                    Items: =Filter(Plant_List, Plant_Names = Label2.Text)
+                                    Items.Value: =Facility
+                                    Reset: =true
+                                    SelectionFill: =RGBA(2, 66, 109, 1)
+                                    Size: =10
+                                    Width: =96
+                                    X: =291
+                                    Y: =182
+                              - Label1_16:
+                                  Control: Label
+                                  Properties:
+                                    FontWeight: =FontWeight.Bold
+                                    Text: =Label2.Text & " - " &facility_drop.SelectedText.Value
+                                    Visible: =false
+                                    Width: =243
+                                    X: =48
+                                    Y: =310
+                              - Label1_37:
+                                  Control: Label
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Size: =9
+                                    Text: ="inches"
+                                    Width: =75
+                                    X: =356
+                                    Y: =335
+                              - Label1_33:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Right
+                                    FontWeight: =FontWeight.Semibold
+                                    Size: =9
+                                    Text: ="Insulation Product Name"
+                                    Width: =158
+                                    X: =144
+                                    Y: =386
+                              - ins_name_txt:
+                                  Control: Classic/DropDown
+                                  Properties:
+                                    BorderThickness: =1
+                                    ChevronBackground: =RGBA(2, 66, 109, 1)
+                                    Default: =LookUp(Plant_Settings,facility_lookup=Text(Label1_16.Text),Insulation_name)
+                                    FontWeight: =FontWeight.Bold
+                                    Items: =["","Sanctuary","GreenShield","OC Propink 77","Applegate","INS-506"]
+                                    Items.Value: =Value
+                                    Reset: =true
+                                    SelectionFill: =RGBA(2, 66, 109, 1)
+                                    Size: =10
+                                    Width: =174
+                                    X: =302
+                                    Y: =387
+                              - Button3_9:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =39
+                                    OnSelect: |-
+                                      =Patch(
+                                          Plant_Settings,
+                                          First(
+                                              Filter(
+                                                  Plant_Settings,
+                                                  Plant_Names = Label2.Text,
+                                                  Facility_name = facility_drop.SelectedText.Value
+                                              )
+                                          ),
+                                          {
+                                              Insulation_name:ins_name_txt.SelectedText.Value,
+                                              Duct_width:Value(AHDS.Text),
+                                              bag_cost: Value(bag_cost_txt.Text)
+
+                                          }
+                                      )
+                                    Size: =16
+                                    TabIndex: =1
+                                    Text: ="Save"
+                                    Width: =332
+                                    X: =144
+                                    Y: =509
+                              - Label1_34:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Right
+                                    FontWeight: =FontWeight.Semibold
+                                    Size: =9
+                                    Text: ="Cost per bag"
+                                    Width: =158
+                                    X: =144
+                                    Y: =438
+                              - bag_cost_txt:
+                                  Control: Classic/TextInput
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderThickness: =1
+                                    Default: =LookUp(Plant_Settings,facility_lookup=Text(Label1_16.Text),bag_cost)
+                                    FontWeight: =FontWeight.Bold
+                                    Format: =TextFormat.Number
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =1
+                                    RadiusBottomRight: =1
+                                    RadiusTopLeft: =1
+                                    RadiusTopRight: =1
+                                    Size: =10
+                                    Width: =53
+                                    X: =302
+                                    Y: =440
+                              - Label2:
+                                  Control: Label
+                                  Properties:
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =50
+                                    Size: =20
+                                    Text: =LookUp(Plant_List,PID=Plant_ID,Plant_Names)
+                                    Width: =400
+                                    X: =36
+                                    Y: =41
+                              - Label1_35:
+                                  Control: Label
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Size: =9
+                                    Text: ="$"
+                                    Width: =158
+                                    X: =356
+                                    Y: =440
+                              - Label35_3:
+                                  Control: Label
+                                  Properties:
+                                    Text: =Round(Mod(TextInput3.Text,Trunc(TextInput3.Text))/0.25,0)*0.25*10
+                                    Visible: =false
+                                    Width: =73
+                                    X: =578
+                                    Y: =244
+                  - Container21:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutJustifyContent: =LayoutJustifyContent.Center
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - cnt_floors:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              Visible: =false
+                            Children:
+                              - Button3_6:
+                                  Control: Classic/Button
+                                  Properties:
+                                    DisplayMode: =DisplayMode.Disabled
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =16
+                                    OnSelect: |-
+                                      =Set(var_plantfacility, Label2.Text & " - " &facility_drop.SelectedText.Value);
+                                      Set(var_insulation_name,ins_name_txt.SelectedText.Value);
+                                      Set(var_bag_cost,Value(bag_cost_txt.Text));
+                                      Navigate(INS_Floors,ScreenTransition.UnCover)
+                                    Size: =24
+                                    TabIndex: =1
+                                    Text: ="Floors"
+                                    Width: =230
+                                    X: =340
+                                    Y: =124
+                              - Icon2_15:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    DisplayMode: =DisplayMode.Disabled
+                                    Height: =16
+                                    Icon: =Icon.ListScrollWatchlist
+                                    OnSelect: |-
+                                      =Set(var_plantfacility, Label2.Text & " - " &facility_drop.SelectedText.Value);
+                                      Navigate(HIS_Floors,ScreenTransition.CoverRight)
+                                    Width: =97
+                                    X: =171
+                              - Label7:
+                                  Control: Label
+                                  Properties:
+                                    Align: =LayoutAlignItems.Center
+                                    DisplayMode: =DisplayMode.Disabled
+                                    Height: =16
+                                    Size: =12
+                                    Text: ="Historical Data"
+                                    Width: =120
+                                    X: =96
+                                    Y: =124
+                        - Container27:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - Button3_7:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =97
+                                    OnSelect: |-
+                                      =Set(var_plantfacility, Label2.Text & " - " &facility_drop.SelectedText.Value);
+                                      Set(var_insulation_name,ins_name_txt.SelectedText.Value);
+                                      Set(var_bag_cost,Value(bag_cost_txt.Text));
+                                      Navigate(INS_Roofs,ScreenTransition.UnCover)
+                                    Size: =24
+                                    TabIndex: =1
+                                    Text: ="Roofs"
+                                    Width: =230
+                                    X: =224
+                                    Y: =26
+                              - Icon2_17:
+                                  Control: Classic/Icon
+                                  Properties:
+                                    Height: =97
+                                    Icon: =Icon.ListScrollWatchlist
+                                    OnSelect: |-
+                                      =Set(var_plantfacility, Label2.Text & " - " &facility_drop.SelectedText.Value);
+                                      Navigate(HIS_Roofs,ScreenTransition.CoverRight)
+                                    Width: =97
+                                    X: =221
+                                    Y: =423
+                              - Label7_1:
+                                  Control: Label
+                                  Properties:
+                                    Align: =LayoutAlignItems.Center
+                                    Size: =12
+                                    Text: ="Historical Data"
+                                    Width: =120
+                                    X: =336
+                                    Y: =451
+                              - Label29:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Justify
+                                    Height: =142
+                                    Text: |-
+                                      ="Roof insulation must be calculated using an external calculator called the Heat Loss Calculation Tool.
+
+                                      This tool can be found in the Engineering SharePoint site. It is the only way to properly calculate insulation depth and number of bags required for every floor."
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Width: =416
+                                    X: =131
+                                    Y: =196

@@ -1,0 +1,1226 @@
+Screens:
+  review_screen1:
+    Properties:
+      OnVisible: |-
+        =Set(var_prod_sections,"null");
+        ClearCollect(col_p,plant_models)
+    Children:
+      - Rectangle2:
+          Control: Rectangle
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =231
+            Width: =160
+            X: =10
+            Y: =296
+      - RectQuickActionBar3_2:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =64
+            Width: =Parent.Width
+      - NewDataGallery_2:
+          Control: Gallery
+          Variant: BrowseLayout_Vertical_TwoTextVariant_ver4.0
+          Properties:
+            Height: =644
+            Items: |
+              =//Filter(Production_Master,Plant_ID=PID,Reviewed="No")
+              //Filter(Production_Master,Plant_ID=PID,Reviewed="No")
+              SortByColumns(Filter(col_production,Plant_ID=PID,Reviewed="No", Facility=Dropdown1_5.SelectedText.Value),"Title",SortOrder.Ascending)
+              //SortByColumns(col_production,"Title",Descending)
+            TemplateFill: "=If(Value(LFeet_1txt.Text)+Value(LInches_1txt.Text)/12 = 0\r\n        Or\r\n        Value(WFeet_1txt.Text)+Value(WInches_1txt.Text)/12 = 0\r\n        Or\r\n        Value(WFeet_1txt.Text)+Value(WInches_1txt.Text)/12 >18\r\n        Or\r\n        DateValue(date_gal_txt.Text) < DateAdd(Today(), -4, TimeUnit.Months)\r\n        Or\r\n        DateValue(date_gal_txt.Text) > DateAdd(Today(), 1, TimeUnit.Months),\r\n        \r\n        Color.LightCoral,Color.Transparent)"
+            TemplateSize: =40
+            Width: =1171
+            X: =194
+            Y: =124
+          Children:
+            - Separator5_2:
+                Control: Rectangle
+                Properties:
+                  Fill: =App.Theme.Colors.Darker30
+                  Height: =1
+                  OnSelect: =Select(btn_review_select)
+                  Width: =Parent.TemplateWidth
+                  Y: =39
+            - Prod_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.Production
+                  Height: =30
+                  OnChange: |-
+                    =Patch(col_production,ThisItem,
+                        {
+                            Production:Prod_txt.Text
+                        }
+                    )
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =2
+                  RadiusBottomRight: =2
+                  RadiusTopLeft: =2
+                  RadiusTopRight: =2
+                  Size: =8
+                  Width: =69
+                  X: =69
+                  Y: =5
+            - Serial_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.Serial
+                  Height: =30
+                  OnChange: |-
+                    =Patch(col_production,ThisItem,
+                        {
+                            Serial:Serial_txt.Text
+                        }
+                    )
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =2
+                  RadiusBottomRight: =2
+                  RadiusTopLeft: =2
+                  RadiusTopRight: =2
+                  Size: =8
+                  Width: =81
+                  X: =142
+                  Y: =5
+            - Model_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.Model
+                  Height: =30
+                  OnChange: |-
+                    =Patch(col_production,ThisItem,
+                        {
+                            Model:Model_txt.Text
+                        }
+                    )
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =2
+                  RadiusBottomRight: =2
+                  RadiusTopLeft: =2
+                  RadiusTopRight: =2
+                  Size: =8
+                  Width: =84
+                  X: =227
+                  Y: =5
+            - type_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  Default: =ThisItem.Home_Type
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(0, 0, 0, 0)
+                  Height: =Parent.TemplateHeight-6
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =8
+                  Width: =49
+                  X: =313
+                  Y: =3
+            - LInches_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.LInches
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =570
+                  Y: =5
+            - WFeet_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.WFeet
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =468
+                  Y: =5
+            - WInches_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.WInches
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =498
+                  Y: =5
+            - edit_toggle:
+                Control: Classic/Toggle
+                Properties:
+                  OnSelect: =Select(btn_review_select)
+                  Visible: =false
+                  X: =1033
+                  Y: =5
+            - LFeet_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.LFeet
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =540
+                  Y: =5
+            - HFeet_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =height_drop_ft.SelectedText.Value
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =612
+                  Y: =5
+            - HInches_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =height_drop_in.SelectedText.Value
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =642
+                  Y: =5
+            - date_gal_txt:
+                Control: Label
+                Properties:
+                  Height: =Parent.TemplateHeight-6
+                  OnSelect: =Select(btn_review_select)
+                  PaddingLeft: =0
+                  Size: =8
+                  Text: =Text(ThisItem.Date, "[$-en-US]dd-mmm-yy")
+                  Width: =69
+                  Y: =3
+            - plantID_txt:
+                Control: Classic/TextInput
+                Properties:
+                  BorderThickness: =0
+                  Default: =ThisItem.Plant_ID
+                  DelayOutput: =true
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  Visible: =false
+                  Width: =44
+                  X: =1037
+                  Y: =5
+            - Icon4:
+                Control: Classic/Icon
+                Properties:
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =1
+                  Height: =50
+                  Icon: =Icon.VerticalLine
+                  OnSelect: =Select(btn_review_select)
+                  Width: =40
+                  X: =664
+            - PWInch_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.PWidth_I
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =727
+                  Y: =5
+            - PLFeet_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.PLength_F
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =769
+                  Y: =5
+            - PLInch_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.PLength_I
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =799
+                  Y: =5
+            - PWFeet_1txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.PWidth_F
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =697
+                  Y: =5
+            - RRoof:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =If(Value(ThisItem.Roof_RValue)>0,ThisItem.Roof_RValue,Value(TextInput2.Text))
+                  DelayOutput: =true
+                  FocusedBorderThickness: =2
+                  Height: =30
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =8
+                  Width: =30
+                  X: =413
+                  Y: =4
+            - facility_txt:
+                Control: Classic/TextInput
+                Properties:
+                  BorderThickness: =0
+                  Default: =ThisItem.Facility
+                  DelayOutput: =true
+                  OnChange: =edit_toggle.Value=true
+                  OnSelect: =Select(btn_review_select)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  Visible: =false
+                  Width: =44
+                  X: =1081
+                  Y: =5
+            - Dropdown3:
+                Control: Classic/DropDown
+                Properties:
+                  BorderThickness: =1
+                  ChevronBackground: =RGBA(2, 66, 109, 1)
+                  Default: |-
+                    =If(var_prod_sections="null",If(ThisItem.Section="S","Single",If(ThisItem.Section="M","Multi")),var_prod_sections)
+
+
+                    //If(ThisItem.Section="S","Single",If(ThisItem.Section="M","Multi",If(var_fixed_sections=true,If(var_sections=true,"Single","Multi"),ThisItem.Section)))
+
+
+                    //If(ThisItem.Section="",If(var_fixed_sections=true,If(var_sections=true,"Single","Double"),If(Value(WFeet_1txt.Text+WInches_1txt.Text/12)<17,"Single",If(Value(WFeet_1txt.Text+WInches_1txt.Text/12)<35,"Double","Triple"))),ThisItem.Section)
+                  Height: =30
+                  Items: =["Single","Multi"]
+                  Items.Value: =Value
+                  PaddingLeft: =8
+                  SelectionFill: =RGBA(2, 66, 109, 1)
+                  Size: =8
+                  Width: =92
+                  X: =846
+                  Y: =5
+            - Icon8:
+                Control: Classic/Icon
+                Properties:
+                  Height: =30
+                  Icon: =Icon.Trash
+                  OnSelect: |-
+                    =Select(btn_review_select);
+                    Remove(col_production,LookUp(col_production,Title=NewDataGallery_2.Selected.Title))
+                  Width: =44
+                  X: =961
+                  Y: =5
+            - txt_elft_production:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =12
+                  Text: =LookUp(plant_models,Plant_ID=PID && Floor_model=ThisItem.Model,extra_lfb)
+                  Width: =42
+                  X: =1073
+                  Y: =4
+            - txt_bags_production:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =12
+                  Text: =Round((Value(LFeet_1txt.Text)+Value(LInches_1txt.Text)/12) * Value(Value(WFeet_1txt.Text)+Value(WInches_1txt.Text)/12 ),0)
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =42
+                  X: =1016
+                  Y: =4
+      - Title2_2:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="Production Data Review"
+            Width: =1282
+            X: =84
+      - Subtitle5_5:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: |-
+              ="Prod. / 
+              Run"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =74
+            X: =262
+            Y: =80
+      - Subtitle5_7:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Type"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =53
+            X: =505
+            Y: =80
+      - Icon1_6:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Subtitle5_8:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: |-
+              ="Serial/ Service
+              "
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =78
+            X: =336
+            Y: =80
+      - Subtitle5_30:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: |-
+              ="Model
+              "
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =75
+            X: =430
+            Y: =80
+      - Subtitle5_31:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =19
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Width"
+            Width: =50
+            X: =668
+            Y: =88
+      - Subtitle5_55:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =36
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Floor Area"
+            Width: =51
+            X: =1208
+            Y: =89
+      - Subtitle5_32:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Ft"
+            Width: =25
+            X: =665
+            Y: =103
+      - Subtitle5_33:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="In"
+            Width: =25
+            X: =696
+            Y: =103
+      - Subtitle5_35:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Ft"
+            Width: =25
+            X: =738
+            Y: =103
+      - Subtitle5_36:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="In"
+            Width: =25
+            X: =767
+            Y: =103
+      - Subtitle5_38:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Ft"
+            Width: =25
+            X: =809
+            Y: =103
+      - Subtitle5_39:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="In"
+            Width: =25
+            X: =839
+            Y: =103
+      - height_drop_ft:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Height: =25
+            Items: =[8,9,10]
+            Items.Value: =Value
+            PaddingLeft: =2
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =9
+            Width: =52
+            X: =32
+            Y: =329
+      - height_drop_in:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Default: ="0"
+            Height: =25
+            Items: =[0,1,2,3,4,5,6,7,8,9,10,11]
+            Items.Value: =Value
+            PaddingLeft: =2
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =9
+            Width: =52
+            X: =95
+            Y: =329
+      - Subtitle5_40:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Blanket Fill Options:"
+            Width: =145
+            X: =13
+            Y: =262
+      - Subtitle5_28:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Date"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =69
+            X: =194
+            Y: =80
+      - Label10:
+          Control: Label
+          Properties:
+            Height: =183
+            Size: =10
+            Text: |-
+              ="Review the data in the table and confirm by hitting the Submit Button. Delete invalid entries using the trash can.
+
+              Use the 'Blanket Fill Options' below to change all rows at the same time."
+            Width: =160
+            X: =9
+            Y: =75
+      - Button4_1:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: "=If(\r\n    // Check if any gallery item has zero width or zero length\r\n    CountIf(\r\n        NewDataGallery_2.AllItems,\r\n        Value(ThisRecord.LFeet_1txt.Text)+Value(ThisRecord.LInches_1txt.Text)/12 = 0\r\n        Or\r\n        Value(ThisRecord.WFeet_1txt.Text)+Value(ThisRecord.WInches_1txt.Text)/12 = 0\r\n    ) > 0,\r\n\r\n    // FAIL: Notify and stop\r\n    Notify(\r\n        \"One or more records have zero Width or Length. Please review before submitting.\",\r\n        NotificationType.Error\r\n    ),\r\n    // Check 2: Width exceeds 18 feet\r\n    CountIf(\r\n        NewDataGallery_2.AllItems,\r\n        Value(ThisRecord.WFeet_1txt.Text)+Value(ThisRecord.WInches_1txt.Text)/12 > 18\r\n    ) > 0,\r\n    Notify(\r\n        \"A floor width cannot be over 18 feet!\",\r\n        NotificationType.Error\r\n    ),\r\n    // Check 3: Date out of allowed range\r\n    DateValue(date_gal_txt.Text) < (DateAdd(Today(), -4, TimeUnit.Months))\r\n    Or\r\n    DateValue(date_gal_txt.Text) > (DateAdd(Today(), 1, TimeUnit.Months)),\r\n    Notify(\r\n        \"Date must be within 4 months in the past and 1 month in the future.\",\r\n        NotificationType.Error\r\n    ),\r\n\r\n\r\n    // PASS: Proceed with all patches\r\n    ForAll(NewDataGallery_2.AllItems,\r\n\r\n        Patch(Production_Master,Defaults(Production_Master),\r\n        //ThisRecord,\r\n            {\r\n                Title:ThisRecord.Title,\r\n                Date:ThisRecord.Date,\r\n                Plant_ID:ThisRecord.Plant_ID,\r\n                Facility:ThisRecord.Facility,\r\n                //Plant_Facility:ThisRecord.Plant_ID & \" - \" & ThisRecord.Facility,\r\n                User_Name:User().FullName,\r\n                W_Date:Date-Weekday(DateValue(date_gal_txt.Text),3),\r\n                Production:ThisRecord.Prod_txt.Text,\r\n                Serial:ThisRecord.Serial_txt.Text,\r\n                Model:ThisRecord.Model_txt.Text,\r\n                Home_Type:ThisRecord.type_txt.Text,\r\n                Section:ThisRecord.Dropdown3.SelectedText.Value,\r\n                Roof_RValue:Value(ThisRecord.RRoof.Text),\r\n                LFeet:Value(ThisRecord.LFeet_1txt.Text),\r\n                LInches:Value(ThisRecord.LInches_1txt.Text),\r\n                WFeet:Value(ThisRecord.WFeet_1txt.Text),\r\n                WInches:Value(ThisRecord.WInches_1txt.Text),\r\n                HFeet:Value(ThisRecord.HFeet_1txt.Text),\r\n                HInches:Value(ThisRecord.HInches_1txt.Text),\r\n                Reviewed:\"Yes\",\r\n                Review_By: User().FullName \r\n            }\r\n            );\r\n        Patch(Insulation_Roofs,\r\n            Defaults(Insulation_Roofs),\r\n                {\r\n                    Title:ThisRecord.Title,\r\n                    Plant_ID:Value(plantID_txt.Text),\r\n                    Facility_ID:ThisRecord.Facility,\r\n                    //Plant_facility:Value(plantID_txt.Text) & \" - \" & Value(facility_txt.Text),\r\n                    User_Name: Office365Users.MyProfileV2().displayName,\r\n                    Date:DateValue(date_gal_txt.Text),\r\n                    W_Date:Date-Weekday(DateValue(date_gal_txt.Text),3),\r\n                    Production:Prod_txt.Text,\r\n                    Serial:Serial_txt.Text,\r\n                    Model:Model_txt.Text,\r\n                    Type:type_txt.Text,\r\n                    Section:Dropdown3.SelectedText.Value,\r\n                    Length:Value(LFeet_1txt.Text)+Value(LInches_1txt.Text)/12,\r\n                    Width:If(Value(LFeet_1txt.Text)+Value(LInches_1txt.Text)/12 > 18,(Value(WFeet_1txt.Text)+Value(WInches_1txt.Text)/12)/2,Value(WFeet_1txt.Text)+Value(WInches_1txt.Text)/12),\r\n                    PWidth:Value(PWFeet_1txt.Text)+Value(PWInch_1txt.Text)/12,\r\n                    PLength:Value(PLFeet_1txt.Text)+Value(PLInch_1txt.Text)/12,\r\n                    Edited: \"No\",\r\n                    RValue: Value(RRoof.Text),\r\n                    BagsReq:0\r\n                }\r\n        );\r\n        Patch(roofs_alldetails,\r\n            Defaults(roofs_alldetails),\r\n                {\r\n                    Title:ThisRecord.Title,\r\n                    PlantID:Value(plantID_txt.Text),\r\n                    Facility:ThisRecord.Facility,\r\n                    //Plant_facility:Value(plantID_txt.Text) & \" - \" & Value(facility_txt.Text),\r\n                    User_Name: Office365Users.MyProfileV2().displayName,\r\n                    Date:DateValue(date_gal_txt.Text),\r\n                    W_Date:Date-Weekday(DateValue(date_gal_txt.Text),3),\r\n                    Production:Prod_txt.Text,\r\n                    Serial:Serial_txt.Text,\r\n                    Model:Model_txt.Text,\r\n                    TypeX:type_txt.Text,\r\n                    Length:Value(LFeet_1txt.Text)+Value(LInches_1txt.Text)/12,\r\n                    Width:Value(WFeet_1txt.Text)+Value(WInches_1txt.Text)/12,\r\n                    Height:Value(HFeet_1txt.Text)+Value(HInches_1txt.Text)/12,\r\n                    PWidth:Value(PWFeet_1txt.Text)+Value(PWInch_1txt.Text)/12,\r\n                    PLength:Value(PLFeet_1txt.Text)+Value(PLInch_1txt.Text)/12,\r\n                    Section:Dropdown3.SelectedText.Value,\r\n                    Sections: If(Dropdown3.SelectedText.Value=\"Single\", \"S\",\"M\"),\r\n                    Edited: \"No\",\r\n                    Truss_spacing: 24,\r\n                    ExtraLFT:Value(txt_elft_production.Text)\r\n                }\r\n        )\r\n    );\r\n    Notify(\r\n        \"The production data was recorded successfully.\",\r\n        NotificationType.Success\r\n    );\r\n    Clear(col_production);\r\n    Navigate(Splash_Screen,ScreenTransition.Fade)\r\n);\r\n    \r\n\r\n    //Value(NewDataGallery_2.Selected.WFeet_txt.Text),\r\n    //           WInches:Value(NewDataGallery_2.Selected.WInches_txt.Text),"
+            RadiusBottomLeft: =3
+            RadiusBottomRight: =3
+            RadiusTopLeft: =3
+            RadiusTopRight: =3
+            Text: ="Submit"
+            Width: =128
+            X: =25
+            Y: =683
+      - Icon2_9:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Subtitle5_68:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =19
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Length"
+            Width: =50
+            X: =740
+            Y: =88
+      - Subtitle5_81:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =19
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Height"
+            Width: =50
+            X: =811
+            Y: =88
+      - Icon4_1:
+          Control: Classic/Icon
+          Properties:
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =1
+            Height: =50
+            Icon: =Icon.VerticalLine
+            OnSelect: =
+            Width: =40
+            X: =858
+            Y: =78
+      - Subtitle5_34:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =15
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Home Dimensions"
+            Width: =196
+            X: =673
+            Y: =65
+      - Subtitle5_37:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =15
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Porch Dimensions"
+            Width: =136
+            X: =893
+            Y: =65
+      - Subtitle5_82:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =19
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Length"
+            Width: =50
+            X: =972
+            Y: =89
+      - Subtitle5_83:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Ft"
+            Width: =25
+            X: =896
+            Y: =103
+      - Subtitle5_84:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="In"
+            Width: =25
+            X: =924
+            Y: =103
+      - Subtitle5_85:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Ft"
+            Width: =25
+            X: =966
+            Y: =103
+      - Subtitle5_86:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="In"
+            Width: =25
+            X: =994
+            Y: =103
+      - Subtitle5_87:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =19
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Width"
+            Width: =50
+            X: =898
+            Y: =88
+      - Subtitle5_90:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Roof R-Value"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =72
+            X: =589
+            Y: =80
+      - Subtitle5_51:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =27
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Sections"
+            Width: =91
+            X: =1040
+            Y: =101
+      - Subtitle5_122:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Height (Ft, In)"
+            Width: =95
+            X: =43
+            Y: =304
+      - Subtitle5_123:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Right
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Roof R Value:"
+            Width: =95
+            X: =3
+            Y: =371
+      - TextInput2:
+          Control: Classic/TextInput
+          Properties:
+            Align: =Align.Center
+            BorderThickness: =1
+            Default: =""
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =10
+            Width: =63
+            X: =101
+            Y: =368
+      - Subtitle5_124:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Right
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =25
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Floor R Value:"
+            Width: =95
+            X: =3
+            Y: =406
+      - TextInput2_4:
+          Control: Classic/TextInput
+          Properties:
+            Align: =Align.Center
+            BorderThickness: =1
+            Default: =""
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =10
+            Width: =63
+            X: =101
+            Y: =404
+      - Button8:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =23
+            OnSelect: |-
+              =//ForAll(NewDataGallery_2.AllItems,Remove(Production_Master, NewDataGallery_2.AllItems))
+              Clear(col_production)
+            RadiusBottomLeft: =3
+            RadiusBottomRight: =3
+            RadiusTopLeft: =3
+            RadiusTopRight: =3
+            Size: =10
+            Text: ="Delete All"
+            Width: =126
+            X: =27
+            Y: =483
+      - Dropdown1_5:
+          Control: Classic/DropDown
+          Properties:
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Default: ="facilityID"
+            Height: =30
+            Items: =Filter(Plant_List, Plant_ID = PID)
+            Items.Value: =Facility
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =77
+            X: =92
+            Y: =579
+      - Label13_5:
+          Control: Label
+          Properties:
+            Text: ="Facility:"
+            Width: =106
+            X: =16
+            Y: =574
+      - Button5:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            FontWeight: =FontWeight.Normal
+            Height: =20
+            OnSelect: |-
+              =If(var_prod_sections="null",Set(var_prod_sections,"Single"),If(var_prod_sections="Single",Set(var_prod_sections,"Multi"),If(var_prod_sections="Multi",Set(var_prod_sections,"null"))))
+
+              //Set(var_sections,!var_sections);//UpdateContext({var_sections:!var_sections});//Set(var_fixed_sections,true);//ForAll(NewDataGallery_2.AllItems,If(var_sections=true,Dropdown3.SelectedText.Value="Single","Double")))
+            RadiusBottomLeft: =5
+            RadiusBottomRight: =5
+            RadiusTopLeft: =5
+            RadiusTopRight: =5
+            Size: =10
+            Text: ="Change Sections"
+            Width: =126
+            X: =27
+            Y: =448
+      - Subtitle5_57:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =27
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="E LFT."
+            Width: =60
+            X: =1260
+            Y: =103
+      - btn_review_select:
+          Control: Classic/Button
+          Properties:
+            OnSelect: =
+            Text: ="."
+            Visible: =false

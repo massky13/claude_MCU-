@@ -1,0 +1,52 @@
+Screens:
+  Screen1:
+    Children:
+      - Label32_1:
+          Control: Label
+          Properties:
+            Text: |
+              =CountRows(Filter(roofs_alldetails,W_Date=DatePicker2_1.SelectedDate,User_Name="Rafael I. Silva Alfonzo", PlantID=237))
+            X: =1095
+            Y: =611
+      - week_cycles_txt_1:
+          Control: Classic/TextInput
+          Properties:
+            BorderThickness: =1
+            Default: =
+            DelayOutput: =true
+            Fill: =RGBA(238, 204, 204, 0.5)
+            Height: =30
+            OnChange: =
+            OnSelect: =
+            PaddingLeft: =3
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =10
+            TabIndex: =3
+            Width: =120
+            X: =1176
+            Y: =419
+      - DatePicker2_1:
+          Control: Classic/DatePicker
+          Properties:
+            Width: =165
+            X: =1005
+            Y: =414
+      - Button9_1:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |-
+              =//ForAll(Filter(roofs_alldetails_gallery_2.AllItems,
+              //Toggle1_1.Value=true),
+
+              Patch(Filter(roofs_alldetails,W_Date=DatePicker2_1.SelectedDate,User_Name="Rafael I. Silva Alfonzo", PlantID=237),
+                     Defaults(roofs_alldetails),
+                     {
+                      Cycle1_start:0,
+                      Cycle1_end:week_cycles_txt_1.Text/(CountRows(Filter(roofs_alldetails,W_Date=DatePicker2_1.SelectedDate,User_Name="Rafael I. Silva Alfonzo", PlantID=237)))
+                     }
+              )
+            X: =1081
+            Y: =476

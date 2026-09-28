@@ -1,0 +1,114 @@
+ComponentDefinitions:
+  cmpReorder:
+    DefinitionType: CanvasComponent
+    Children:
+      - cntReorder:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            Height: =475
+            X: =40
+            Y: =40
+          Children:
+            - galReorderItems:
+                Control: Gallery
+                Variant: BrowseLayout_Vertical_OneTextVariant_ver5.0
+                Properties:
+                  Height: =377
+                  Items: |
+                    =Table(
+                                  {
+                                      Index:1,
+                                      Value:"Apples"
+                                  },
+                                  {
+                                      Index:2,
+                                      Value:"Oranges"
+                                  },
+                                  {
+                                      Index:3,
+                                      Value:"Bananas"
+                                  },
+                                  {
+                                      Index:4,
+                                      Value:"Pears"
+                                  },
+                                  {
+                                      Index:5,
+                                      Value:"Grapes"
+                                  },
+                                  {
+                                      Index:6,
+                                      Value:"Plums"
+                                  },
+                                  {
+                                      Index:7,
+                                      Value:"Mangoes"
+                                  }
+                              )
+                  Width: =435
+                  X: =40
+                  Y: =40
+                Children:
+                  - Title5:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(50, 49, 48, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =Self.Size * 1.8
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =ThisItem.Value
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =Parent.TemplateWidth - 86
+                        X: =16
+                        Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                  - NextArrow3:
+                      Control: Classic/Icon
+                      Properties:
+                        AccessibleLabel: =Self.Tooltip
+                        Color: =RGBA(166, 166, 166, 1)
+                        Height: =50
+                        Icon: =Icon.ChevronRight
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =12
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Tooltip: ="View item details"
+                        Width: =50
+                        X: =Parent.TemplateWidth - Self.Width - 12
+                        Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                  - Separator4:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =8
+                        OnSelect: =Select(Parent)
+                        Width: =Parent.TemplateWidth
+                        Y: =Parent.TemplateHeight - Self.Height
+                  - Rectangle8:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =App.Theme.Colors.Darker30
+                        Height: =Parent.TemplateHeight - Separator4.Height
+                        OnSelect: =Select(Parent)
+                        Visible: =ThisItem.IsSelected
+                        Width: =4
+                  - cntReorderItem:
+                      Control: GroupContainer
+                      Variant: ManualLayout
+                      Properties:
+                        Height: =80
+                        Width: =373
+            - ButtonCanvas3:
+                Control: Button
+                Properties:
+                  OnSelect: =
+                  X: =40
+                  Y: =436

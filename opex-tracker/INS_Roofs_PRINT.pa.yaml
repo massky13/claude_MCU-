@@ -1,0 +1,384 @@
+Screens:
+  INS_Roofs_PRINT:
+    Properties:
+      Height: =1123
+      Width: =794
+    Children:
+      - NewDataGallery_8:
+          Control: Gallery
+          Variant: BrowseLayout_Vertical_TwoTextVariant_ver4.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            BorderThickness: =1
+            Height: =990
+            Items: |-
+              =//FirstN(Filter(Insulation_Roofs,Plant_ID=PID,W_Date=DatePicker4_2.SelectedDate),33)
+              FirstN(col_insulation_roofs,33)
+            OnSelect: =
+            ShowScrollbar: =false
+            TemplateSize: =30
+            Width: =667
+            X: =64
+            Y: =99
+          Children:
+            - bags_req_txt_4:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  BorderThickness: =1
+                  Default: =ThisItem.BagsReq
+                  DelayOutput: =true
+                  Height: =29
+                  LineHeight: =1
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =3
+                  Width: =50
+                  X: =517
+            - bags_actual_txt_4:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  BorderThickness: =1
+                  Default: =ThisItem.BagsActual
+                  DelayOutput: =true
+                  Height: =29
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =4
+                  Width: =50
+                  X: =567
+            - moisture_txt_4:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  BorderThickness: =1
+                  Default: =ThisItem.Moisture
+                  DelayOutput: =true
+                  Height: =29
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =5
+                  Width: =50
+                  X: =617
+            - depth_txt_4:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  BorderThickness: =1
+                  Default: =ThisItem.Depth
+                  DelayOutput: =true
+                  Height: =29
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =1
+                  Width: =50
+                  X: =402
+            - rvalue_txt_4:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  BorderThickness: =1
+                  Default: =ThisItem.RValue
+                  DelayOutput: =true
+                  Height: =29
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =2
+                  Width: =50
+                  X: =452
+            - date_txt_8:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =Text(ThisItem.Date, "[$-en-US]dd-mmm-yy")
+                  Width: =79
+            - date_txt_9:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.Production
+                  Width: =104
+                  X: =79
+            - date_txt_10:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.Serial
+                  Width: =81
+                  X: =183
+            - Separator5_9:
+                Control: Rectangle
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  Fill: =RGBA(0, 0, 0, 1)
+                  Height: =1
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  Y: =Parent.TemplateHeight - 1
+            - date_txt_14:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =Text( Int(ThisItem.Width) & "'" & RoundDown((ThisItem.Width - Int(ThisItem.Width)) * 12, 0) & "''" ) & " x "& Text( Int(ThisItem.Length) & "'" & RoundDown((ThisItem.Length - Int(ThisItem.Length)) * 12, 0) & "''" )
+                  Width: =99
+                  X: =264
+      - Title2_11:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="Roofs Insulation Bags"
+            Width: =Parent.Width
+      - Subtitle5_103:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Production"
+            Width: =102
+            X: =145
+            Y: =77
+      - Icon1_15:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =40
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            Width: =40
+            X: =691
+            Y: =19
+      - Subtitle5_105:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Actual"
+            Width: =59
+            X: =627
+            Y: =77
+      - Subtitle5_106:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =8
+            Text: ="------Bags------"
+            Width: =116
+            X: =570
+            Y: =64
+      - Subtitle5_107:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="M%"
+            Width: =60
+            X: =674
+            Y: =77
+      - Subtitle5_108:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Depth"
+            Width: =70
+            X: =455
+            Y: =77
+      - Subtitle5_109:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="RVal"
+            Width: =60
+            X: =513
+            Y: =77
+      - Subtitle5_110:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Req"
+            Width: =56
+            X: =579
+            Y: =77
+      - Subtitle5_111:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Date"
+            Width: =62
+            X: =67
+            Y: =77
+      - Subtitle5_112:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Serial"
+            Width: =43
+            X: =254
+            Y: =77
+      - Icon2_16:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =40
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+            Width: =40
+            X: =64
+            Y: =24
+      - Icon3_9:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =40
+            Icon: =Icon.Print
+            OnSelect: =Print()
+            Width: =40
+            X: =626
+            Y: =19
+      - Label12:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =21
+            Size: =10
+            Text: |-
+              ="Week starting: "&Text(var_selected_date, "mmm d, yyyy")
+            Width: =199
+            X: =297
+            Y: =43
+      - Subtitle5_115:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Dimensions"
+            Width: =94
+            X: =332
+            Y: =77

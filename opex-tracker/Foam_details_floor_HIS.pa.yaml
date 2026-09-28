@@ -1,0 +1,473 @@
+Screens:
+  Foam_details_floor_HIS:
+    Children:
+      - RectQuickActionBar3_12:
+          Control: Rectangle
+          Properties:
+            Height: =64
+            Width: =Parent.Width
+      - Title2_13:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="Historical Foam Roofs - All details by Floor"
+            Width: =1360
+            X: =3
+      - Icon1_18:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Icon2_24:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Icon3_10:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =60
+            Icon: =Icon.Print
+            OnSelect: |-
+              =
+              Print()
+            Width: =60
+            X: =1081
+      - Dropdown2_1:
+          Control: Classic/DropDown
+          Properties:
+            Items: =Filter(Plant_List,Plant_Names=Dropdown2_3.SelectedText.Value)
+            Items.Value: =Facility
+            Size: =10
+            Width: =73
+            X: =92
+            Y: =164
+      - Label9_1:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Semibold
+            Size: =10
+            Text: ="Week Date"
+            X: =15
+            Y: =268
+      - Dropdown2_3:
+          Control: Classic/DropDown
+          Properties:
+            Items: |-
+              =ForAll(Distinct(Plant_List,Plant_Names), {Result: ThisRecord.Value})
+            Items.Value: =Result
+            Size: =10
+            Width: =150
+            X: =15
+            Y: =90
+      - Label6_1:
+          Control: Label
+          Properties:
+            Text: |-
+              =If(Dropdown2_3.SelectedText.Value="Weiser, ID",17,
+              Value(LookUp(Plant_List,Plant_Names = Dropdown2_3.SelectedText.Value, Plant_ID)))
+            Visible: =false
+            Width: =49
+            X: =7
+            Y: =718
+      - Label21:
+          Control: Label
+          Properties:
+            Text: ="Facility:"
+            Width: =77
+            X: =15
+            Y: =164
+      - DatePicker1_2:
+          Control: Classic/DatePicker
+          Properties:
+            Size: =12
+            StartOfWeek: =StartOfWeek.Monday
+            StartYear: '=2020    '
+            Width: =150
+            X: =15
+            Y: =308
+      - Label22_2:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Semibold
+            Size: =12
+            Text: ="$"&Sum(Gallery1_2.AllItems,Label26_8.Text)//CountRows(Gallery1.AllItems)
+            X: =15
+            Y: =429
+      - Label9_5:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Semibold
+            Size: =12
+            Text: ="Total Extra Cost:"
+            X: =15
+            Y: =404
+      - Gallery1_2:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            DelayItemLoading: =false
+            Height: =652
+            Items: |-
+              =//FirstN(Filter(roofs_alldetails,PlantID=PID,Edited="Yes"),12)
+              SortByColumns(Filter(
+                  roofs_alldetails,
+                  PlantID = Value(Label6_1.Text),
+                  Facility = Dropdown2_1.SelectedText.Value,
+                  W_Date = DateValue(DatePicker1_2.SelectedDate)),"Title",SortOrder.Ascending)
+            LoadingSpinner: =LoadingSpinner.None
+            TemplateSize: =30
+            Width: =1185
+            X: =181
+            Y: =116
+          Children:
+            - Label23_4:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Date
+                  Width: =89
+                  X: =45
+            - Label24_4:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Production
+                  Width: =95
+                  X: =134
+            - Label25_24:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Serial
+                  Width: =84
+                  X: =229
+            - Label26_8:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: ="$"&RoundUp(ThisItem.extra_cost,1)
+                  Width: =71
+                  X: =914
+            - Label27_8:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =RoundUp(ThisItem.Width,1)
+                  Width: =40
+                  X: =313
+            - Label27_9:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =RoundUp(ThisItem.Length,1)
+                  Width: =40
+                  X: =374
+            - Label25_25:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =RoundUp(ThisItem.ExtraLFT,0)
+                  Width: =40
+                  X: =442
+            - Label25_26:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Cycle1_start
+                  Width: =75
+                  X: =486
+            - Label25_27:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =RoundUp(ThisItem.Cycle1_end,1)
+                  Width: =75
+                  X: =552
+            - Label25_28:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Cycle2_start
+                  Width: =75
+                  X: =627
+            - Label25_29:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Cycle2_end
+                  Width: =75
+                  X: =702
+            - Label26_9:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.User_Name
+                  Width: =121
+                  X: =979
+            - Label26_12:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =RoundUp(ThisItem.LFT_LB,2)
+                  Width: =57
+                  X: =777
+            - Label26_14:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =RoundUp(ThisItem.TOTAL_LFT,2)
+                  Width: =70
+                  X: =847
+            - Label23_6:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =11
+                  Text: =ThisItem.Title
+                  Width: =45
+      - Label23_5:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Height: =20
+            OnSelect: =
+            Size: =11
+            Text: ="Date"
+            Width: =111
+            X: =231
+            Y: =94
+      - Label24_5:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Height: =20
+            OnSelect: =
+            Size: =11
+            Text: ="Production"
+            Width: =95
+            X: =320
+            Y: =95
+      - Label25_30:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Height: =20
+            OnSelect: =
+            Size: =11
+            Text: ="Serial"
+            Width: =84
+            X: =415
+            Y: =95
+      - Label26_10:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =36
+            OnSelect: =
+            Size: =11
+            Text: ="Extra Cost"
+            Width: =56
+            X: =1113
+            Y: =80
+      - Label27_10:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =20
+            OnSelect: =
+            Size: =11
+            Text: ="Width"
+            Width: =55
+            X: =494
+            Y: =95
+      - Label27_11:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =20
+            OnSelect: =
+            Size: =11
+            Text: ="Length"
+            Width: =66
+            X: =550
+            Y: =95
+      - Label25_31:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =52
+            OnSelect: =
+            Size: =11
+            Text: ="Extra LFT"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =65
+            X: =620
+            Y: =64
+      - Label25_32:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =36
+            OnSelect: =
+            Size: =11
+            Text: ="C1 Start"
+            Width: =55
+            X: =683
+            Y: =77
+      - Label25_33:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =37
+            OnSelect: =
+            Size: =11
+            Text: ="C1 End"
+            Width: =55
+            X: =753
+            Y: =77
+      - Label25_34:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =37
+            OnSelect: =
+            Size: =11
+            Text: ="C2 Start"
+            Width: =60
+            X: =826
+            Y: =76
+      - Label25_35:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =35
+            OnSelect: =
+            Size: =11
+            Text: ="C2 End"
+            Width: =55
+            X: =901
+            Y: =75
+      - Label26_11:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Height: =19
+            OnSelect: =
+            Size: =11
+            Text: ="User Name"
+            Width: =93
+            X: =1167
+            Y: =94
+      - Label26_13:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =49
+            OnSelect: =
+            Size: =11
+            Text: ="Actual LFT / Lb"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =67
+            X: =964
+            Y: =66
+      - Label26_15:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Bold
+            Height: =49
+            OnSelect: =
+            Size: =11
+            Text: ="LFT"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =67
+            X: =1034
+            Y: =66
+      - Label22_3:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Semibold
+            Size: =12
+            Text: =RoundUp(Sum(Gallery1_2.AllItems,Label26_12.Text)/CountRows(Gallery1_2.AllItems),2)
+            Width: =166
+            X: =15
+            Y: =549
+      - Label9_6:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Semibold
+            Size: =12
+            Text: ="Average feet per lb:"
+            Width: =139
+            X: =15
+            Y: =513
+      - Label23_7:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Height: =20
+            OnSelect: =
+            Size: =11
+            Text: ="#"
+            Width: =111
+            X: =187
+            Y: =95

@@ -1,0 +1,11 @@
+App:
+  Properties:
+    BackEnabled: =false
+    OnStart: |-
+      =Set(PID,Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation,3)));
+      Set(var_selected_date, Today()-Weekday(Today(),3));
+      ClearCollect(col_audit, {display_name: "", mail: "", office_loc: ""});
+      Clear(col_audit);
+      ClearCollect(col_week_picker, {month_label: "", w1: Today(), w2: Today(), w3: Today(), w4: Today(), w5: Today()});
+      Clear(col_week_picker)
+    Theme: =PowerAppsTheme

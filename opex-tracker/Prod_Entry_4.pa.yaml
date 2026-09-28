@@ -1,0 +1,341 @@
+Screens:
+  Prod_Entry_4:
+    Properties:
+      Fill: |-
+        =RGBA(
+            255,
+            255,
+            255,
+            1
+        )
+      OnVisible: |-
+        =Collect(Collection1, {Image: Image1.Image});
+        Set(show_floor_question,false)
+    Children:
+      - Text1_3:
+          Control: Classic/TextInput
+          Properties:
+            Default: =
+            Height: =486
+            HoverFill: =RGBA(241, 244, 249, 1)
+            Mode: =TextMode.MultiLine
+            Size: =10
+            Width: =548
+            X: =40
+            Y: =120
+      - RectQuickActionBar1_7:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =64
+            Width: =Parent.Width
+      - Label1_22:
+          Control: Label
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Size: =24
+            Text: ="Topeka Production Data Entry Screen"
+            Width: =760
+            X: =93
+            Y: =12
+      - Button1_3:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: '=0   '
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: |+
+              =Clear(ColTopeka2);
+              ForAll(ForAll(Split(Text1_3.Text,Char(10)), {Result: ThisRecord.Value}),
+              Collect(ColTopeka2,Table({
+              CService:First(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value})).Result,
+              CRun:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),2)).Result,
+              CFloor:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),3)).Result,
+              CModel:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),4)).Result,
+              CSize:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,
+              CDate:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),6)).Result,
+
+              CRLength: Text(Left(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x"),Find("x",Text(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x")))-1)),
+
+              CRWide: Text(Mid(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x"),Find("x",Text(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x")))+1,9))
+
+              //CRValue:Last(FirstN(Split(Result,Char(9)),8)).Result
+
+
+
+
+
+
+
+              })));
+
+            Text: ="Process Info"
+            X: =428
+            Y: =627
+      - Label4_2:
+          Control: Label
+          Properties:
+            Size: =10
+            Text: |-
+              ="
+              Service Item     Run           Floor    Model            Size          Online Date"
+            VerticalAlign: =VerticalAlign.Bottom
+            Width: =584
+            X: =39
+            Y: =76
+      - Button1_21:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: '=0   '
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: |-
+              =Clear(ColTopeka2);
+              Reset(Text1_3)
+            Text: ="Clear Data"
+            X: =428
+            Y: =688
+      - Icon1_21:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Icon2_28:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Label13_4:
+          Control: Label
+          Properties:
+            Text: |-
+              ="Your plant ID is " & PID & ", facility: "
+            Width: =262
+            X: =40
+            Y: =636
+      - Dropdown1_4:
+          Control: Classic/DropDown
+          Properties:
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Height: =30
+            Items: =Filter(Plant_List, Plant_ID = PID)
+            Items.Value: =Facility
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =77
+            X: =276
+            Y: =641
+      - DataTable2_1:
+          Control: DataTable
+          Properties:
+            HeadingFill: =RGBA(2, 66, 109, 1)
+            Height: =530
+            Items: =ColTopeka2
+            Size: =9
+            Width: =716
+            X: =623
+            Y: =76
+          Children:
+            - CDate_Column2_2:
+                Control: DataTableColumn
+                Variant: Textual
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Date"
+                  FieldName: ="CDate"
+                  Order: =1
+                  Text: =ThisItem.CDate
+                  Width: =85
+            - CService_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Service"
+                  FieldName: ="CService"
+                  Order: =2
+                  Text: =ThisItem.CService
+                  Width: =89
+            - CRun_Column1_1:
+                Control: DataTableColumn
+                Variant: Textual
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Run"
+                  FieldName: ="CRun"
+                  Order: =5
+                  Text: =ThisItem.CRun
+                  Width: =115
+            - CFloor_Column1_1:
+                Control: DataTableColumn
+                Variant: Textual
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Floor"
+                  FieldName: ="CFloor"
+                  Order: =7
+                  Text: =ThisItem.CFloor
+                  Width: =64
+            - CModel_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Model"
+                  FieldName: ="CModel"
+                  Order: =8
+                  Text: =ThisItem.CModel
+                  Width: =163
+            - CRWide_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="W"
+                  FieldName: ="CRWide"
+                  Order: =10
+                  Text: =ThisItem.CRWide
+                  Width: =62
+            - CRLength_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="L"
+                  FieldName: ="CRLength"
+                  Order: =11
+                  Text: =ThisItem.CRLength
+                  Width: =50
+      - floor_question_BG_3:
+          Control: Label
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.61)
+            Height: =768
+            Text: '=    '
+            Visible: =show_floor_question
+            Width: =1366
+      - Rectangle1_3:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =301
+            Visible: =show_floor_question
+            Width: =869
+            X: =249
+            Y: =234
+      - Button6_2:
+          Control: Classic/Button
+          Properties:
+            OnSelect: "=Set(VAR_by_floor,true);\r\n\r\nSet(facilityID,Dropdown1_4.SelectedText.Value);\r\n\r\nForAll(Col3Dim, \r\n    Patch(Production_Master, \r\n        Defaults(Production_Master),\r\n        {\r\n            Title:Last(Production_Master).Title+1,\r\n            Plant_ID:PID,\r\n            Facility:facilityID,\r\n            //Plant_facility:PID & \" - \" & facilityID,\r\n            User_Name: Office365Users.MyProfileV2().displayName,\r\n            Date:DateValue(CDate),\r\n            Production:Text(CRun),\r\n            Serial:Text(CItem),\r\n            Model:Text(CModel),\r\n            report_by_floor:VAR_by_floor,\r\n            Home_Type:Text(CFloor),\r\n            Combined_Size:Text(CSize),\r\n            Reviewed:\"No\",\r\n\r\n            WFeet:Value(If(IsMatch(CRWide,\"'\",MatchOptions.Contains),Left(CRWide,Find(\"'\",CRWide)-1),CRWide)),\r\n            WInches:Value(If(Len(CRWide)=2,\r\n                0,\r\n                Left(Mid(CRWide,Find(\"'\",CRWide)+1),2))),\r\n                \r\n            LFeet:Value(If(IsMatch(CRLength,\"'\",MatchOptions.Contains),Left(CRLength,Find(\"'\",CRLength)-1),CRLength)),\r\n            LInches:Value(If(Len(CRLength)=2,\r\n                0,\r\n                Left(Mid(CRLength,Find(\"'\",CRLength)+1),2))),\r\n\r\n            Roof_RValue:Value(CRValue)            \r\n        }\r\n    ))\r\n;\r\n\r\nClear(Col3Dim);\r\nUpdateContext({show_floor_question: false});\r\nNavigate(review_screen1,ScreenTransition.Fade);\r\n\r\n\r\n"
+            Text: ="Floor"
+            Visible: =show_floor_question
+            Width: =170
+            X: =495
+            Y: =443
+      - Label16_3:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            FontWeight: =FontWeight.Bold
+            Height: =88
+            Size: =24
+            Text: ="Was the information entered by floor or by house?"
+            Visible: =show_floor_question
+            Width: =869
+            X: =249
+            Y: =234
+      - Button6_3:
+          Control: Classic/Button
+          Properties:
+            OnSelect: "=Set(VAR_by_floor,false);\r\n\r\nSet(facilityID,Dropdown1_4.SelectedText.Value);\r\n\r\nForAll(Col3Dim, \r\n    Patch(Production_Master, \r\n        Defaults(Production_Master),\r\n        {\r\n            Title:Last(Production_Master).Title+1,\r\n            Plant_ID:PID,\r\n            Facility:facilityID,\r\n            //Plant_facility:PID & \" - \" & facilityID,\r\n            User_Name: Office365Users.MyProfileV2().displayName,\r\n            Date:DateValue(CDate),\r\n            Production:Text(CRun),\r\n            Serial:Text(CItem),\r\n            Model:Text(CModel),\r\n            Home_Type:Text(CFloor),\r\n            report_by_floor:VAR_by_floor,\r\n            Combined_Size:Text(CSize),\r\n            Reviewed:\"No\",\r\n\r\n            WFeet:Value(If(IsMatch(CRWide,\"'\",MatchOptions.Contains),Left(CRWide,Find(\"'\",CRWide)-1),CRWide)),\r\n            WInches:Value(If(Len(CRWide)=2,\r\n                0,\r\n                Left(Mid(CRWide,Find(\"'\",CRWide)+1),2))),\r\n                \r\n            LFeet:Value(If(IsMatch(CRLength,\"'\",MatchOptions.Contains),Left(CRLength,Find(\"'\",CRLength)-1),CRLength)),\r\n            LInches:Value(If(Len(CRLength)=2,\r\n                0,\r\n                Left(Mid(CRLength,Find(\"'\",CRLength)+1),2))),\r\n\r\n            Roof_RValue:Value(CRValue)            \r\n        }\r\n    ))\r\n;\r\n\r\nClear(Col3Dim);\r\nUpdateContext({show_floor_question: false});\r\nNavigate(review_screen1,ScreenTransition.Fade);\r\n\r\n\r\n"
+            Text: ="House"
+            Visible: =show_floor_question
+            Width: =170
+            X: =704
+            Y: =443
+      - Image2_10:
+          Control: Image
+          Properties:
+            Image: =floor
+            Visible: =show_floor_question
+            Width: =106
+            X: =527
+            Y: =326
+      - Image2_11:
+          Control: Image
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Image: =house
+            Visible: =show_floor_question
+            Width: =106
+            X: =735
+            Y: =326
+      - Label15_3:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            Text: ="Please wait while loading..."
+            Visible: =show_floor_question
+            Width: =273
+            X: =547
+            Y: =495
+      - Button1_31:
+          Control: Classic/Button
+          Properties:
+            OnSelect: "=//UpdateContext({show_floor_question: true})\r\n\r\n\r\nSet(facilityID,Dropdown1_4.SelectedText.Value);\r\n\r\nForAll(ColTopeka2, \r\n    Patch(Production_Master, \r\n        Defaults(Production_Master),\r\n        {\r\n            Title:Value(Last(Production_Master).Title)+1,\r\n            Plant_ID:PID,\r\n            Facility:facilityID,\r\n            //Plant_facility:PID & \" - \" & facilityID,\r\n            User_Name: Office365Users.MyProfileV2().displayName,\r\n            Date:DateValue(CDate),\r\n            //W_Date:CDate-Weekday(DateValue(CDate),3),\r\n            Production:Text(CRun),\r\n            Serial:Text(CService),\r\n            Model:Text(CModel),\r\n            report_by_floor:true,\r\n            Home_Type:Text(CFloor),\r\n            Combined_Size:Text(CSize),\r\n            Reviewed:If(CDate=\"\",\"\",\"No\"),\r\n\r\n            WFeet:LookUp(topeka_widths,o_width=Value(CRWide),width_feet),\r\n            WInches:LookUp(topeka_widths,o_width=Value(CRWide),width_inches),\r\n            \r\n            //Value(If(Value(CRWide)=,13,If(Value(CRWide=15)) ,\r\n\r\n            //WFeet:Value(If(IsMatch(CRWide,\"'\",Contains),Left(CRWide,Find(\"'\",CRWide)-1),CRWide)),\r\n            //WInches:Value(If(Len(CRWide)=2,\r\n            //    0,\r\n            //    Left(Mid(CRWide,Find(\"'\",CRWide)+1),2))),\r\n                \r\n            LFeet:Value(If(IsMatch(CRLength,\"'\",MatchOptions.Contains),Left(CRLength,Find(\"'\",CRLength)-1),CRLength)),\r\n            LInches:Value(If(Len(CRLength)=2,\r\n                0,\r\n                Left(Mid(CRLength,Find(\"'\",CRLength)+1),2)))\r\n\r\n            //Roof_RValue:Value(CRValue)            \r\n        }\r\n    ))\r\n;\r\n\r\nClear(ColTopeka2);\r\n//UpdateContext({show_floor_question: false});\r\nNavigate(review_screen1,ScreenTransition.Fade);\r\n"
+            Text: ="OLD"
+            Visible: =false
+            Width: =211
+            X: =1103
+            Y: =636
+      - Button1_35:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: '=0   '
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: "=Set(facilityID,Dropdown1_4.SelectedText.Value);\r\n\r\nClear(col_production);\r\nSet(start_row,100);\r\n\r\nForAll(ColTopeka2,If( CDate<>\"\",\r\n    Collect(col_production,\r\n        \r\n        {\r\n            Title:start_row + Value(CountRows(col_production)+1,\"000\"),\r\n            Plant_ID:PID,\r\n            Facility:facilityID,\r\n            //Plant_facility:PID & \" - \" & facilityID,\r\n            User_Name: Office365Users.MyProfileV2().displayName,\r\n            Date:DateValue(CDate),\r\n            //W_Date:CDate-Weekday(DateValue(CDate),3),\r\n            Production:Text(CRun),\r\n            Serial:Text(CService),\r\n            Model:Text(CModel),\r\n            Roof_RValue:Value(\"\"),\r\n            Floor_RValue:Value(\"\"),\r\n            report_by_floor:true,\r\n            Home_Type:Text(CFloor),\r\n            Combined_Size:Text(CSize),\r\n            Reviewed:If(CDate=\"\",\"\",\"No\"),\r\n            WFeet:LookUp(topeka_widths,o_width=Value(CRWide),width_feet),\r\n            WInches:LookUp(topeka_widths,o_width=Value(CRWide),width_inches),\r\n            Section:If(Value(ThisRecord.CRWide)>16,\"M\",\"S\"),\r\n            LFeet:Value(If(IsMatch(CRLength,\"'\",MatchOptions.Contains),Left(CRLength,Find(\"'\",CRLength)-1),CRLength)),\r\n            LInches:Value(If(Len(CRLength)=2, 0, Left(Mid(CRLength,Find(\"'\",CRLength)+1),2))),\r\n            PLength_F:0,\r\n            PLength_I:0,\r\n            PWidth_F:0,\r\n            PWidth_I:0\r\n        }\r\n    )))\r\n;\r\n\r\nClear(ColTopeka2);\r\nReset(Text1_3);\r\nNavigate(review_screen1,ScreenTransition.Fade);\r\n"
+            Text: ="Next"
+            Width: =211
+            X: =875
+            Y: =688
+      - Button1_9:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |+
+              =Clear(ColTopeka2);
+              ForAll(ForAll(Split(Text1_3.Text,Char(10)), {Result: ThisRecord.Value}),
+              Collect(ColTopeka2,Table({
+              CService:First(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value})).Result,
+              CRun:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),2)).Result,
+              CFloor:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),3)).Result,
+              CModel:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),4)).Result,
+              CSize:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,
+              CDate:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),6)).Result,
+
+              CRLength: Text(Left(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x"),Find("x",Text(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x")))-1)),
+
+              CRWide: Text(Mid(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x"),Find("x",Text(Substitute(Substitute(Substitute(Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,"""","")," ",""),"X","x")))+1,9))
+
+              //CRValue:Last(FirstN(Split(Result,Char(9)),8)).Result
+
+
+
+
+
+
+
+              })));
+
+            Text: ="old process info"
+            Visible: =false
+            Width: =212
+            X: =1103
+            Y: =707

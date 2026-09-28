@@ -1,0 +1,1274 @@
+Screens:
+  Foam_details_week:
+    Properties:
+      OnVisible: |
+        =Set(var_prod_sections,"null");
+
+        // Start of the 4-month window: the Monday of the week containing the date
+        // four calendar months ago. W_Date values are always Mondays, so the
+        // boundary is snapped to a week start.
+        Set(
+            var_week_first,
+            With(
+                {d: DateAdd(Today(), -4, TimeUnit.Months)},
+                d - Weekday(d, 3)
+            )
+        );
+
+        ClearCollect(
+            col_roofs_week_cycles,
+            Filter(
+                roofs_week_cycles,
+                PlantID = PID,
+                Facility = VAR_facility,
+                pump_name = VAR_pump_name,
+                W_Date >= var_week_first
+            )
+        );
+
+        // One query per visit: 4 months of detail rows cached locally. Week switching
+        // then filters this collection instead of hitting SharePoint again.
+        ClearCollect(
+            col_roofs_week_details,
+            AddColumns(
+                SortByColumns(
+                    ShowColumns(
+                        Filter(
+                            roofs_alldetails,
+                            PlantID = PID,
+                            Facility = VAR_facility,
+                            pump_name = VAR_pump_name,
+                            W_Date >= var_week_first
+                        ),
+                        ID,
+                        Title,
+                        Production,
+                        Serial,
+                        Sections,
+                        Truss_spacing,
+                        Cycle1_end,
+                        Bead_TopBot,
+                        'Date',
+                        W_Date,
+                        extra_cost,
+                        LFT_LB,
+                        Missing,
+                        pump_name
+                    ),
+                    "ID",
+                    SortOrder.Ascending
+                ),
+                _dirty,
+                false,
+                ToDelete,
+                false
+            )
+        );
+
+        ClearCollect(col_pumps, Distinct(Filter('plant-pumps',Plant_ID=PID,Facility=VAR_facility),pump_name));
+
+        Set(
+            var_week_sel,
+            Coalesce(
+                First(Sort(col_roofs_week_cycles, W_Date, SortOrder.Descending)).W_Date,
+                Today() - Weekday(Today(), 3)
+            )
+        );
+    Children:
+      - RectQuickActionBar3_5:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =64
+            Width: =Parent.Width
+      - Title2_5:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="ROOFS - Weekly Foam Data"
+            Width: =1274
+            X: =92
+      - Icon1_9:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Icon2_13:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Icon3_12:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Height: =60
+            Icon: =Icon.Print
+            OnSelect: |-
+              =
+              Print()
+            Width: =60
+            X: =1081
+      - Label12_4:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Fill: =RGBA(255, 255, 255, 1)
+            Text: |-
+              ="Facility: "&VAR_facility&"     Pump: "&VAR_pump_name
+            Width: =257
+            X: =130
+            Y: =12
+      - Container1:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =App.Height-64
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            PaddingBottom: =8
+            PaddingLeft: =8
+            PaddingRight: =8
+            PaddingTop: =8
+            Width: =App.Width
+            Y: =64
+          Children:
+            - Container3:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  FillPortions: =5
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =5
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                Children:
+                  - Subtitle5_100:
+                      Control: Label
+                      Properties:
+                        Align: =LayoutAlignItems.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =20
+                        OnSelect: =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="Pump Cycles & Extra Feet Cycle counts"
+                        Width: =344
+                        X: =18
+                        Y: =25
+                  - Subtitle5_143:
+                      Control: Label
+                      Properties:
+                        Align: =LayoutAlignItems.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =FontWeight.Lighter
+                        Height: =32
+                        OnSelect: =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Use this screen to report the foam usage by week, instead of for each floor."
+                        Width: =354
+                        X: =18
+                        Y: =52
+                  - Subtitle5_144:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Justify
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =FontWeight.Lighter
+                        Height: =110
+                        OnSelect: =
+                        PaddingBottom: =0
+                        PaddingTop: =0
+                        Size: =8
+                        Text: |-
+                          ="1- Select the reporting week's Monday
+                          2- Type the pump cycles for that week. Either reset the counter every week or substact end-start cycles.
+                          3- The table below summarizes the reported cycles.
+                          4- Type in the details per floor on the larger table on the right.
+                          5- Hit Submit when you are done. The blocks will change from Red to Green once processed."
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =388
+                        X: =15
+                        Y: =44
+                  - Container4:
+                      Control: GroupContainer
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =130
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                      Children:
+                        - Label33:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =Color.Black
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              Size: =10
+                              Text: ="Week Start"
+                              Width: =121
+                              X: =26
+                        - DatePicker2:
+                            Control: Classic/DatePicker
+                            Properties:
+                              DefaultDate: =Today() - Weekday(Today(), 3)
+                              Height: =30
+                              InputTextPlaceholder: =If(IsBlank(Self.SelectedDate), Text(Date(2021,12,31), Self.Format, Self.Language))
+                              OnChange: =
+                              PaddingLeft: =5
+                              PaddingTop: =5
+                              Size: =10
+                              StartOfWeek: '=StartOfWeek.Monday  '
+                              StartYear: =2021
+                              Width: =144
+                              X: =147
+                        - week_lft_txt:
+                            Control: Classic/TextInput
+                            Properties:
+                              Align: =Align.Center
+                              BorderThickness: =1
+                              Default: =LookUp(col_roofs_week_cycles, W_Date = DatePicker2.SelectedDate, week_lft)
+                              DelayOutput: =true
+                              Fill: =RGBA(238, 204, 204, 0.5)
+                              Height: =30
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =3
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Size: =10
+                              TabIndex: =3
+                              Width: =70
+                              X: =309
+                              Y: =45
+                        - Label33_1:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =Color.Black
+                              BorderThickness: =1
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              Size: =10
+                              Text: ="Week Cycles"
+                              Width: =102
+                              X: =26
+                              Y: =45
+                        - Label33_2:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =Color.Black
+                              BorderThickness: =1
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              Size: =10
+                              Text: ="Week Extra FT"
+                              Width: =105
+                              X: =204
+                              Y: =45
+                        - week_cycles_txt:
+                            Control: Classic/TextInput
+                            Properties:
+                              Align: =Align.Center
+                              BorderThickness: =1
+                              Default: =LookUp(col_roofs_week_cycles, W_Date = DatePicker2.SelectedDate, Cycles)
+                              DelayOutput: =true
+                              Fill: =RGBA(238, 204, 204, 0.5)
+                              Height: =30
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =3
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Size: =10
+                              TabIndex: =3
+                              Width: =70
+                              X: =128
+                              Y: =45
+                        - Button9_2:
+                            Control: Classic/Button
+                            Properties:
+                              BorderThickness: =0
+                              Fill: =RGBA(2, 66, 109, 1)
+                              Height: =30
+                              OnSelect: |
+                                =//ForAll(Filter(roofs_alldetails_gallery_2.AllItems,
+                                //Toggle1_1.Value=true),
+                                Set(
+                                    VAR_last_w_cycles,
+                                    LookUp(
+                                        roofs_week_cycles,
+                                        W_Date = Date(
+                                            Year(DatePicker2.SelectedDate),
+                                            Month(DatePicker2.SelectedDate),
+                                            Day(DatePicker2.SelectedDate) - 7
+                                        ),
+                                        Cycles
+                                    )
+                                );
+                                Set(
+                                    VAR_cycles_floor,
+                                    Value(week_cycles_txt.Text) / CountRows(Filter(col_roofs_week_details, W_Date = var_week_sel))
+                                );
+                                Set(
+                                    VAR_week_lft,
+                                    Value(week_lft_txt.Text) / CountRows(Filter(col_roofs_week_details, W_Date = var_week_sel))
+                                );
+                                Patch(
+                                    roofs_week_cycles,
+                                    Defaults(roofs_week_cycles),
+                                    {
+                                        Title: Value(Last(roofs_week_cycles).Title) + 1,
+                                        PlantID: PID,
+                                        Facility: VAR_facility,
+                                        Plant_Facility: PID & " - " & VAR_facility,
+                                        User_Name: User().FullName,
+                                        W_Date: DatePicker2.SelectedDate,
+                                        pump_name: VAR_pump_name,
+                                        last_week_cycles: VAR_last_w_cycles,
+                                        Cycles: Value(week_cycles_txt.Text),
+                                        week_lft: Value(week_lft_txt.Text)
+                                        //total_week_cycles:Value(week_cycles_txt.Text)- VAR_last_w_cycles
+                                    }
+                                );
+
+                                Patch(
+                                    col_roofs_week_cycles,
+                                    Defaults(col_roofs_week_cycles),
+                                    {
+                                        Title: Value(Last(col_roofs_week_cycles).Title) + 1,
+                                        PlantID: PID,
+                                        Facility: VAR_facility,
+                                        Plant_Facility: PID & " - " & VAR_facility,
+                                        User_Name: User().FullName,
+                                        W_Date: DatePicker2.SelectedDate,
+                                        pump_name: VAR_pump_name,
+                                        last_week_cycles: VAR_last_w_cycles,
+                                        Cycles: Value(week_cycles_txt.Text),
+                                        week_lft: Value(week_lft_txt.Text)
+                                        //total_week_cycles:Value(week_cycles_txt.Text)- VAR_last_w_cycles
+                                    }
+                                )
+                              Size: =12
+                              Text: ="Add Weekly Data"
+                              Width: =191
+                              X: =100
+                              Y: =90
+                  - Container8:
+                      Control: GroupContainer
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =30
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                      Children:
+                        - Label37:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              Size: =10
+                              Text: ="Week"
+                              Width: =70
+                              X: =6
+                              Y: =10
+                        - Label37_1:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              Size: =10
+                              Text: ="Pump"
+                              Width: =50
+                              X: =122
+                              Y: =10
+                        - Label37_2:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              Size: =10
+                              Text: ="Cycles"
+                              Width: =60
+                              X: =198
+                              Y: =10
+                        - Label37_3:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              Size: =10
+                              Text: ="Extra FT"
+                              Width: =60
+                              X: =279
+                              Y: =10
+                  - roofs_alldetails_gallery_2:
+                      Control: Gallery
+                      Variant: BrowseLayout_Vertical_OneTextVariant_ver4.0
+                      Properties:
+                        Height: =20*15
+                        Items: =Sort( col_roofs_week_cycles, W_Date,SortOrder.Descending)
+                        OnSelect: =Set(var_week_sel, ThisItem.W_Date)
+                        TemplateFill: =If(    ThisItem.IsSelected,    Color.LightCoral,    Color.White)
+                        TemplateSize: |
+                          =20
+                        Width: =386
+                        X: =15
+                        Y: =326
+                      Children:
+                        - Title1:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Height: =19
+                              OnSelect: =Select(Parent)
+                              PaddingBottom: =0
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =ThisItem.W_Date
+                              Width: =80
+                        - NextArrow1:
+                            Control: Classic/Icon
+                            Properties:
+                              AccessibleLabel: =Self.Tooltip
+                              Height: =0
+                              Icon: =Icon.ChevronRight
+                              OnSelect: =Select(Parent)
+                              PaddingBottom: =10
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              PaddingTop: =10
+                              TabIndex: =0
+                              Tooltip: ="View item details"
+                              Width: =20
+                              Y: =(Parent.TemplateHeight / 2) - (Self.Height / 2)
+                        - Separator1:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =App.Theme.Colors.Darker30
+                              Height: =1
+                              OnSelect: =Select(Parent)
+                              Width: =Parent.TemplateWidth
+                              Y: =Parent.TemplateHeight - 1
+                        - Title1_1:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Height: =19
+                              OnSelect: =Select(Parent)
+                              PaddingBottom: =0
+                              PaddingTop: =0
+                              Size: =9
+                              Text: '=ThisItem.pump_name  '
+                              Width: =70
+                              X: =113
+                        - Title1_2:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Height: =19
+                              OnSelect: =Select(Parent)
+                              PaddingBottom: =0
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =ThisItem.Cycles
+                              Width: =62
+                              X: =198
+                              Y: =1
+                        - Title1_3:
+                            Control: Label
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Height: =19
+                              OnSelect: =Select(Parent)
+                              PaddingBottom: =0
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =ThisItem.week_lft
+                              Width: =62
+                              X: =276
+                        - Icon10_2:
+                            Control: Classic/Icon
+                            Properties:
+                              Height: =20
+                              Icon: =Icon.Trash
+                              OnSelect: |-
+                                =Select(btn_foam_week_select);
+                                RemoveIf(roofs_week_cycles,ID=ThisItem.ID);
+                                RemoveIf(col_roofs_week_cycles,ID = ThisItem.ID);
+                                Notify("Week data removed successfully",NotificationType.Success);
+                                Refresh(roofs_week_cycles);
+                                ClearCollect(col_roofs_week_cycles, Filter(roofs_week_cycles,PlantID=PID,Facility=VAR_facility, pump_name=VAR_pump_name, W_Date >= var_week_first));
+                              Width: =28
+                              X: =346
+                        - week_row_overlay:
+                            Control: Rectangle
+                            Properties:
+                              AccessibleLabel: ="Select week " & ThisItem.W_Date
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Height: =Parent.TemplateHeight
+                              OnSelect: =Select(Parent)
+                              TabIndex: =0
+                              Tooltip: ="Select this week"
+                              Width: =344
+                  - Button9_3:
+                      Control: Classic/Button
+                      Properties:
+                        BorderThickness: =0
+                        Fill: =RGBA(2, 66, 109, 1)
+                        Height: =30
+                        OnSelect: |
+                          =Set(
+                              VAR_last_w_cycles,
+                              LookUp(
+                                  roofs_week_cycles,
+                                  W_Date = var_week_sel - 7,
+                                  Cycles
+                              )
+                          );
+                          With(
+                              {weekRows: Filter(col_roofs_week_details, W_Date = var_week_sel)},
+                              Set(
+                                  VAR_cycles_floor,
+                                  Value(roofs_alldetails_gallery_2.Selected.Cycles) / CountRows(weekRows)
+                              );
+                              Set(
+                                  VAR_week_lft,
+                                  Value(roofs_alldetails_gallery_2.Selected.week_lft) / CountRows(weekRows)
+                              );
+                              ForAll(
+                                  weekRows As row,
+                                  IfError(
+                                      Patch(
+                                          roofs_alldetails,
+                                          LookUp(roofs_alldetails, ID = row.ID),
+                                          {
+                                              Date: row.Date,
+                                              W_Date: row.W_Date,
+                                              Sections: If(
+                                                  var_prod_sections = "null",
+                                                  row.Sections,
+                                                  var_prod_sections
+                                              ),
+                                              Truss_spacing: Value(row.Truss_spacing),
+                                              ExtraLFT: VAR_week_lft,
+                                              Cycle1_start: 0,
+                                              Cycle1_end: VAR_cycles_floor,
+                                              Edited: "Yes",
+                                              Missing: Coalesce(row.Missing, false),
+                                              cyclesPP: VAR_cyclesPP,
+                                              dollarsPP: VAR_dollarsPP,
+                                              foam_trussendwall: Value(VAR_ToverEW),
+                                              foam_oversidewalls: VAR_EBoverSW,
+                                              targetLFTPP: VAR_targetFPP,
+                                              foam_name: VAR_foam_name,
+                                              pump_name: Coalesce(row.pump_name, VAR_pump_name)
+                                          }
+                                      ),
+                                      Collect(
+                                          colApplyErrors,
+                                          {
+                                              ID: row.ID,
+                                              Message: FirstError.Message
+                                          }
+                                      );
+                                      Blank()
+                                  )
+                              )
+                          );
+                          Notify("Weekly data applied successfully.", NotificationType.Success);
+                          // Refresh only the selected week from SharePoint so the server-calculated
+                          // columns (extra_cost, LFT_LB) are current. The other 11 weeks stay cached.
+                          RemoveIf(col_roofs_week_details, W_Date = var_week_sel);
+                          Collect(
+                              col_roofs_week_details,
+                              AddColumns(
+                                  SortByColumns(
+                                      ShowColumns(
+                                          Filter(
+                                              roofs_alldetails,
+                                              PlantID = PID,
+                                              Facility = VAR_facility,
+                                              pump_name = VAR_pump_name,
+                                              W_Date = var_week_sel
+                                          ),
+                                          ID,
+                                          Title,
+                                          Production,
+                                          Serial,
+                                          Sections,
+                                          Truss_spacing,
+                                          Cycle1_end,
+                                          Bead_TopBot,
+                                          'Date',
+                                          W_Date,
+                                          extra_cost,
+                                          LFT_LB,
+                                          Missing,
+                                          pump_name
+                                      ),
+                                      "ID",
+                                      SortOrder.Ascending
+                                  ),
+                                  _dirty,
+                                  false,
+                                  ToDelete,
+                                  false
+                              )
+                          )
+                        Size: =12
+                        Text: ="Apply Weekly Data"
+                        Width: =191
+                        X: =40
+                        Y: =40
+            - Container9:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  FillPortions: =9
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                Children:
+                  - Container11:
+                      Control: GroupContainer
+                      Variant: ManualLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =30
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                      Children:
+                        - Subtitle5_50:
+                            Control: Label
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Prod / Serial"
+                              Width: =192
+                              X: =180
+                        - Subtitle5_52:
+                            Control: Label
+                            Properties:
+                              Align: =LayoutAlignItems.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Sections"
+                              Width: =68
+                              X: =579
+                        - Subtitle5_53:
+                            Control: Label
+                            Properties:
+                              Align: =LayoutAlignItems.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Truss"
+                              Width: =70
+                              X: =400
+                        - Subtitle5_54:
+                            Control: Label
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Date"
+                              Width: =114
+                              X: =38
+                        - Subtitle5_95:
+                            Control: Label
+                            Properties:
+                              Align: =LayoutAlignItems.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              OnSelect: =
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Pump"
+                              Width: =90
+                              X: =473
+                  - roofs_alldetails_gallery_1:
+                      Control: Gallery
+                      Variant: BrowseLayout_Vertical_TwoTextVariant_ver4.0
+                      Properties:
+                        Height: =649
+                        Items: =Filter(col_roofs_week_details, W_Date = var_week_sel)
+                        LoadingSpinner: =LoadingSpinner.Data
+                        LoadingSpinnerColor: =Color.Blue
+                        OnSelect: =
+                        TemplateSize: =30
+                        Width: =661
+                        X: =436
+                        Y: =44
+                      Children:
+                        - TextInput2_11:
+                            Control: Classic/TextInput
+                            Properties:
+                              Default: =ThisItem.Production & " / " &ThisItem.Serial
+                              DisplayMode: =DisplayMode.View
+                              Height: =30
+                              OnSelect: =Select(btn_foam_week_select)
+                              PaddingLeft: =5
+                              PaddingRight: =0
+                              Size: =10
+                              TabIndex: =-1
+                              Width: =180
+                              X: =178
+                        - section_drop_1:
+                            Control: Classic/DropDown
+                            Properties:
+                              BorderThickness: =1
+                              ChevronBackground: =RGBA(2, 66, 109, 1)
+                              Default: |-
+                                =Coalesce(
+                                    ThisItem.Sections,
+                                    If(var_prod_sections = "null", ThisItem.Sections, var_prod_sections)
+                                )
+                              Fill: =RGBA(238, 204, 204, 1)
+                              Height: =25
+                              Items: =["S","M"]
+                              Items.Value: =Value
+                              OnChange: |
+                                =
+                                Patch(
+                                    col_roofs_week_details,
+                                    LookUp(col_roofs_week_details, ID = ThisItem.ID),
+                                    {_dirty: true, Sections: Self.SelectedText.Value}
+                                );
+                                With(
+                                    {
+                                        patchedRecord: Patch(
+                                            roofs_alldetails,
+                                            LookUp(roofs_alldetails, ID = ThisItem.ID),
+                                            {
+                                                Sections: Self.SelectedText.Value,
+                                                Edited: "Yes",
+                                                cyclesPP: VAR_cyclesPP,
+                                                dollarsPP: VAR_dollarsPP,
+                                                foam_trussendwall: Value(VAR_ToverEW),
+                                                foam_oversidewalls: VAR_EBoverSW,
+                                                targetLFTPP: VAR_targetFPP,
+                                                foam_name: VAR_foam_name,
+                                                pump_name: VAR_pump_name
+                                            }
+                                        )
+                                    },
+                                    Patch(
+                                        col_roofs_week_details,
+                                        LookUp(col_roofs_week_details, ID = patchedRecord.ID),
+                                        {_dirty: false}
+                                    )
+                                )
+                              OnSelect: =Select(btn_foam_week_select)
+                              PaddingBottom: =0
+                              PaddingLeft: =3
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              SelectionFill: =RGBA(2, 66, 109, 1)
+                              Size: =10
+                              TabIndex: =-1
+                              Width: =61
+                              X: =581
+                              Y: =(Parent.TemplateHeight-Self.Height)/2
+                        - truss_drop_1:
+                            Control: Classic/DropDown
+                            Properties:
+                              BorderThickness: =1
+                              ChevronBackground: =RGBA(2, 66, 109, 1)
+                              Default: =ThisItem.Truss_spacing
+                              Fill: =RGBA(238, 204, 204, 1)
+                              Height: =25
+                              Items: =[12,16,24]
+                              Items.Value: =Value
+                              OnChange: |
+                                =Patch(
+                                    col_roofs_week_details,
+                                    LookUp(col_roofs_week_details, ID = ThisItem.ID),
+                                    {_dirty: true, Truss_spacing: Value(Self.SelectedText.Value)}
+                                );
+                                With(
+                                    {
+                                        patchedRecord: Patch(
+                                            roofs_alldetails,
+                                            LookUp(roofs_alldetails, ID = ThisItem.ID),
+                                            {
+                                                Truss_spacing: Value(Self.SelectedText.Value),
+                                                Edited: "Yes",
+                                                cyclesPP: VAR_cyclesPP,
+                                                dollarsPP: VAR_dollarsPP,
+                                                foam_trussendwall: Value(VAR_ToverEW),
+                                                foam_oversidewalls: VAR_EBoverSW,
+                                                targetLFTPP: VAR_targetFPP,
+                                                foam_name: VAR_foam_name,
+                                                pump_name: VAR_pump_name
+                                            }
+                                        )
+                                    },
+                                    Patch(
+                                        col_roofs_week_details,
+                                        LookUp(col_roofs_week_details, ID = patchedRecord.ID),
+                                        {_dirty: false}
+                                    )
+                                )
+                              OnSelect: =Select(btn_foam_week_select)
+                              PaddingBottom: =0
+                              PaddingLeft: =3
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              SelectionFill: =RGBA(2, 66, 109, 1)
+                              Size: =10
+                              TabIndex: =-1
+                              Width: =67
+                              X: =402
+                              Y: =(Parent.TemplateHeight-Self.Height)/2
+                        - Separator5_4:
+                            Control: Rectangle
+                            Properties:
+                              Fill: =App.Theme.Colors.Darker30
+                              Height: =1
+                              OnSelect: =Select(btn_foam_week_select)
+                              Width: =Parent.TemplateWidth
+                              Y: =Parent.TemplateHeight - 1
+                        - Label31:
+                            Control: Label
+                            Properties:
+                              Color: =RGBA(0, 0, 0, 0)
+                              Fill: =If(ThisItem.Cycle1_end>0,RGBA(54, 176, 75, 1),Color.Red)
+                              Height: =24
+                              OnSelect: =Select(btn_foam_week_select)
+                              Size: =10
+                              Text: =ThisItem.Bead_TopBot
+                              Width: =24
+                              X: =2
+                              Y: =3
+                        - DatePicker3:
+                            Control: Classic/DatePicker
+                            Properties:
+                              BorderThickness: =1
+                              DefaultDate: =ThisItem.Date
+                              Height: =25
+                              OnChange: |
+                                =Patch(
+                                    col_roofs_week_details,
+                                    LookUp(col_roofs_week_details, ID = ThisItem.ID),
+                                    {
+                                        _dirty: true,
+                                        Date: Self.SelectedDate,
+                                        W_Date: Self.SelectedDate - Weekday(DateValue(Self.SelectedDate),3)
+                                    }
+                                );
+                                With(
+                                    {
+                                        patchedRecord: Patch(
+                                            roofs_alldetails,
+                                            LookUp(roofs_alldetails, ID = ThisItem.ID),
+                                            {
+                                                Date: Self.SelectedDate,
+                                                W_Date: Self.SelectedDate - Weekday(DateValue(Self.SelectedDate),3),
+                                                Edited: "Yes",
+                                                cyclesPP: VAR_cyclesPP,
+                                                dollarsPP: VAR_dollarsPP,
+                                                foam_trussendwall: Value(VAR_ToverEW),
+                                                foam_oversidewalls: VAR_EBoverSW,
+                                                targetLFTPP: VAR_targetFPP,
+                                                foam_name: VAR_foam_name,
+                                                pump_name: VAR_pump_name
+                                            }
+                                        )
+                                    },
+                                    Patch(
+                                        col_roofs_week_details,
+                                        LookUp(col_roofs_week_details, ID = patchedRecord.ID),
+                                        {_dirty: false}
+                                    )
+                                )
+                              OnSelect: =Select(btn_foam_week_select)
+                              PaddingBottom: =0
+                              PaddingLeft: =5
+                              PaddingRight: =0
+                              Size: =10
+                              StartOfWeek: =StartOfWeek.Monday
+                              StartYear: =2021
+                              TabIndex: =-1
+                              Width: =122
+                              X: =36
+                              Y: =(Parent.TemplateHeight-Self.Height)/2
+                        - Dropdown6:
+                            Control: Classic/DropDown
+                            Properties:
+                              BorderThickness: =1
+                              ChevronBackground: =RGBA(2, 66, 109, 1)
+                              Default: =VAR_pump_name
+                              Height: =25
+                              Items: =col_pumps
+                              Items.Value: =Value
+                              OnChange: |
+                                =Patch(
+                                    col_roofs_week_details,
+                                    LookUp(col_roofs_week_details, ID = ThisItem.ID),
+                                    {_dirty: true, pump_name: Self.SelectedText.Value}
+                                );
+                                With(
+                                    {
+                                        patchedRecord: Patch(
+                                            roofs_alldetails,
+                                            LookUp(roofs_alldetails, ID = ThisItem.ID),
+                                            {pump_name: Self.SelectedText.Value}
+                                        )
+                                    },
+                                    Patch(
+                                        col_roofs_week_details,
+                                        LookUp(col_roofs_week_details, ID = patchedRecord.ID),
+                                        {_dirty: false}
+                                    )
+                                )
+                              OnSelect: =Select(btn_foam_week_select)
+                              PaddingBottom: =0
+                              PaddingLeft: =3
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              SelectionFill: =RGBA(2, 66, 109, 1)
+                              Size: =10
+                              TabIndex: =-1
+                              Width: =94
+                              X: =475
+                              Y: =(Parent.TemplateHeight-Self.Height)/2
+                        - Text6:
+                            Control: ModernText
+                            Properties:
+                              Height: =30
+                              OnSelect: =Select(btn_foam_week_select)
+                              Size: =8
+                              Text: =ThisItem.ID
+                              Visible: =false
+                              Width: =64
+                              X: =679
+                        - Checkbox2:
+                            Control: Classic/CheckBox
+                            Properties:
+                              CheckboxSize: =20
+                              Default: =Coalesce(ThisItem.ToDelete, false)
+                              Height: =30
+                              OnCheck: |-
+                                =Patch(
+                                    col_roofs_week_details,
+                                    LookUp(col_roofs_week_details, ID = ThisItem.ID),
+                                    {ToDelete: true}
+                                )
+                              OnUncheck: |
+                                =Patch(
+                                    col_roofs_week_details,
+                                    LookUp(col_roofs_week_details, ID = ThisItem.ID),
+                                    {ToDelete: false}
+                                )
+                              Text: =
+                              Width: =24
+                              X: =663
+            - Container10:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  FillPortions: =2
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =5
+                  LayoutMinHeight: =16
+                  LayoutMinWidth: =16
+                  PaddingBottom: =8
+                  PaddingTop: =8
+                Children:
+                  - Label32:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =30
+                        Size: =9
+                        Text: |-
+                          ="Floors reported on the selected week: " & CountRows(Filter(col_roofs_week_details, W_Date = var_week_sel))
+                        Width: =Parent.Width
+                        X: =1097
+                        Y: =64
+                  - Label9_7:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        FontWeight: =FontWeight.Semibold
+                        Size: =10
+                        Text: ="Total Extra Cost:"
+                        Width: =269
+                        X: =1097
+                        Y: =47
+                  - Label22_4:
+                      Control: Label
+                      Properties:
+                        Align: =LayoutAlignItems.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Size: =10
+                        Text: ="$" & Sum(Filter(col_roofs_week_details, W_Date = var_week_sel), RoundUp(Value(extra_cost), 2))
+                        Width: =269
+                        X: =1097
+                        Y: =68
+                  - Label9_8:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        FontWeight: =FontWeight.Semibold
+                        Size: =10
+                        Text: ="Average feet per lb:"
+                        Width: =269
+                        X: =1097
+                        Y: =111
+                  - Label22_5:
+                      Control: Label
+                      Properties:
+                        Align: =LayoutAlignItems.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =30
+                        Size: =10
+                        Text: |-
+                          =If(
+                              CountRows(Filter(col_roofs_week_details, W_Date = var_week_sel)) = 0,
+                              0,
+                              RoundUp(
+                                  Sum(Filter(col_roofs_week_details, W_Date = var_week_sel), RoundUp(Value(LFT_LB), 2)) / CountRows(Filter(col_roofs_week_details, W_Date = var_week_sel)),
+                                  2
+                              )
+                          )
+                        Width: =269
+                        X: =1097
+                        Y: =140
+                  - Rectangle3:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(0, 0, 0, 0)
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                  - Subtitle5_56:
+                      Control: Label
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Height: =24
+                        OnSelect: =
+                        PaddingBottom: =0
+                        PaddingLeft: =3
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Blanket-fill Options:"
+                        Width: =148
+                        X: =76
+                        Y: =354
+                  - Subtitle5_125:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Stretch
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Height: =20
+                        OnSelect: =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Truss Spacing"
+                        Width: =115
+                        X: =44
+                        Y: =413
+                  - truss_fill_1:
+                      Control: Classic/DropDown
+                      Properties:
+                        BorderThickness: =1
+                        ChevronBackground: =RGBA(2, 66, 109, 1)
+                        Default: =24
+                        Height: =25
+                        Items: =[12,16,24]
+                        Items.Value: =Value
+                        OnChange: |
+                          =With(
+                              {trussValue: Value(Self.SelectedText.Value)},
+                              UpdateIf(
+                                  col_roofs_week_details,
+                                  W_Date = var_week_sel,
+                                  {Truss_spacing: trussValue, _dirty: true}
+                              );
+                              ForAll(
+                                  Filter(col_roofs_week_details, W_Date = var_week_sel) As row,
+                                  Patch(
+                                      roofs_alldetails,
+                                      LookUp(roofs_alldetails, ID = row.ID),
+                                      {Truss_spacing: trussValue, Edited: "Yes"}
+                                  )
+                              );
+                              UpdateIf(col_roofs_week_details, W_Date = var_week_sel, {_dirty: false});
+                              Notify(
+                                  "Truss spacing set to " & trussValue & " on all rows.",
+                                  NotificationType.Success
+                              )
+                          )
+                        SelectionFill: =RGBA(2, 66, 109, 1)
+                        Size: =9
+                        Width: =74
+                        X: =150
+                        Y: =413
+                  - check_select_all:
+                      Control: CheckBox
+                      Properties:
+                        Label: ="Select All"
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        OnCheck: |
+                          =UpdateIf(
+                              col_roofs_week_details,
+                              W_Date = var_week_sel,
+                              {ToDelete: true}
+                          )
+                        OnUncheck: |
+                          =UpdateIf(
+                              col_roofs_week_details,
+                              W_Date = var_week_sel,
+                              {ToDelete: false}
+                          )
+                  - Rectangle3_2:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Height: =40
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                  - Button5_1:
+                      Control: Classic/Button
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderThickness: =0
+                        Fill: =RGBA(2, 66, 109, 1)
+                        FontWeight: =FontWeight.Normal
+                        Height: =30
+                        LayoutMaxWidth: =Parent.Width-10
+                        LayoutMinWidth: '=40  '
+                        OnSelect: =If(var_prod_sections="null",Set(var_prod_sections,"S"),If(var_prod_sections="S",Set(var_prod_sections,"M"),If(var_prod_sections="M",Set(var_prod_sections,"null"))))
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        RadiusBottomLeft: =5
+                        RadiusBottomRight: =5
+                        RadiusTopLeft: =5
+                        RadiusTopRight: =5
+                        Size: =10
+                        Text: ="Change Sections"
+                        Width: =126
+                        X: =75
+                        Y: =385
+                  - Button9_5:
+                      Control: Classic/Button
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderThickness: =0
+                        Fill: =RGBA(2, 66, 109, 1)
+                        Height: =30
+                        OnSelect: |
+                          =If(
+                              IsEmpty(Filter(col_roofs_week_details, W_Date = var_week_sel, ToDelete = true)),
+                              Notify("Select at least one row to delete.", NotificationType.Warning),
+                              ForAll(
+                                  Filter(col_roofs_week_details, W_Date = var_week_sel, ToDelete = true) As delRow,
+                                  Remove(roofs_alldetails, LookUp(roofs_alldetails, ID = delRow.ID));
+                                  RemoveIf(col_roofs_week_details, ID = delRow.ID)
+                              );
+                              Notify("Selected rows deleted successfully.", NotificationType.Success);Reset(check_select_all);
+                              Refresh(roofs_alldetails)
+                          )
+                        RadiusBottomLeft: =5
+                        RadiusBottomRight: =5
+                        RadiusTopLeft: =5
+                        RadiusTopRight: =5
+                        Size: =10
+                        Text: ="Delete Selected"
+                        Width: =150
+                        X: =56
+                        Y: =456
+      - btn_foam_week_select:
+          Control: Classic/Button
+          Properties:
+            OnSelect: =
+            Text: ="."
+            Visible: =false

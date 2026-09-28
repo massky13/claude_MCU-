@@ -1,0 +1,980 @@
+Screens:
+  INS_Roofs:
+    Properties:
+      OnVisible: |-
+        =Set(var_selected_date, Today()-Weekday(Today(),3));
+        ClearCollect(col_week_picker,
+            ForAll(Sequence(8),
+                With({ms: DateAdd(Date(Year(Today()), Month(Today()) - 6, 1), ThisRecord.Value - 1, TimeUnit.Months)},
+                With({fm: DateAdd(ms, Mod(8 - Weekday(ms, StartOfWeek.Monday), 7), TimeUnit.Days)},
+                {
+                    month_label: Text(ms, "mmm") & " " & Text(ms, "yy"),
+                    w1: fm,
+                    w2: If(Month(DateAdd(fm, 7, TimeUnit.Days)) = Month(ms), DateAdd(fm, 7, TimeUnit.Days)),
+                    w3: If(Month(DateAdd(fm, 14, TimeUnit.Days)) = Month(ms), DateAdd(fm, 14, TimeUnit.Days)),
+                    w4: If(Month(DateAdd(fm, 21, TimeUnit.Days)) = Month(ms), DateAdd(fm, 21, TimeUnit.Days)),
+                    w5: If(Month(DateAdd(fm, 28, TimeUnit.Days)) = Month(ms), DateAdd(fm, 28, TimeUnit.Days))
+                }))
+            )
+        );
+        ClearCollect(
+            col_insulation_roofs,
+            AddColumns(
+                SortByColumns(
+                    Filter(
+                        Insulation_Roofs,
+                        Plant_ID = PID,
+                        Facility_ID = Dropdown1_7.SelectedText.Value,
+                        W_Date = var_selected_date
+                    ),
+                    "Title",
+                    SortOrder.Ascending
+                ),
+                _dirty, false,
+                ToDelete, false
+            )
+        )
+    Children:
+      - RectQuickActionBar3:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =64
+            Width: =Parent.Width
+      - NewDataGallery:
+          Control: Gallery
+          Variant: BrowseLayout_Vertical_TwoTextVariant_ver4.0
+          Properties:
+            BorderColor: '=    '
+            Height: =665
+            Items: =col_insulation_roofs
+            OnSelect: =
+            TemplateSize: =30
+            Width: =934
+            X: =209
+            Y: =103
+          Children:
+            - bags_req_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =If(ThisItem.BagsReq>0,ThisItem.BagsReq,"")
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =26
+                  LineHeight: =1
+                  OnChange: |
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {
+                            BagsReq: If(Self.Text = "", 0, Value(Self.Text)),
+                            _dirty: true
+                        }
+                    )
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =3
+                  Width: =57
+                  X: =532
+                  Y: =2
+            - bags_actual_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =If(ThisItem.BagsActual>=0,ThisItem.BagsActual,"")
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =26
+                  OnChange: |
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {
+                            BagsActual: If(Self.Text = "", 0, Value(Self.Text)),
+                            _dirty: true
+                        }
+                    )
+                  OnSelect: =
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =4
+                  Width: =60
+                  X: =589
+                  Y: =2
+            - moisture_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =ThisItem.Moisture
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =26
+                  OnChange: |
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {
+                            Moisture: If(Self.Text = "", 0, Value(Self.Text)),
+                            _dirty: true
+                        }
+                    )
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =5
+                  Width: =60
+                  X: =649
+                  Y: =2
+            - depth_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =If(ThisItem.Depth>0,ThisItem.Depth)
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =26
+                  OnChange: |-
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {
+                            Depth: If(Self.Text = "", Blank(), Value(Self.Text)),
+                            _dirty: true
+                        }
+                    )
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =1
+                  Width: =60
+                  X: =396
+                  Y: =2
+            - rvalue_txt:
+                Control: Classic/TextInput
+                Properties:
+                  Align: =Align.Center
+                  BorderThickness: =1
+                  Default: =If(ThisItem.RValue>0,ThisItem.RValue)
+                  DelayOutput: =true
+                  Fill: =RGBA(238, 204, 204, 0.5)
+                  Height: =26
+                  OnChange: |
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {
+                            RValue: If(Self.Text = "", 0, Value(Self.Text)),
+                            _dirty: true
+                        }
+                    )
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =10
+                  TabIndex: =2
+                  Width: =60
+                  X: =456
+                  Y: =2
+            - Label3:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =Value(bags_actual_txt.Text)-Value(bags_req_txt.Text)
+                  Width: =47
+                  X: =716
+            - Toggle4:
+                Control: Classic/Toggle
+                Properties:
+                  Default: =ThisItem._dirty
+                  Height: =23
+                  OnChange: =
+                  OnSelect: =Select(Parent)
+                  ShowLabel: =false
+                  Visible: =false
+                  Width: =57
+                  X: =813
+                  Y: =3
+            - delete_check:
+                Control: Classic/CheckBox
+                Properties:
+                  CheckboxSize: =25
+                  Default: =Coalesce(ThisItem.ToDelete, false)
+                  Height: =30
+                  OnCheck: |
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {ToDelete: true}
+                    )
+                  OnSelect: =Select(Parent)
+                  OnUncheck: |
+                    =Patch(
+                        col_insulation_roofs,
+                        LookUp(col_insulation_roofs, ID = ThisItem.ID),
+                        {ToDelete: false}
+                    )
+                  Size: =10
+                  Text: =""
+                  Width: =43
+                  X: =779
+            - date_txt_3:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.Production
+                  Width: =137
+                  X: =119
+            - date_txt_4:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.Serial
+                  Width: =83
+                  X: =256
+            - Separator5:
+                Control: Rectangle
+                Properties:
+                  Fill: =App.Theme.Colors.Darker30
+                  Height: =1
+                  OnSelect: =Select(Parent)
+                  Width: =Parent.TemplateWidth
+                  X: =1
+                  Y: =Parent.TemplateHeight - 1
+            - DatePicker4_1:
+                Control: Classic/DatePicker
+                Properties:
+                  DefaultDate: =DateValue(ThisItem.Date, "en-US")
+                  Height: =30
+                  OnChange: |-
+                    =Select(Parent);
+                    Patch(
+                        col_insulation_roofs,
+                        NewDataGallery.Selected,
+                        {Date: DatePicker4_1.SelectedDate},
+                        {W_Date:DatePicker4_1.SelectedDate-Weekday(DateValue(DatePicker4_1.SelectedDate),3)}
+                    )
+                  OnSelect: =Select(Parent)
+                  PaddingLeft: =5
+                  PaddingTop: =5
+                  Size: =8
+                  StartOfWeek: =StartOfWeek.Monday
+                  StartYear: =2020
+                  Width: =110
+                  X: =2
+            - total_cost_item_txt:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: ="$"&RoundUp(var_bag_cost*Value(Label3.Text),1)
+                  Width: =63
+                  X: =845
+            - floor_extra_cost_txt:
+                Control: Label
+                Properties:
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Text: =ThisItem.unit_cost*Value(Label3.Text)
+                  Visible: =false
+                  Width: =40
+                  X: =822
+            - date_txt_5:
+                Control: Label
+                Properties:
+                  Align: =Align.Center
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =Round(ThisItem.Length*ThisItem.Width,0)
+                  Width: =58
+                  X: =339
+      - Title2:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            PaddingRight: =10
+            Size: =18
+            Text: ="Roofs Insulation Bags"
+            Width: =1267
+            X: =99
+      - Button3:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: |
+              =ForAll(
+                  col_insulation_roofs As row,
+                  Patch(
+                      Insulation_Roofs,
+                      LookUp(Insulation_Roofs, ID = row.ID),
+                      {
+                          RValue: Value(row.RValue),
+                          Depth: Value(row.Depth),
+                          Moisture: Value(row.Moisture),
+                          BagsReq: If(IsBlank(row.BagsReq), 0, Value(row.BagsReq)),
+                          BagsActual: If(IsBlank(row.BagsActual), 0, Value(row.BagsActual)),
+                          insulation_name: var_insulation_name,
+                          unit_cost: var_bag_cost,
+                          Edited: "Yes"
+                      }
+                  )
+              );
+              Notify("Insulation Data Entered", NotificationType.Success);
+              Refresh(Insulation_Roofs);
+
+              ClearCollect(
+                  col_insulation_roofs,
+                  AddColumns(
+                      SortByColumns(
+                          Filter(
+                              Insulation_Roofs,
+                              Plant_ID = PID,
+                              Facility_ID = Dropdown1_7.SelectedText.Value,
+                              W_Date = var_selected_date
+                          ),
+                          "Title",
+                          SortOrder.Ascending
+                      ),
+                      _dirty,
+                      false,
+                      ToDelete,
+                      false
+                  )
+              )
+            TabIndex: =1
+            Text: ="Submit"
+            Width: =168
+            X: =18
+            Y: =591
+      - Subtitle5_1:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Production"
+            Width: =102
+            X: =334
+            Y: =70
+      - Icon1:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Subtitle5_3:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Req"
+            Width: =56
+            X: =743
+            Y: =69
+      - Subtitle5_4:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Actual"
+            Width: =59
+            X: =802
+            Y: =70
+      - Subtitle5_10:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Bags"
+            Width: =115
+            X: =733
+            Y: =48
+      - Subtitle5_11:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="M%"
+            Width: =60
+            X: =854
+            Y: =70
+      - Subtitle5_12:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Depth"
+            Width: =70
+            X: =606
+            Y: =70
+      - Subtitle5_13:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="RVal"
+            Width: =60
+            X: =670
+            Y: =70
+      - Subtitle5_14:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Diff"
+            Width: =56
+            X: =921
+            Y: =70
+      - Subtitle5_2:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Date"
+            Width: =78
+            X: =216
+            Y: =69
+      - Subtitle5_43:
+          Control: Label
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Serial"
+            Width: =59
+            X: =470
+            Y: =70
+      - Icon2_5:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - icon_print:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Print
+            OnSelect: |-
+              =
+              Navigate(INS_Roofs_PRINT,ScreenTransition.None)
+            Visible: =If(CountRows(Filter(col_insulation_roofs, _dirty = true))>0,false,true)
+            X: =1056
+      - Label10_5:
+          Control: Label
+          Properties:
+            Height: =247
+            Size: =10
+            Text: |-
+              ="Use the SAVE button above to pre-fill the information on this screen, SAVE it and print a hard copy for the shop floor.
+
+              The information will still be there for when it is time to enter the Actual number of bags used and the moisture content.
+
+              Click on Submit when done."
+            VerticalAlign: =VerticalAlign.Top
+            Width: =187
+            X: =1157
+            Y: =98
+      - Subtitle5_101:
+          Control: Label
+          Properties:
+            Align: =TextPosition.Left
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =29
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =10
+            Text: ="Blanket-fill Options:"
+            Width: =136
+            X: =1176
+            Y: =454
+      - bags_zero_chk:
+          Control: Classic/CheckBox
+          Properties:
+            CheckboxSize: =30
+            Height: =39
+            OnCheck: |-
+              =UpdateIf(col_insulation_roofs, true, {BagsReq: 0, BagsActual: 0})
+            Size: =9
+            Text: ="Zero out all bags"
+            Width: =168
+            X: =1172
+            Y: =483
+      - Dropdown1_7:
+          Control: Classic/DropDown
+          Properties:
+            BorderThickness: =1
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Default: ="facilityID"
+            Height: =30
+            Items: =Filter(Plant_List, Plant_ID = PID)
+            Items.Value: =Facility
+            OnChange: |-
+              = ClearCollect(
+                      col_insulation_roofs,
+                      AddColumns(
+                          SortByColumns(
+                              Filter(
+                                  Insulation_Roofs,
+                                  Plant_ID = PID,
+                                  Facility_ID = Dropdown1_7.SelectedText.Value,
+                                  W_Date=var_selected_date
+                              ),
+                              "Title",
+                              SortOrder.Ascending
+                          ),
+                          _dirty,
+                          false,
+                          ToDelete,
+                          false
+                      )
+                  );
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =121
+            X: =74
+            Y: =156
+      - Label13_7:
+          Control: Label
+          Properties:
+            Height: =30
+            Size: =10
+            Text: ="Facility:"
+            Width: =59
+            X: =15
+            Y: =156
+      - Button9:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =28
+            OnSelect: |
+              =If(
+                  IsEmpty(Filter(col_insulation_roofs, ToDelete = true)),
+                  Notify("Select at least one row to delete.", NotificationType.Warning),
+                  ForAll(
+                      Filter(col_insulation_roofs, ToDelete = true),
+                      Remove(Insulation_Roofs,ThisRecord);
+                      Remove(col_insulation_roofs,ThisRecord);
+                  );
+                  Notify("Selected rows deleted successfully.", NotificationType.Success);Reset(select_all_chk);
+                  Refresh(Insulation_Roofs);
+                  ClearCollect(
+                      col_insulation_roofs,
+                      AddColumns(
+                          SortByColumns(
+                              Filter(
+                                  Insulation_Roofs,
+                                  Plant_ID = PID,
+                                  Facility_ID = Dropdown1_7.SelectedText.Value,
+                                  W_Date = var_selected_date
+                              ),
+                              "Title",
+                              SortOrder.Ascending
+                          ),
+                          _dirty,
+                          false,
+                          ToDelete,
+                          false
+                          )
+                  )
+              )
+            Size: =10
+            Text: ="Delete Selected"
+            Width: =165
+            X: =1176
+            Y: =588
+      - Subtitle5_18:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Check"
+            Width: =56
+            X: =975
+            Y: =70
+      - select_all_chk:
+          Control: Classic/CheckBox
+          Properties:
+            CheckboxSize: =30
+            Height: =39
+            OnCheck: |+
+              =UpdateIf(
+                  col_insulation_roofs,
+                  true,
+                      {ToDelete: true}
+              )
+
+            OnUncheck: |-
+              =//ForAll(col_insulation_roofs,Patch(col_insulation_roofs,LookUp(col_insulation_roofs,ID=ThisRecord.ID),{ToDelete: false }))
+              UpdateIf(
+                  col_insulation_roofs,
+                  true,
+                      {ToDelete: false}
+              )
+            Size: =9
+            Text: ="Check All"
+            Width: =168
+            X: =1172
+            Y: =511
+      - Label22_6:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =30
+            Size: =12
+            Text: ="$"&Sum(NewDataGallery.AllItems,total_cost_item_txt.Text)
+            Width: =168
+            X: =18
+            Y: =673
+      - Label9_9:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =12
+            Text: ="Total Extra Cost:"
+            Width: =168
+            X: =18
+            Y: =643
+      - lbl_week_picker_header:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Size: =9
+            Text: ="Select Week starting Monday:"
+            Width: =200
+            X: =5
+            Y: =201
+      - lbl_selected_week:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(2, 66, 109, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =9
+            Text: ="Week of " & Text(var_selected_date, "mmm d, yyyy")
+            Width: =195
+            X: =4
+            Y: =442
+      - gal_week_picker:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            Height: =220
+            Items: =col_week_picker
+            TemplateSize: =20
+            Width: =200
+            X: =5
+            Y: =229
+          Children:
+            - lbl_wk_month:
+                Control: Label
+                Properties:
+                  FontWeight: =FontWeight.Bold
+                  Height: =Parent.TemplateHeight
+                  Size: =8
+                  Text: =ThisItem.month_label
+                  Width: '=50  '
+            - circ_w1:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =RGBA(2, 66, 109, 1)
+                  BorderThickness: =1
+                  Color: =If(var_selected_date = ThisItem.w1, RGBA(255, 255, 255, 1), RGBA(50, 50, 50, 1))
+                  Fill: =If(var_selected_date = ThisItem.w1, RGBA(2, 66, 109, 1), RGBA(230, 230, 230, 1))
+                  Height: '=Parent.TemplateHeight   '
+                  OnSelect: =Set(var_selected_date, ThisItem.w1); Select(btn_week_reload)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =17
+                  RadiusBottomRight: =17
+                  RadiusTopLeft: =17
+                  RadiusTopRight: =17
+                  Size: =8
+                  Text: =If(IsBlank(ThisItem.w1), "", Text(Day(ThisItem.w1)))
+                  Visible: =Not(IsBlank(ThisItem.w1))
+                  Width: =Parent.TemplateHeight
+                  X: =55
+            - circ_w2:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =RGBA(2, 66, 109, 1)
+                  BorderThickness: =1
+                  Color: =If(var_selected_date = ThisItem.w2, RGBA(255, 255, 255, 1), RGBA(50, 50, 50, 1))
+                  Fill: =If(var_selected_date = ThisItem.w2, RGBA(2, 66, 109, 1), RGBA(230, 230, 230, 1))
+                  Height: '=Parent.TemplateHeight   '
+                  OnSelect: =Set(var_selected_date, ThisItem.w2); Select(btn_week_reload)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =17
+                  RadiusBottomRight: =17
+                  RadiusTopLeft: =17
+                  RadiusTopRight: =17
+                  Size: =8
+                  Text: =If(IsBlank(ThisItem.w2), "", Text(Day(ThisItem.w2)))
+                  Visible: =Not(IsBlank(ThisItem.w2))
+                  Width: =Parent.TemplateHeight
+                  X: =80
+            - circ_w3:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =RGBA(2, 66, 109, 1)
+                  BorderThickness: =1
+                  Color: =If(var_selected_date = ThisItem.w3, RGBA(255, 255, 255, 1), RGBA(50, 50, 50, 1))
+                  Fill: =If(var_selected_date = ThisItem.w3, RGBA(2, 66, 109, 1), RGBA(230, 230, 230, 1))
+                  Height: '=Parent.TemplateHeight   '
+                  OnSelect: =Set(var_selected_date, ThisItem.w3); Select(btn_week_reload)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =17
+                  RadiusBottomRight: =17
+                  RadiusTopLeft: =17
+                  RadiusTopRight: =17
+                  Size: =8
+                  Text: =If(IsBlank(ThisItem.w3), "", Text(Day(ThisItem.w3)))
+                  Visible: =Not(IsBlank(ThisItem.w3))
+                  Width: =Parent.TemplateHeight
+                  X: =105
+            - circ_w4:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =RGBA(2, 66, 109, 1)
+                  BorderThickness: =1
+                  Color: =If(var_selected_date = ThisItem.w4, RGBA(255, 255, 255, 1), RGBA(50, 50, 50, 1))
+                  Fill: =If(var_selected_date = ThisItem.w4, RGBA(2, 66, 109, 1), RGBA(230, 230, 230, 1))
+                  Height: '=Parent.TemplateHeight   '
+                  OnSelect: =Set(var_selected_date, ThisItem.w4); Select(btn_week_reload)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =17
+                  RadiusBottomRight: =17
+                  RadiusTopLeft: =17
+                  RadiusTopRight: =17
+                  Size: =8
+                  Text: =If(IsBlank(ThisItem.w4), "", Text(Day(ThisItem.w4)))
+                  Visible: =Not(IsBlank(ThisItem.w4))
+                  Width: =Parent.TemplateHeight
+                  X: =130
+            - circ_w5:
+                Control: Classic/Button
+                Properties:
+                  BorderColor: =RGBA(2, 66, 109, 1)
+                  BorderThickness: =1
+                  Color: =If(var_selected_date = ThisItem.w5, RGBA(255, 255, 255, 1), RGBA(50, 50, 50, 1))
+                  Fill: =If(var_selected_date = ThisItem.w5, RGBA(2, 66, 109, 1), RGBA(230, 230, 230, 1))
+                  Height: '=Parent.TemplateHeight   '
+                  OnSelect: =Set(var_selected_date, ThisItem.w5); Select(btn_week_reload)
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  RadiusBottomLeft: =17
+                  RadiusBottomRight: =17
+                  RadiusTopLeft: =17
+                  RadiusTopRight: =17
+                  Size: =8
+                  Text: =If(IsBlank(ThisItem.w5), "", Text(Day(ThisItem.w5)))
+                  Visible: =Not(IsBlank(ThisItem.w5))
+                  Width: =Parent.TemplateHeight
+                  X: =155
+      - Subtitle5_19:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Cost"
+            Width: =56
+            X: =1056
+            Y: =70
+      - Label14:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            Height: =23
+            Size: =10
+            Text: |-
+              ="Plant ID: "& PID
+            X: =30
+            Y: =744
+      - Subtitle5_59:
+          Control: Label
+          Properties:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =44
+            OnSelect: =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =12
+            Text: ="Area"
+            Width: =59
+            X: =549
+            Y: =70
+      - btn_week_reload:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |-
+              =ClearCollect(
+                  col_insulation_roofs,
+                  AddColumns(
+                      SortByColumns(
+                          Filter(
+                              Insulation_Roofs,
+                              Plant_ID = PID,
+                              Facility_ID = Dropdown1_7.SelectedText.Value,
+                              W_Date = var_selected_date
+                          ),
+                          "Title",
+                          SortOrder.Ascending
+                      ),
+                      _dirty, false,
+                      ToDelete, false
+                  )
+              )
+            Text: ="reload"
+            Visible: =false

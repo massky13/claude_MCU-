@@ -1,0 +1,438 @@
+Screens:
+  Prod_Entry_1:
+    Properties:
+      Fill: |-
+        =RGBA(
+            255,
+            255,
+            255,
+            1
+        )
+      OnVisible: |-
+        =Clear(Collection1);
+        UpdateContext({show_floor_question: false});
+        Reset(Text1)
+    Children:
+      - Text1:
+          Control: Classic/TextInput
+          Properties:
+            Default: =
+            Height: =486
+            HoverFill: =RGBA(241, 244, 249, 1)
+            Mode: =TextMode.MultiLine
+            Size: =9
+            Width: =582
+            X: =40
+            Y: =153
+      - RectQuickActionBar1:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(2, 66, 109, 1)
+            Height: =64
+            Width: =Parent.Width
+      - Label1:
+          Control: Label
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Size: =24
+            Text: ="Enter Production Data for the week"
+            Width: =760
+            X: =103
+            Y: =12
+      - Button1:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: |+
+              =Clear(Col1Dim);
+              ForAll(ForAll(Split(Text1.Text,Char(10)), {Result: ThisRecord.Value}),
+              Collect(Col1Dim,Table({
+              CDate:First(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value})).Result,
+              CProduction:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),2)).Result,
+              CSerial:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),3)).Result,
+              CModel:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),4)).Result,
+              CType:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),5)).Result,
+              CRValue:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),6)).Result,
+              CWFeet:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),7)).Result,
+              CWInches:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),8)).Result,
+              CLFeet:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),9)).Result,
+              CLInches:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),10)).Result,
+              CPWFeet:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),11)).Result,
+              CPWInches:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),12)).Result,
+              CPLFeet:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),13)).Result,
+              CPLInches:Last(FirstN(ForAll(Split(Result,Char(9)), {Result: ThisRecord.Value}),14)).Result
+              })));
+
+            Text: ="Process Data"
+            X: =462
+            Y: =663
+      - Label4:
+          Control: Label
+          Properties:
+            Size: =9
+            Text: ="Date  Production  Serial  Model     Type      RValue     Feet Inches   Feet Inches   Feet Inches   Feet Inches"
+            Width: =634
+            X: =40
+            Y: =120
+      - DataTable1:
+          Control: DataTable
+          Properties:
+            HeadingFill: =RGBA(2, 66, 109, 1)
+            Height: =565
+            Items: =Col1Dim
+            Size: =9
+            Width: =689
+            X: =649
+            Y: =76
+          Children:
+            - CDate_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Date"
+                  FieldName: ="CDate"
+                  Order: =1
+                  Text: =ThisItem.CDate
+                  Width: =110
+            - CProduction_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Prod"
+                  FieldName: ="CProduction"
+                  Order: =2
+                  Text: =ThisItem.CProduction
+                  Width: =129
+            - CPLFeet_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Floor Size"
+                  FieldName: ="CPLFeet"
+                  Order: =3
+                  Text: =RoundUp((ThisItem.CWFeet + ThisItem.CWInches/12),1) & " x " & RoundUp((ThisItem.CLFeet + ThisItem.CLInches/12),1)
+                  Width: =97
+            - CRValue_Column1:
+                Control: DataTableColumn
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="RValue"
+                  FieldName: ="CRValue"
+                  Order: =7
+                  Text: =ThisItem.CRValue
+                  Width: =84
+      - Label5_3:
+          Control: Label
+          Properties:
+            Height: =20
+            Size: =9
+            Text: ="Width            Length           Porch W         Porch L"
+            Width: =347
+            X: =342
+            Y: =115
+      - Button1_6:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |-
+              =Set(VAR_by_floor,true);
+
+              Set(facilityID,Dropdown1.SelectedText.Value);
+
+              ForAll(Col1Dim, 
+                  Patch(Production_Master, 
+                      Defaults(Production_Master),
+                      {
+                          Title:Last(Production_Master).Title+1,
+                          Plant_ID:PID,
+                          Facility:facilityID,
+                          //Plant_facility:PID & " - " & facilityID,
+                          Date:DateValue(CDate),
+                          W_Date:CDate-Weekday(DateValue(CDate),3),
+                          User_Name: Office365Users.MyProfileV2().displayName,
+                          Production:Text(CProduction),
+                          Serial:Text(CSerial),
+                          Model:Text(CModel),
+                          Home_Type:Text(CType),
+                          report_by_floor:VAR_by_floor,
+                          Roof_RValue:Value(CRValue),
+                          LFeet:Value(CLFeet),
+                          LInches:Value(CLInches),
+                          WFeet:Value(CWFeet),
+                          WInches:Value(CWInches),
+                          PLength_F:Value(CPLFeet),
+                          PLength_I:Value(CPLInches),
+                          PWidth_F:Value(CPWFeet),
+                          PWidth_I:Value(CPWInches),
+                          //Length:(Value(CLFeet)+Value(CLInches)/12),
+                          //Width:(Value(CWFeet)+Value(CWInches)/12),
+                          //SQFeet:RoundUp(((Value(CLFeet)+Value(CLInches)/12)*(Value(CWFeet)+Value(CWInches)/12)),0),
+                          //BagsActual:0,
+                          //BagsReq:0,
+                          Reviewed:If(CDate="","","No")
+                      }
+                  ))
+              ;
+
+              Clear(Col1Dim);
+              UpdateContext({show_floor_question: false});
+
+              Navigate(review_screen1,ScreenTransition.Fade)
+
+
+
+
+              //UpdateContext({show_floor_question: true});
+
+              //Set(facilityID,Dropdown1.SelectedText.Value);ForAll(Col1Dim,Patch(Production_Master,Defaults(Production_Master),{Title:Last(Production_Master).Title+1,Plant_ID:PID,Facility:facilityID,
+                          //Plant_facility:PID & " - " & facilityID,
+              //Date:DateValue(CDate),User_Name:Office365Users.MyProfileV2().displayName,Production:Text(CProduction),Serial:Text(CSerial),Model:Text(CModel),Home_Type:Text(CType),Roof_RValue:Value(CRValue),LFeet:Value(CLFeet),LInches:Value(CLInches),WFeet:Value(CWFeet),WInches:Value(CWInches),//PLength_F:Value(CPLFeet),PLength_I:Value(CPLInches),PWidth_F:Value(CPWFeet),PWidth_I:Value(CPWInches),
+                          //Length:(Value(CLFeet)+Value(CLInches)/12),
+
+                          //Width:(Value(CWFeet)+Value(CWInches)/12),
+
+                          //SQFeet:RoundUp(((Value(CLFeet)+Value(CLInches)/12)*(Value(CWFeet)+Value(CWInches)/12)),0),
+
+                          //BagsActual:0,
+
+                          //BagsReq:0,
+              //Reviewed:"No"}));Clear(Col1Dim);Navigate(review_screen1,ScreenTransition.Fade);
+            Text: ="Next"
+            Visible: =false
+            Width: =211
+            X: =1066
+            Y: =691
+      - Button1_7:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: |-
+              =Clear(Col1Dim);
+              Reset(Text1)
+            Text: ="Clear Data"
+            X: =462
+            Y: =714
+      - Icon1_2:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Label5:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            FontWeight: =FontWeight.Bold
+            Text: ="Paste the schedule data from Excel in the box below "
+            Width: =582
+            X: =40
+            Y: =70
+      - Icon2_1:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Label13:
+          Control: Label
+          Properties:
+            Text: |-
+              ="Your plant ID is " & PID & ", facility: "
+            Width: =236
+            X: =40
+            Y: =656
+      - Dropdown1:
+          Control: Classic/DropDown
+          Properties:
+            ChevronBackground: =RGBA(2, 66, 109, 1)
+            Height: =30
+            Items: =Filter(Plant_List, Plant_ID = PID)
+            Items.Value: =Facility
+            SelectionFill: =RGBA(2, 66, 109, 1)
+            Size: =10
+            Width: =77
+            X: =276
+            Y: =661
+      - Label5_4:
+          Control: Label
+          Properties:
+            Height: =20
+            Size: =9
+            Text: ="Roofs"
+            Width: =44
+            X: =276
+            Y: =115
+      - floor_question_BG_1:
+          Control: Label
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.61)
+            Height: =768
+            Text: '=    '
+            Visible: =show_floor_question
+            Width: =1366
+      - Rectangle1_1:
+          Control: Rectangle
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =301
+            Visible: =show_floor_question
+            Width: =869
+            X: =249
+            Y: =234
+      - by_floor_button:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |-
+              =Set(VAR_by_floor,true);
+
+              Set(facilityID,Dropdown1.SelectedText.Value);
+
+              ForAll(Col1Dim, 
+                  Patch(Production_Master, 
+                      Defaults(Production_Master),
+                      {
+                          Title:Last(Production_Master).Title+1,
+                          Plant_ID:PID,
+                          Facility:facilityID,
+                          //Plant_facility:PID & " - " & facilityID,
+                          Date:DateValue(CDate),
+                          User_Name: Office365Users.MyProfileV2().displayName,
+                          Production:Text(CProduction),
+                          Serial:Text(CSerial),
+                          Model:Text(CModel),
+                          Home_Type:Text(CType),
+                          report_by_floor:VAR_by_floor,
+                          Roof_RValue:Value(CRValue),
+                          LFeet:Value(CLFeet),
+                          LInches:Value(CLInches),
+                          WFeet:Value(CWFeet),
+                          WInches:Value(CWInches),
+                          PLength_F:Value(CPLFeet),
+                          PLength_I:Value(CPLInches),
+                          PWidth_F:Value(CPWFeet),
+                          PWidth_I:Value(CPWInches),
+                          //Length:(Value(CLFeet)+Value(CLInches)/12),
+                          //Width:(Value(CWFeet)+Value(CWInches)/12),
+                          //SQFeet:RoundUp(((Value(CLFeet)+Value(CLInches)/12)*(Value(CWFeet)+Value(CWInches)/12)),0),
+                          //BagsActual:0,
+                          //BagsReq:0,
+                          Reviewed:If(CDate="","","No")
+                      }
+                  ))
+              ;
+
+              Clear(Col1Dim);
+              UpdateContext({show_floor_question: false});
+
+              Navigate(review_screen1,ScreenTransition.Fade)
+            Text: ="Floor"
+            Visible: =show_floor_question
+            Width: =170
+            X: =495
+            Y: =443
+      - Label16_1:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            FontWeight: =FontWeight.Bold
+            Height: =88
+            Size: =24
+            Text: ="Was the information entered by floor or by house?"
+            Visible: =show_floor_question
+            Width: =869
+            X: =249
+            Y: =234
+      - by_house_button:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |-
+              =Set(VAR_by_floor,false);
+
+              Set(facilityID,Dropdown1.SelectedText.Value);
+
+              ForAll(Col1Dim, 
+                  Patch(Production_Master, 
+                      Defaults(Production_Master),
+                      {
+                          Title:Last(Production_Master).Title+1,
+                          Plant_ID:PID,
+                          Facility:facilityID,
+                          //Plant_facility:PID & " - " & facilityID,
+                          Date:DateValue(CDate),
+                          User_Name: Office365Users.MyProfileV2().displayName,
+                          Production:Text(CProduction),
+                          Serial:Text(CSerial),
+                          Model:Text(CModel),
+                          report_by_floor:VAR_by_floor,
+                          Home_Type:Text(CType),
+                          Roof_RValue:Value(CRValue),
+                          LFeet:Value(CLFeet),
+                          LInches:Value(CLInches),
+                          WFeet:Value(CWFeet),
+                          WInches:Value(CWInches),
+                          PLength_F:Value(CPLFeet),
+                          PLength_I:Value(CPLInches),
+                          PWidth_F:Value(CPWFeet),
+                          PWidth_I:Value(CPWInches),
+                          //Length:(Value(CLFeet)+Value(CLInches)/12),
+                          //Width:(Value(CWFeet)+Value(CWInches)/12),
+                          //SQFeet:RoundUp(((Value(CLFeet)+Value(CLInches)/12)*(Value(CWFeet)+Value(CWInches)/12)),0),
+                          //BagsActual:0,
+                          //BagsReq:0,
+                          Reviewed:If(CDate="","","No")
+                      }
+                  ))
+              ;
+
+              Clear(Col1Dim);
+              UpdateContext({show_floor_question: false});
+
+              Navigate(review_screen1,ScreenTransition.Fade)
+            Text: ="House"
+            Visible: =show_floor_question
+            Width: =170
+            X: =704
+            Y: =443
+      - Image2_7:
+          Control: Image
+          Properties:
+            Image: =floor
+            Visible: =show_floor_question
+            Width: =106
+            X: =527
+            Y: =326
+      - Image2_6:
+          Control: Image
+          Properties:
+            DisplayMode: =DisplayMode.View
+            Image: =house
+            Visible: =show_floor_question
+            Width: =106
+            X: =735
+            Y: =326
+      - Label15:
+          Control: Label
+          Properties:
+            Align: =LayoutAlignItems.Center
+            Text: ="Please wait while loading..."
+            Visible: =show_floor_question
+            Width: =273
+            X: =547
+            Y: =498
+      - Button1_36:
+          Control: Classic/Button
+          Properties:
+            BorderThickness: =0
+            Fill: =RGBA(2, 66, 109, 1)
+            OnSelect: "=//UpdateContext({show_floor_question: true})\r\n\r\n\r\nSet(facilityID,Dropdown1.SelectedText.Value);\r\nSet(start_row,100);\r\nClear(col_production);\r\n\r\nForAll(Col1Dim,If( CDate<>\"\",\r\n    Collect(col_production,\r\n        \r\n        {\r\n            Title:start_row + Value(CountRows(col_production)+1,\"000\"),\r\n            Plant_ID:PID,\r\n            Facility:facilityID,\r\n            //Plant_facility:PID & \" - \" & facilityID,\r\n            Date:DateValue(CDate),\r\n            W_Date:CDate-Weekday(DateValue(CDate),3),\r\n            User_Name: Office365Users.MyProfileV2().displayName,\r\n            Production:Text(CProduction),\r\n            Serial:Text(CSerial),\r\n            Model:Text(CModel),\r\n            Home_Type:Text(CType),\r\n            report_by_floor:VAR_by_floor,\r\n            Roof_RValue:Value(CRValue),\r\n            LFeet:Value(CLFeet),\r\n            LInches:Value(CLInches),\r\n            WFeet:Value(CWFeet),\r\n            WInches:Value(CWInches),\r\n            PLength_F:Value(CPLFeet),\r\n            PLength_I:Value(CPLInches),\r\n            PWidth_F:Value(CPWFeet),\r\n            PWidth_I:Value(CPWInches),\r\n            Reviewed:If(CDate=\"\",\"\",\"No\"),\r\n            Section: If(Value(ThisRecord.CWFeet)>16,\"M\",\"S\")\r\n        }\r\n    )))\r\n;\r\n\r\nClear(Col1Dim);\r\nReset(Text1);\r\nNavigate(review_screen1,ScreenTransition.Fade);\r\n"
+            Text: ="Next"
+            Width: =211
+            X: =890
+            Y: =703

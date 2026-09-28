@@ -4,15 +4,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Power Apps Canvas App for the **OpEx Training Hub** at Champion Homes. It manages Lean Six Sigma certification exams (currently LSSGB — Green Belt). The app is authored as `.pa.yaml` files using the Canvas Authoring MCP server and synced to Power Apps Studio.
+Power Apps Canvas Apps for Champion Homes OpEx, authored as `.pa.yaml` files using the Canvas Authoring MCP server and synced to Power Apps Studio. The repo holds two separate apps:
 
-Two app folders exist:
+| Folder | App | Studio IDs |
+|---|---|---|
+| `opex-tracker/` | **OpEx Tracker** — production & insulation tracking (foam, insulation floors/roofs, production entry) | env `Default-906f2348-17ef-4fb9-943a-f0a55a301f94`, app `a5796c13-e1d2-4ae4-9df3-e777e2f31dac` |
+| `lssgb-test/`, `lssgb-test-sync/`, `lssgb-timer-fix/` | **OpEx Training Hub** — Lean Six Sigma certification exams (LSSGB) | not recorded |
+
+Everything below the OpEx Tracker section describes the Training Hub (LSSGB) app.
+
+## OpEx Tracker (`opex-tracker/`)
+
+`opex-tracker/` is a straight `sync_canvas` pull from Studio: always re-sync before editing, since Studio is the source of truth.
+
+- `App.OnStart` sets `PID` (plant ID = first 3 chars of the user's `officeLocation` from `Office365Users.UserProfileV2`) and `var_selected_date` (start of the current week). Theme: `PowerAppsTheme`.
+- Hub screen is `Splash_Screen`; nearly every screen navigates back to it or to `review_screen1`.
+- Screen groups: `Foam_*` (foam details by floor/week, settings), `INS_*` (insulation floors/roofs + print views, `INS_Splash`), `HIS_*` (history), `Prod_Entry_1`–`4` (production entry wizard writing to `Production_Master`), `Location_Audit`, `Dev_Screen`, `Screen1`.
+- Component: `Components/cmpReorder`.
+- Data sources: `Insulation_Floors`, `Insulation_Roofs`, `Plant_List`, `plant_models`, `Plant_Settings`, `plant-pumps`, `Production_Master`, `roofs_alldetails`, `roofs_week_cycles`, `topeka_widths`. Connector: `Office365Users`.
+- `compile_canvas` currently reports 26 delegation warnings (LookUps on `facility_lookup`, `Value` in `Button1_31`/`Button1_35`) and no errors.
+
+## OpEx Training Hub (LSSGB)
+
+App folders:
 - `lssgb-test/` — the active development version
 - `lssgb-test-sync/` — a sync copy kept in step with the active version
+- `lssgb-timer-fix/` — a variant carrying a timer fix
 
 ## Authoring workflow
 
 This project uses the Canvas Authoring MCP server. Use the `/canvas-app` skill to create or edit screens. The MCP server compiles and syncs changes to Power Apps. Do not hand-edit `.pa.yaml` files without the MCP server unless you are making trivial structural fixes.
+
+The server is the NuGet package `Microsoft.PowerApps.CanvasAuthoring.McpServer`, run with `dnx` (needs the .NET 10 SDK). Its `connect` tool needs the Studio `environment_id` and `app_id` (both are in the Studio edit URL), and coauthoring must be enabled for the app in Studio. On headless hosts (e.g. cloud sessions) pass `auth_flow: devicecode`; the sign-in code arrives as an MCP elicitation.
 
 ## Screen navigation
 

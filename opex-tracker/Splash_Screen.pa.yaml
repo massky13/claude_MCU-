@@ -1,0 +1,1310 @@
+Screens:
+  Splash_Screen:
+    Properties:
+      Fill: =RGBA(255, 255, 255, 1)
+      OnVisible: |-
+        =Set(PID,Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation,3)));
+        UpdateContext({var_view_models:false})
+    Children:
+      - cont_view_model:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.Bold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =671
+            Visible: =var_view_models
+            Width: =Parent.Width-20
+            X: =10
+            Y: =87
+          Children:
+            - Icon2:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  OnSelect: |-
+                    =UpdateContext({var_add_model:false});
+                    UpdateContext({var_view_models:false});
+                    UpdateContext({var_edit_models:false});
+                  X: =1282
+            - gal_model_list:
+                Control: Gallery
+                Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =522
+                  Items: =Filter(plant_models, Plant_ID=PID && Facility=drop_facility_models.Selected.Value)
+                  OnSelect: =
+                  TemplateSize: =35
+                  Transition: =Transition.Pop
+                  Width: =738
+                  X: =15
+                  Y: =80
+                Children:
+                  - Subtitle1:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =Self.Size * 1.8
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =ThisItem.Floor_model
+                        Width: =139
+                        X: =10
+                        Y: =(Parent.TemplateHeight - Self.Height)/2
+                  - Separator2:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =8
+                        OnSelect: =Select(Parent)
+                        Width: =Parent.TemplateWidth
+                        Y: =Parent.TemplateHeight - Self.Height
+                  - Rectangle4:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =App.Theme.Colors.Darker30
+                        Height: =Parent.TemplateHeight - Separator2.Height
+                        OnSelect: =Select(Parent)
+                        Visible: =ThisItem.IsSelected
+                        Width: =4
+                  - Subtitle1_1:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =Self.Size * 1.8
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: "=ThisItem.Width_F & \"'\" & ThisItem.Width_I & \"'' x \" & ThisItem.Length_F & \"'\" & ThisItem.Length_I & \"''\" "
+                        Width: =132
+                        X: =149
+                        Y: =(Parent.TemplateHeight - Self.Height)/2
+                  - Icon10:
+                      Control: Classic/Icon
+                      Properties:
+                        Height: =30
+                        Icon: =Icon.Trash
+                        OnSelect: |-
+                          =Select(Parent);
+                          Remove(plant_models,ThisItem)
+                        Width: =30
+                        X: =691
+                        Y: =3
+                  - Icon11:
+                      Control: Classic/Icon
+                      Properties:
+                        Height: =30
+                        Icon: =Icon.Edit
+                        OnSelect: |-
+                          =Select(Parent);
+                          UpdateContext({var_add_model:false});
+                          UpdateContext({var_view_models:true});
+                          UpdateContext({var_edit_model:true});
+                        Width: =30
+                        X: =644
+                        Y: =3
+                  - Subtitle1_2:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =Self.Size * 1.8
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =ThisItem.extra_lfb
+                        Width: =63
+                        X: =360
+                        Y: =6
+                  - Subtitle1_3:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =Self.Size * 1.8
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =ThisItem.bags
+                        Width: =45
+                        X: =444
+                        Y: =6
+                  - Arrow1:
+                      Control: Arrow
+                      Properties:
+                        Height: =30
+                        OnSelect: |-
+                          =Select(Parent);
+                          Patch(
+                              col_models,
+                              Defaults(col_models),
+                              {Model: ThisItem.Floor_model}
+                          )
+                        Visible: =false
+                        Width: =30
+                        X: =555
+                        Y: =4
+                  - Subtitle1_4:
+                      Control: Label
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =Self.Size * 1.8
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =ThisItem.Section
+                        Width: =45
+                        X: =281
+                        Y: =6
+            - TextCanvas2:
+                Control: Text
+                Properties:
+                  Height: =35
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =16
+                  Text: |-
+                    ="Model list for plant " & PID & ", facility: "
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =287
+                  X: =25
+                  Y: =16
+            - ButtonCanvas1:
+                Control: Button
+                Properties:
+                  Align: =Align.Center
+                  FontSize: =15
+                  Height: =41
+                  Icon: ="Add"
+                  OnSelect: |-
+                    =UpdateContext({var_add_model:true});
+                    UpdateContext({var_view_models:false});
+                    UpdateContext({var_edit_models:false});
+                  Text: ="Add Model"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Width: =224
+                  X: =266
+                  Y: =603
+            - TextCanvas2_1:
+                Control: Text
+                Properties:
+                  Text: |-
+                    ="Model #"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =147
+                  X: =25
+                  Y: =48
+            - TextCanvas2_2:
+                Control: Text
+                Properties:
+                  Text: ="Dimensions"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =124
+                  X: =172
+                  Y: =48
+            - TextCanvas2_3:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Extra Feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =83
+                  X: =368
+                  Y: =48
+            - TextCanvas2_4:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Bags"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =51
+                  X: =456
+                  Y: =48
+            - Text1_4:
+                Control: Classic/TextInput
+                Properties:
+                  Default: =
+                  Height: =480
+                  HoverFill: =RGBA(241, 244, 249, 1)
+                  Mode: =TextMode.MultiLine
+                  Size: =12
+                  Visible: =false
+                  Width: =178
+                  X: =833
+                  Y: =89
+            - Button1_11:
+                Control: Classic/Button
+                Properties:
+                  Height: =62
+                  OnSelect: |
+                    =Clear(col_models);
+                    ForAll(
+                        ForAll(
+                            Split(
+                                Text1_4.Text,
+                                Char(10)
+                            ),
+                            {Result: ThisRecord.Value}
+                        ),
+                        Collect(
+                            col_models,
+                            Table(
+                                {
+                                    Model: First(
+                                        ForAll(
+                                            Split(
+                                                Result,
+                                                Char(9)
+                                            ),
+                                            {Result: ThisRecord.Value}
+                                        )
+                                    ).Result
+                                }
+                            )
+                        )
+                    );
+                  Text: ="Process Models"
+                  Visible: =false
+                  Width: =178
+                  X: =833
+                  Y: =582
+            - Rectangle6:
+                Control: Rectangle
+                Properties:
+                  Height: =Parent.Height
+                  Visible: =false
+                  Width: =10
+                  X: =765
+            - TextCanvas1:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =33
+                  Size: =18
+                  Text: ="Week Production"
+                  Visible: =false
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =178
+                  X: =833
+                  Y: =56
+            - Gallery3:
+                Control: Gallery
+                Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                Properties:
+                  BorderThickness: =1
+                  Height: =480
+                  Items: =col_models
+                  TemplateSize: =30
+                  Visible: =false
+                  Width: =238
+                  X: =1044
+                  Y: =89
+                Children:
+                  - Title3:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(50, 49, 48, 1)
+                        FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                        Height: =22
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =ThisItem.Model
+                        Width: =120
+                        X: =16
+                        Y: =(Parent.TemplateHeight-Self.Height)/2
+                  - Rectangle7:
+                      Control: Rectangle
+                      Properties:
+                        Fill: =If(ThisItem.Model in plant_models.Floor_model, Color.Green,Color.Red)
+                        Height: =Parent.TemplateHeight-4
+                        OnSelect: =Select(Parent)
+                        Width: =10
+                        Y: =2
+                  - Icon10_1:
+                      Control: Classic/Icon
+                      Properties:
+                        Height: =30
+                        Icon: =Icon.Trash
+                        OnSelect: |-
+                          =Select(Parent);
+                          Remove(col_models,ThisItem)
+                        Width: =30
+                        X: =192
+                        Y: =(Parent.TemplateHeight-Self.Height)/2
+            - TextCanvas1_1:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =33
+                  Size: =18
+                  Text: ="Production List"
+                  Visible: =false
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =238
+                  X: =1044
+                  Y: =56
+            - Button1_24:
+                Control: Classic/Button
+                Properties:
+                  Height: =62
+                  OnSelect: "=Clear(col_production);\r\nForAll(col_models As addModel,\r\n    Patch(col_production, Defaults(col_production),\r\n        {\r\n            //Title:addModel.Title,\r\n            Date:date_models.SelectedDate,\r\n            Plant_ID:PID,\r\n            Facility:drop_facility_models.Selected.Value,\r\n            //Plant_Facility:ThisRecord.Plant_ID & \" - \" & ThisRecord.Facility,\r\n            User_Name:User().FullName,\r\n            W_Date:date_models.SelectedDate,//Date-Weekday(DateValue(date_gal_txt.Text),3),\r\n            Production:\"\",\r\n            Serial:\"\",\r\n            Model:addModel.Model,\r\n            Home_Type:\"\",\r\n            Section:LookUp(plant_models,Plant_ID=PID && Floor_model=addModel.Model, Section),\r\n            //Roof_RValue:\"\",\r\n            LFeet:Value(LookUp(plant_models,Plant_ID=PID && Floor_model=addModel.Model, Length_F)),\r\n            LInches:Value(LookUp(plant_models,Plant_ID=PID && Floor_model=addModel.Model, Length_I)),\r\n            WFeet:Value(LookUp(plant_models,Plant_ID=PID && Floor_model=addModel.Model, Width_F)),\r\n            WInches:Value(LookUp(plant_models,Plant_ID=PID && Floor_model=addModel.Model, Width_I)),\r\n            Reviewed:\"No\"\r\n      \r\n        }\r\n    )\r\n);\r\n\r\n//UpdateContext({var_view_models:false})"
+                  Text: ="Proceed"
+                  Visible: =false
+                  Width: =131
+                  X: =1150
+                  Y: =582
+            - TextCanvas2_29:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Transfer"
+                  Visible: =false
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =63
+                  X: =553
+                  Y: =52
+            - Button1_25:
+                Control: Classic/Button
+                Properties:
+                  Height: =62
+                  OnSelect: =Clear(col_models)
+                  Text: ="Clear"
+                  Visible: =false
+                  Width: =85
+                  X: =1044
+                  Y: =582
+            - drop_facility_models:
+                Control: DropDown
+                Properties:
+                  Height: =35
+                  Items: =["1", "2", "3"]
+                  Width: =84
+                  X: =292
+                  Y: =16
+            - TextCanvas2_31:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Sections"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =81
+                  X: =278
+                  Y: =48
+            - date_models:
+                Control: DatePicker
+                Properties:
+                  Visible: =false
+                  Width: =211
+                  X: =833
+                  Y: =16
+            - TextCanvas3:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  Text: ="(only Mondays)"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Visible: =false
+                  Width: =126
+                  X: =1053
+                  Y: =16
+            - Image1:
+                Control: Image
+                Properties:
+                  Height: =208
+                  Image: ='new opex logo nobg'
+                  ImagePosition: =ImagePosition.Center
+                  Width: =276
+            - Image4:
+                Control: Image
+                Properties:
+                  Image: ='new opex logo'
+                  X: =40
+                  Y: =40
+            - Image5:
+                Control: Image
+                Properties:
+                  Image: ='new opex logo'
+                  X: =60
+                  Y: =60
+      - cont_add_model:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.Bold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =345
+            Visible: =var_add_model
+            Width: =653
+            X: =(Parent.Width-Self.Width)/2
+            Y: =(Parent.Height - Self.Height)/2
+          Children:
+            - TextCanvas2_13:
+                Control: Text
+                Properties:
+                  Fill: =RGBA(221, 221, 221, 0.2)
+                  Height: =47
+                  Text: ="Length"
+                  VerticalAlign: =VerticalAlign.Top
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =172
+                  X: =439
+                  Y: =121
+            - TextCanvas2_12:
+                Control: Text
+                Properties:
+                  Fill: =RGBA(221, 221, 221, 0.2)
+                  Height: =47
+                  Text: ="Width"
+                  VerticalAlign: =VerticalAlign.Top
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =172
+                  X: =227
+                  Y: =121
+            - Icon2_4:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  OnSelect: |-
+                    =UpdateContext({var_add_model:false});
+                    UpdateContext({var_view_models:true});
+                    UpdateContext({var_edit_models:false});
+                  X: =589
+            - TextCanvas2_5:
+                Control: Text
+                Properties:
+                  Size: =16
+                  Text: ="Add Model for plant " & PID & ":"
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =425
+                  X: =40
+                  Y: =18
+            - TextCanvas2_6:
+                Control: Text
+                Properties:
+                  Text: |-
+                    ="Model #"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =147
+                  X: =40
+                  Y: =138
+            - TextCanvas2_7:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =68
+                  X: =232
+                  Y: =140
+            - TextCanvas2_8:
+                Control: Text
+                Properties:
+                  Text: ="Extra linear feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =114
+                  X: =227
+                  Y: =236
+            - TextCanvas2_9:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  Text: ="Bags"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =58
+                  X: =374
+                  Y: =238
+            - TextInputCanvas1:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Width: =164
+                  X: =40
+                  Y: =171
+            - TextInputCanvas1_1:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Width: =80
+                  X: =227
+                  Y: =171
+            - TextInputCanvas1_2:
+                Control: TextInput
+                Properties:
+                  Width: =114
+                  X: =227
+                  Y: =269
+            - TextCanvas2_10:
+                Control: Text
+                Properties:
+                  Text: ="Dimensions"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =124
+                  X: =227
+                  Y: =86
+            - TextCanvas2_11:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =31
+                  Text: ="Inches"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =80
+                  X: =319
+                  Y: =141
+            - TextInputCanvas1_3:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Width: =80
+                  X: =319
+                  Y: =171
+            - TextInputCanvas1_4:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Width: =80
+                  X: =439
+                  Y: =171
+            - TextInputCanvas1_5:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Width: =80
+                  X: =531
+                  Y: =171
+            - TextCanvas2_14:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =68
+                  X: =444
+                  Y: =141
+            - TextCanvas2_15:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =31
+                  Text: ="Inches"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =80
+                  X: =531
+                  Y: =142
+            - TextCanvas2_16:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =30
+                  Text: ="x"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =40
+                  X: =399
+                  Y: =172
+            - TextInputCanvas1_6:
+                Control: TextInput
+                Properties:
+                  Width: =58
+                  X: =374
+                  Y: =269
+            - ButtonCanvas2:
+                Control: Button
+                Properties:
+                  OnSelect: "=Patch(\r\n    plant_models,Defaults(plant_models),\r\n    {\r\n        Plant_ID:PID,\r\n        Facility:drop_facility_models.Selected.Value,\r\n        Floor_model:TextInputCanvas1.Value,\r\n        Width_F:Value (TextInputCanvas1_1.Value),\r\n        Width_I: Value(TextInputCanvas1_3.Value),\r\n        Length_F:Value(TextInputCanvas1_4.Value),\r\n        Length_I:Value(TextInputCanvas1_5.Value),\r\n        Section: drop_sections_model_1.Selected.Value,\r\n        extra_lfb:Value(TextInputCanvas1_2.Value),\r\n        bags:Value(TextInputCanvas1_6.Value)\r\n    }\r\n);\r\n        \r\n        \r\n\r\nUpdateContext({var_add_model:false});\r\nUpdateContext({var_view_models:true});\r\nUpdateContext({var_edit_models:false});"
+                  Text: ="OK"
+                  X: =477
+                  Y: =270
+            - TextCanvas2_32:
+                Control: Text
+                Properties:
+                  Text: ="Sections"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =59
+                  X: =40
+                  Y: =236
+            - drop_sections_model_1:
+                Control: DropDown
+                Properties:
+                  Items: =["S", "M"]
+                  Width: =59
+                  X: =40
+                  Y: =269
+      - cont_edit_model:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            DropShadow: =DropShadow.Bold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =345
+            Visible: =var_edit_model
+            Width: =653
+            X: =(Parent.Width-Self.Width)/2
+            Y: =(Parent.Height - Self.Height)/2
+          Children:
+            - TextCanvas2_20:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Fill: =RGBA(221, 221, 221, 0.2)
+                  Height: =47
+                  Text: ="Length"
+                  VerticalAlign: =VerticalAlign.Top
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =172
+                  X: =439
+                  Y: =121
+            - TextCanvas2_19:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Fill: =RGBA(221, 221, 221, 0.2)
+                  Height: =47
+                  Text: ="Width"
+                  VerticalAlign: =VerticalAlign.Top
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =172
+                  X: =227
+                  Y: =121
+            - Icon2_14:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  OnSelect: =UpdateContext({var_edit_model:false})
+                  X: =589
+            - TextCanvas2_17:
+                Control: Text
+                Properties:
+                  Size: =16
+                  Text: ="Edit Model for plant " & PID & ":"
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =425
+                  X: =40
+                  Y: =32
+            - TextCanvas2_21:
+                Control: Text
+                Properties:
+                  Text: |-
+                    ="Model #"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =147
+                  X: =40
+                  Y: =138
+            - TextCanvas2_22:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =68
+                  X: =232
+                  Y: =140
+            - TextCanvas2_27:
+                Control: Text
+                Properties:
+                  Text: ="Extra linear feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =106
+                  X: =227
+                  Y: =237
+            - TextCanvas2_28:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  Text: ="Bags"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =44
+                  X: =347
+                  Y: =237
+            - TextInputCanvas1_7:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Value: =gal_model_list.Selected.Floor_model
+                  Width: =164
+                  X: =40
+                  Y: =171
+            - TextInputCanvas1_8:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Value: =gal_model_list.Selected.Width_F
+                  Width: =80
+                  X: =227
+                  Y: =171
+            - TextInputCanvas1_12:
+                Control: TextInput
+                Properties:
+                  Value: =gal_model_list.Selected.extra_lfb
+                  Width: =106
+                  X: =227
+                  Y: =270
+            - TextCanvas2_18:
+                Control: Text
+                Properties:
+                  Text: ="Dimensions"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =124
+                  X: =227
+                  Y: =86
+            - TextCanvas2_23:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =31
+                  Text: ="Inches"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =80
+                  X: =319
+                  Y: =141
+            - TextInputCanvas1_9:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Value: =gal_model_list.Selected.Width_I
+                  Width: =80
+                  X: =319
+                  Y: =171
+            - TextInputCanvas1_10:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Value: =gal_model_list.Selected.Length_F
+                  Width: =80
+                  X: =439
+                  Y: =171
+            - TextInputCanvas1_11:
+                Control: TextInput
+                Properties:
+                  Height: =30
+                  Value: =gal_model_list.Selected.Length_I
+                  Width: =80
+                  X: =531
+                  Y: =171
+            - TextCanvas2_24:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Text: ="Feet"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =68
+                  X: =444
+                  Y: =141
+            - TextCanvas2_25:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =31
+                  Text: ="Inches"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =80
+                  X: =531
+                  Y: =142
+            - TextCanvas2_26:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Height: =30
+                  Text: ="x"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =40
+                  X: =399
+                  Y: =172
+            - TextInputCanvas1_13:
+                Control: TextInput
+                Properties:
+                  Value: =gal_model_list.Selected.bags
+                  Width: =44
+                  X: =347
+                  Y: =270
+            - ButtonCanvas2_1:
+                Control: Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(
+                        plant_models,gal_model_list.Selected,
+                        {
+                            Plant_ID:PID,
+                            Floor_model:TextInputCanvas1_7.Value,
+                            Section: drop_sections_model.Selected.Value,
+                            Width_F:Value (TextInputCanvas1_8.Value),
+                            Width_I: Value(TextInputCanvas1_9.Value),
+                            Length_F:Value(TextInputCanvas1_10.Value),
+                            Length_I:Value(TextInputCanvas1_11.Value),
+                            extra_lfb:Value(TextInputCanvas1_12.Value),
+                            bags:Value(TextInputCanvas1_13.Value)
+                        }
+                    );
+                    UpdateContext({var_edit_model:false})
+                  Text: ="OK"
+                  X: =477
+                  Y: =270
+            - TextCanvas2_30:
+                Control: Text
+                Properties:
+                  Text: ="Sections"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =59
+                  X: =40
+                  Y: =237
+            - drop_sections_model:
+                Control: DropDown
+                Properties:
+                  DefaultSelectedItems: =[gal_model_list.Selected.Section]
+                  Items: =["S", "M"]
+                  Width: =59
+                  X: =40
+                  Y: =270
+      - Container7:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Height: =App.Height
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =8
+            Width: =App.Width
+            Y: '=0 '
+          Children:
+            - Header1:
+                Control: Header
+                Properties:
+                  BasePaletteColor: =RGBA(2, 66, 109, 1)
+                  Fill: =RGBA(2, 66, 109, 1)
+                  Font: =Font.'Open Sans'
+                  Height: '=75  '
+                  Logo: ='Opex Logo vertical white nobg'
+                  LogoMaxHeight: =120
+                  Style: ='Header.Style'.Primary
+                  Title: ="OpEx Tracker"
+                  TitleFontSize: =26
+            - cont_logo:
+                Control: GroupContainer
+                Variant: ManualLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Height: =152
+                  LayoutMaxHeight: =130
+                  Width: '=App.Width-16    '
+                  X: =8
+                  Y: =87
+                Children:
+                  - Image3:
+                      Control: Image
+                      Properties:
+                        Image: ='new company and opex logo cropped transp'
+                        Width: =600
+                        X: =(Parent.Width- Self.Width)/2
+                        Y: =(Parent.Height-Self.Height)/2
+                  - Text5:
+                      Control: ModernText
+                      Properties:
+                        Align: =Align.Right
+                        Size: =10
+                        Text: ="V 5/26/2026 V2"
+                        VerticalAlign: =VerticalAlign.Bottom
+                        X: =1200
+                        Y: =98
+            - Container2:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  Height: =501
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =8
+                  PaddingBottom: =8
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  PaddingTop: =8
+                  Width: =App.Width
+                  Y: =255
+                Children:
+                  - cont_enter_data:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                        X: =40
+                        Y: =40
+                      Children:
+                        - Label1_6:
+                            Control: Label
+                            Properties:
+                              Align: =LayoutAlignItems.Center
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              Size: =20
+                              Text: ="Enter Production Data"
+                              Width: =618
+                              X: =23
+                              Y: =53
+                        - Label5_6:
+                            Control: Label
+                            Properties:
+                              Height: =30
+                              Size: =12
+                              Text: ="Choose 1 button below according to your available data:"
+                              Width: =618
+                              X: =65
+                              Y: =118
+                        - Container5:
+                            Control: GroupContainer
+                            Variant: GridLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutGridColumns: =2
+                              LayoutGridRows: =5
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              LayoutOverflowX: =LayoutOverflow.Scroll
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                            Children:
+                              - Button1_10:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Height: =45
+                                    OnSelect: =Navigate(Prod_Entry_1,ScreenTransition.Fade);
+                                    Size: =12
+                                    Text: ="W | L | Ft | In"
+                                    Width: =145
+                                    X: =23
+                                    Y: =107
+                              - Label5_10:
+                                  Control: Label
+                                  Properties:
+                                    Align: =TextPosition.Left
+                                    Height: =45
+                                    Size: =12
+                                    Text: ="Width, length, feet and inches separated"
+                                    Width: =339
+                                    X: =104
+                                    Y: =107
+                              - Button1_13:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Height: =45
+                                    OnSelect: =Navigate(Prod_Entry_2,ScreenTransition.Fade)
+                                    Size: =12
+                                    Text: ="13'6"" | 56'"
+                                    Width: =145
+                                    X: =23
+                                    Y: =172
+                              - Label5_9:
+                                  Control: Label
+                                  Properties:
+                                    Align: =TextPosition.Left
+                                    Height: =45
+                                    Size: =12
+                                    Text: ="Feet and inches in the same field"
+                                    Width: =299
+                                    X: =104
+                                    Y: =173
+                              - Button1_12:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Height: =45
+                                    OnSelect: =Navigate(Prod_Entry_3,ScreenTransition.Fade)
+                                    Size: =12
+                                    Text: ="13'6"" x 56'"
+                                    Width: =145
+                                    X: =23
+                                    Y: =237
+                              - Label5_8:
+                                  Control: Label
+                                  Properties:
+                                    Align: =TextPosition.Left
+                                    Height: =45
+                                    Size: =12
+                                    Text: ="Width and Length in the same field"
+                                    Width: =299
+                                    X: =104
+                                    Y: =237
+                              - Button1_14:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    Height: =45
+                                    OnSelect: =Navigate(Prod_Entry_4,ScreenTransition.Fade)
+                                    Size: =12
+                                    Text: ="Optimized"
+                                    Width: =145
+                                    X: =23
+                                    Y: =302
+                              - Label5_11:
+                                  Control: Label
+                                  Properties:
+                                    Align: =TextPosition.Left
+                                    Height: =45
+                                    Size: =12
+                                    Text: ="Topeka-style data fields"
+                                    Width: =299
+                                    X: =104
+                                    Y: =302
+                              - Button1_23:
+                                  Control: Classic/Button
+                                  Properties:
+                                    DisplayMode: =DisplayMode.Disabled
+                                    Height: =45
+                                    OnSelect: =UpdateContext({var_view_models:true})
+                                    Size: =12
+                                    Text: ="Models"
+                                    Width: =145
+                                    X: =23
+                                    Y: =367
+                              - Label5_12:
+                                  Control: Label
+                                  Properties:
+                                    Align: =TextPosition.Left
+                                    DisplayMode: =DisplayMode.Disabled
+                                    Height: =45
+                                    Size: =12
+                                    Text: ="Predefined model information"
+                                    Width: =299
+                                    X: =104
+                                    Y: =367
+                  - cont_edit_data:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =16
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                      Children:
+                        - Label1_9:
+                            Control: Label
+                            Properties:
+                              Align: =LayoutAlignItems.Center
+                              FontWeight: =FontWeight.Bold
+                              Height: =30
+                              Size: =20
+                              Text: ="Enter data per category"
+                              Width: =381
+                              X: =832
+                              Y: =268
+                        - Button1_4:
+                            Control: Classic/Button
+                            Properties:
+                              BorderThickness: =0
+                              Fill: =RGBA(2, 66, 109, 1)
+                              Height: =60
+                              OnSelect: =Navigate(INS_Splash,ScreenTransition.Fade)
+                              Text: ="Blown Insulation"
+                              Width: =195
+                              X: =93
+                              Y: =161
+                        - Button1_5:
+                            Control: Classic/Button
+                            Properties:
+                              BorderThickness: =0
+                              Fill: =RGBA(2, 66, 109, 1)
+                              Height: =60
+                              OnSelect: =Navigate(Foam_settings,ScreenTransition.Fade)
+                              Text: ="2-Part Foam"
+                              Width: =195
+                              X: =93
+                              Y: =65
+                        - Container6:
+                            Control: GroupContainer
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                            Children:
+                              - Label17:
+                                  Control: Label
+                                  Properties:
+                                    Align: =Align.Right
+                                    Height: =30
+                                    Size: =10
+                                    Text: |-
+                                      ="Your Plant is: " & LookUp(Plant_List,PID=Plant_ID,Plant_Names) & " - ID: " & PID
+                                    Width: =391
+                                    X: =264
+                                    Y: =311
+                              - Button2:
+                                  Control: Classic/Button
+                                  Properties:
+                                    BorderThickness: =0
+                                    Fill: =RGBA(2, 66, 109, 1)
+                                    OnSelect: =Navigate(review_screen1,ScreenTransition.Fade);
+                                    Size: =10
+                                    Text: ="Review Production Data"
+                                    Width: =252
+                                    X: =214
+                                    Y: =271
+      - Button7_1:
+          Control: Classic/Button
+          Properties:
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(230, 230, 230, 1)
+            Height: =35
+            OnSelect: =If(User().Email="ralfonzo@skylinehomes.com",Navigate(Dev_Screen),"")
+            Size: =10
+            Text: ="DEV SCREEN"
+            Visible: =User().Email="ralfonzo@skylinehomes.com"
+            Width: =96
+            X: =1248
+            Y: =87
+      - Button7_2:
+          Control: Classic/Button
+          Properties:
+            Color: =RGBA(0, 0, 0, 1)
+            Fill: =RGBA(230, 230, 230, 1)
+            Height: =35
+            OnSelect: =UpdateContext({var_location_show:!var_location_show})
+            Size: =10
+            Text: ="Set Location"
+            Visible: =User().Email="ralfonzo@skylinehomes.com"
+            Width: =96
+            X: =1248
+            Y: =135
+      - cont_location:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =App.Height-Self.Y
+            Visible: =var_location_show
+            Width: =App.Width-20
+            X: =10
+            Y: =80
+          Children:
+            - Button7_3:
+                Control: Classic/Button
+                Properties:
+                  Color: =RGBA(0, 0, 0, 1)
+                  Fill: =RGBA(230, 230, 230, 1)
+                  Height: =35
+                  OnSelect: =UpdateContext({var_location_show:!var_location_show})
+                  Text: ="Accept"
+                  Visible: =var_location_show
+                  Width: =158
+                  X: =1065
+                  Y: =310
+            - Button7_4:
+                Control: Classic/Button
+                Properties:
+                  Color: =RGBA(0, 0, 0, 1)
+                  Fill: =RGBA(230, 230, 230, 1)
+                  Height: =35
+                  OnSelect: |-
+                    =Set(PID,Value(Left(Office365Users.UserProfileV2(User().Email).officeLocation,3)));
+                    UpdateContext({var_location_show:!var_location_show})
+                  Text: ="Cancel"
+                  Visible: =var_location_show
+                  Width: =158
+                  X: =1065
+                  Y: =534
+            - Label19:
+                Control: Label
+                Properties:
+                  Align: =Align.Justify
+                  FontWeight: =FontWeight.Bold
+                  Height: =200
+                  Size: =16
+                  Text: ="Please be careful when changing the location. Any changes will affect that plant's data."
+                  Visible: =var_location_show
+                  Width: =315
+                  X: =99
+                  Y: =228
+            - Table1:
+                Control: Table
+                Properties:
+                  EnableRangeSelection: ='PowerAppsOneGrid.EnableRangeSelection'.Disable
+                  EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Enable
+                  Height: =688
+                  Items: |-
+                    =Sort(Plant_List,Plant_Names,SortOrder.Ascending)
+                    //Distinct(Sort(Plant_List,Plant_Names,Ascending),Plant_Names)
+                    //Sort(Distinct(Plant_List,Plant_Names),Ascending)
+                  OnSelect: =Set(PID,Value(Table1.Selected.Plant_ID))
+                  ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.ListOnly
+                  Width: =590
+                  X: =455
+                Children:
+                  - Plant_ID1:
+                      Control: TableDataField
+                      Variant: textualColumn
+                      IsLocked: true
+                      Properties:
+                        FieldDisplayName: ="Plant_ID"
+                        FieldName: ="Plant_ID"
+                        FieldType: ="n"
+                        Order: =3
+                  - Plant_Names1:
+                      Control: TableDataField
+                      Variant: textualColumn
+                      IsLocked: true
+                      Properties:
+                        FieldDisplayName: ="Plant_Names"
+                        FieldName: ="Plant_Names"
+                        FieldType: ="s"
+                        Order: =4
+            - Text4:
+                Control: ModernText
+                Properties:
+                  Text: |-
+                    ="Set PID: " & PID
+                  X: =40
+                  Y: =40

@@ -1,0 +1,24 @@
+EditorState:
+  ScreensOrder:
+    - Splash_Screen
+    - Dev_Screen
+    - Foam_details_floor
+    - Foam_details_floor_HIS
+    - Foam_details_week
+    - Foam_settings
+    - HIS_Floors
+    - HIS_Roofs
+    - INS_Floors
+    - INS_Print_Floors
+    - INS_Roofs
+    - INS_Roofs_PRINT
+    - INS_Splash
+    - Location_Audit
+    - Prod_Entry_1
+    - Prod_Entry_2
+    - Prod_Entry_3
+    - Prod_Entry_4
+    - review_screen1
+    - Screen1
+  ComponentDefinitionsOrder:
+    - cmpReorder

@@ -1,0 +1,352 @@
+Screens:
+  Dev_Screen:
+    Children:
+      - RectQuickActionBar1_1:
+          Control: Rectangle
+          Properties:
+            Height: =64
+            Width: =Parent.Width
+      - Label1_1:
+          Control: Label
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Size: =24
+            Text: ="DEV SCREEN"
+            Width: =760
+            X: =103
+            Y: =12
+      - Icon1_3:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.ChevronLeft
+            OnSelect: =Back()
+            X: =1302
+      - Icon2_11:
+          Control: Classic/Icon
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            Icon: =Icon.Home
+            OnSelect: =Navigate(Splash_Screen,ScreenTransition.Fade)
+      - Button12:
+          Control: Classic/Button
+          Properties:
+            Height: =47
+            OnSelect: |-
+              =ForAll(Gallery4.AllItems,
+              Patch(roofs_alldetails,ThisRecord,
+                  {
+                  pump_name:pump_name_txt.Text,
+                  foam_name:foam_name_txt.Text,
+                  dollarsPP:Value('foam_cost.txt'.Text),
+                  cyclesPP:Value(pump_cycles_txt.Text),
+                  targetLFTPP:Value(target_txt.Text)
+                  }
+              ))
+            Text: ="Enter Wdate"
+            Width: =135
+            X: =15
+            Y: =223
+      - Gallery4:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            DelayItemLoading: =false
+            Height: =499
+            Items: =Filter(col_roofs_alldetails,IsBlank(foam_trussendwall))
+            LoadingSpinner: =LoadingSpinner.None
+            TemplateSize: =25
+            Width: =713
+            X: =483
+            Y: =73
+          Children:
+            - Label30:
+                Control: Label
+                Properties:
+                  Height: =25
+                  OnSelect: =Select(Parent)
+                  Text: |-
+                    ="ID: "&ThisItem.PlantID &" Date: "& ThisItem.Date & " User: " & ThisItem.User_Name & " Truss: " & ThisItem.Truss_spacing
+                  Width: =703
+      - Button12_1:
+          Control: Classic/Button
+          Properties:
+            Height: =30
+            OnSelect: |+
+              =//ForAll(Gallery4.AllItems,
+              //Remove(Insulation_Roofs,ThisRecord))
+
+            Text: ="Delete Rows"
+            Width: =132
+            X: =64
+            Y: =346
+      - Dropdown2_6:
+          Control: Classic/DropDown
+          Properties:
+            Items: |-
+              =Sort(ForAll(Distinct(Plant_List,Plant_Names), {Result: ThisRecord.Value}),Result,SortOrder.Ascending)
+            Items.Value: =Result
+            OnChange: |-
+              =ClearCollect(col_roofs_alldetails,
+                  Filter(roofs_alldetails,PlantID=LookUp(Plant_List,Plant_Names = Dropdown2_6.SelectedText.Value,Plant_ID)));
+            Size: =10
+            Width: =181
+            X: =15
+            Y: =84
+      - Label6_3:
+          Control: Label
+          Properties:
+            Text: |-
+              =If(
+                  Value(
+                      LookUp(
+                          Plant_List,
+                          Plant_Names = Dropdown2_6.SelectedText.Value,
+                          Plant_ID
+                      )
+                  ) = 16,
+                  17,
+                  Value(
+                      LookUp(
+                          Plant_List,
+                          Plant_Names = Dropdown2_6.SelectedText.Value,
+                          Plant_ID
+                      )
+                  )
+              )
+            Width: =49
+            X: =35
+            Y: =728
+      - Button12_2:
+          Control: Classic/Button
+          Properties:
+            Height: =81
+            OnSelect: |-
+              =ClearCollect(col_roofs_alldetails,
+                  Filter(roofs_alldetails,PlantID=LookUp(Plant_List,Plant_Names = Dropdown2_6.SelectedText.Value,Plant_ID)));
+
+              ForAll(Filter(col_roofs_alldetails,IsBlank(cyclesPP)) As patchRecord,
+              Patch(roofs_alldetails,patchRecord,
+                  {
+                  pump_name:pump_name_txt.Text,
+                  foam_name:foam_name_txt.Text,
+                  dollarsPP:Value('foam_cost.txt'.Text),
+                  cyclesPP:Value(pump_cycles_txt.Text),
+                  targetLFTPP:Value(target_txt.Text)
+                  }
+              ))
+            Size: =10
+            Text: ="pump settings"
+            Width: =83
+            X: =20
+            Y: =637
+      - pump_name_txt:
+          Control: Label
+          Properties:
+            Height: =41
+            Text: |-
+              =LookUp(
+                          'plant-pumps',
+                          Plant_ID = Value(Label6_3.Text),
+                          pump_name
+              )
+            Width: =303
+            X: =75
+            Y: =369
+      - foam_name_txt:
+          Control: Label
+          Properties:
+            Height: =41
+            Text: |-
+              =LookUp(
+                          'plant-pumps',
+                          Plant_ID = Value(Label6_3.Text),
+                          foam_name
+              )
+            Width: =303
+            X: =75
+            Y: =407
+      - foam_cost.txt:
+          Control: Label
+          Properties:
+            Height: =41
+            Text: |-
+              =LookUp(
+                          'plant-pumps',
+                          Plant_ID = Value(Label6_3.Text),
+                          foam_cost
+              )
+            Width: =303
+            X: =75
+            Y: =448
+      - pump_cycles_txt:
+          Control: Label
+          Properties:
+            Height: =41
+            Text: |-
+              =LookUp(
+                          'plant-pumps',
+                          Plant_ID = Value(Label6_3.Text),
+                          cycles_PP
+              )
+            Width: =303
+            X: =75
+            Y: =489
+      - target_txt:
+          Control: Label
+          Properties:
+            Height: =41
+            Text: |-
+              =LookUp(
+                          'plant-pumps',
+                          Plant_ID = Value(Label6_3.Text),
+                          target_lfpp
+              )
+            Width: =303
+            X: =75
+            Y: =531
+      - Button12_3:
+          Control: Classic/Button
+          Properties:
+            Height: =81
+            OnSelect: |-
+              =//ForAll(Gallery4.AllItems,
+              //Patch(Insulation_Roofs,ThisRecord,
+                  {
+                  //BagsReq:0,
+                  BagsReq:0
+                  }
+              //))
+            Size: =10
+            Text: ="Bags Actual 0"
+            Width: =83
+            X: =232
+            Y: =637
+      - Button12_4:
+          Control: Classic/Button
+          Properties:
+            Height: =47
+            OnSelect: |-
+              =ForAll(Gallery4.AllItems,
+              Patch(roofs_alldetails,ThisRecord,
+                  {
+                   Truss_spacing:24
+                  }
+              ))
+            Text: ="Enter Truss Spacing"
+            Width: =135
+            X: =196
+            Y: =223
+      - Button12_5:
+          Control: Classic/Button
+          Properties:
+            Height: =81
+            OnSelect: |-
+              =ClearCollect(col_roofs_alldetails,
+                  Filter(roofs_alldetails,PlantID=LookUp(Plant_List,Plant_Names = Dropdown2_6.SelectedText.Value,Plant_ID)));
+
+              ForAll(Filter(col_roofs_alldetails, IsBlank(foam_trussendwall)) As patchRecord,
+              Patch(roofs_alldetails,patchRecord,
+                  {
+                  foam_trussendwall:1,
+                  foam_oversidewalls:true
+                  }
+              ))
+            Size: =10
+            Text: ="truss settings"
+            Width: =99
+            X: =116
+            Y: =637
+      - Text7:
+          Control: ModernText
+          Properties:
+            Text: =Office365Users.MyProfileV2().officeLocation
+            Width: =221
+            X: =451
+            Y: =736
+      - Text7_1:
+          Control: ModernText
+          Properties:
+            Text: =
+            Width: =221
+            X: =684
+            Y: =736
+      - lbl_emp_lookup_header:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Text: ="Employee Office Location Lookup"
+            Width: =400
+            X: =451
+            Y: =600
+      - emp_search_input:
+          Control: Classic/TextInput
+          Properties:
+            HintText: ="Enter employee name or email"
+            Width: =300
+            X: =451
+            Y: =640
+      - btn_emp_lookup:
+          Control: Classic/Button
+          Properties:
+            OnSelect: |-
+              =ClearCollect(col_emp_search,
+                  Office365Users.SearchUserV2({searchTerm: emp_search_input.Text, top: 10}).value
+              )
+            Text: ="Search"
+            Width: =100
+            X: =760
+            Y: =640
+      - gal_emp_search:
+          Control: Gallery
+          Variant: Vertical
+          Properties:
+            Height: =200
+            Items: =col_emp_search
+            OnSelect: |-
+              =Set(varEmpProfile,
+                  Office365Users.UserProfileV2(ThisItem.Mail)
+              )
+            TemplateSize: =40
+            Width: =409
+            X: =451
+            Y: =690
+          Children:
+            - lbl_emp_search_name:
+                Control: Label
+                Properties:
+                  Height: =22
+                  OnSelect: =Select(Parent)
+                  Text: =ThisItem.DisplayName
+                  Width: =250
+                  X: =5
+                  Y: =5
+            - lbl_emp_search_mail:
+                Control: Label
+                Properties:
+                  Color: =RGBA(100, 100, 100, 1)
+                  Height: =18
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.Mail
+                  Width: =390
+                  X: =5
+                  Y: =22
+      - lbl_emp_display_name:
+          Control: Label
+          Properties:
+            Text: |-
+              =If(IsBlank(varEmpProfile), "", "Name: " & varEmpProfile.displayName)
+            Width: =409
+            X: =451
+            Y: =900
+      - lbl_emp_office_location:
+          Control: Label
+          Properties:
+            FontWeight: =FontWeight.Bold
+            Text: |-
+              =If(IsBlank(varEmpProfile), "", "Office Location: " & varEmpProfile.officeLocation)
+            Width: =409
+            X: =451
+            Y: =935
