@@ -1230,6 +1230,46 @@ Screens:
             X: =10
             Y: =80
           Children:
+            - Label19:
+                Control: Label
+                Properties:
+                  Align: =Align.Justify
+                  FontWeight: =FontWeight.Bold
+                  Height: =200
+                  Size: =16
+                  Text: ="Please be careful when changing the location. Any changes will affect that plant's data."
+                  Visible: =var_location_show
+                  Width: =315
+                  X: =99
+                  Y: =228
+            - gal_plants:
+                Control: Gallery
+                Variant: Vertical
+                Properties:
+                  Height: =688
+                  Items: =Sort(Plant_List, Plant_Names, SortOrder.Ascending)
+                  OnSelect: =Set(PID, Value(ThisItem.Plant_ID))
+                  TemplatePadding: =2
+                  TemplateSize: =30
+                  Width: =590
+                  WrapCount: =3
+                  X: =455
+                Children:
+                  - lbl_plant_tile:
+                      Control: Label
+                      Properties:
+                        BorderColor: =RGBA(2, 66, 109, 1)
+                        BorderThickness: =1
+                        Color: =If(Value(ThisItem.Plant_ID) = PID, RGBA(255, 255, 255, 1), RGBA(2, 66, 109, 1))
+                        Fill: =If(Value(ThisItem.Plant_ID) = PID, RGBA(2, 66, 109, 1), RGBA(245, 245, 245, 1))
+                        FontWeight: =If(Value(ThisItem.Plant_ID) = PID, FontWeight.Bold, FontWeight.Normal)
+                        Height: =Parent.TemplateHeight
+                        OnSelect: =Select(Parent)
+                        PaddingLeft: =6
+                        Size: =9
+                        Text: =ThisItem.Plant_ID & " · " & ThisItem.Plant_Names
+                        Tooltip: =ThisItem.Plant_Names
+                        Width: =Parent.TemplateWidth
             - Button7_3:
                 Control: Classic/Button
                 Properties:
@@ -1256,51 +1296,6 @@ Screens:
                   Width: =158
                   X: =1065
                   Y: =534
-            - Label19:
-                Control: Label
-                Properties:
-                  Align: =Align.Justify
-                  FontWeight: =FontWeight.Bold
-                  Height: =200
-                  Size: =16
-                  Text: ="Please be careful when changing the location. Any changes will affect that plant's data."
-                  Visible: =var_location_show
-                  Width: =315
-                  X: =99
-                  Y: =228
-            - Table1:
-                Control: Table
-                Properties:
-                  EnableRangeSelection: ='PowerAppsOneGrid.EnableRangeSelection'.Disable
-                  EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Enable
-                  Height: =688
-                  Items: |-
-                    =Sort(Plant_List,Plant_Names,SortOrder.Ascending)
-                    //Distinct(Sort(Plant_List,Plant_Names,Ascending),Plant_Names)
-                    //Sort(Distinct(Plant_List,Plant_Names),Ascending)
-                  OnSelect: =Set(PID,Value(Table1.Selected.Plant_ID))
-                  ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.ListOnly
-                  Width: =590
-                  X: =455
-                Children:
-                  - Plant_ID1:
-                      Control: TableDataField
-                      Variant: textualColumn
-                      IsLocked: true
-                      Properties:
-                        FieldDisplayName: ="Plant_ID"
-                        FieldName: ="Plant_ID"
-                        FieldType: ="n"
-                        Order: =3
-                  - Plant_Names1:
-                      Control: TableDataField
-                      Variant: textualColumn
-                      IsLocked: true
-                      Properties:
-                        FieldDisplayName: ="Plant_Names"
-                        FieldName: ="Plant_Names"
-                        FieldType: ="s"
-                        Order: =4
             - Text4:
                 Control: ModernText
                 Properties:
